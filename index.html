@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GinoNote - Đồng bộ Web (Giao diện App)</title>
+    <title>GinoNote - Đồng bộ Web (Giao diện App Sáng)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-theme mobile-app-mode">
+<body class="light-theme mobile-app-mode">
 
     <header class="app-header">
         <div class="header-left">
@@ -64,9 +64,8 @@
                         <span class="tag">Tiếng Anh</span>
                     </div>
                 </div>
-                <div class="note-card note-urgent">
-                    <div class="note-title">Ý tưởng App</div>
-                    <div class="note-body">Thiết kế FAB (+) và màn hình editor chi tiết y hệt app.</div>
+                <div class="note-card note-urgent" style="background-color: #fce4ec;"> <div class="note-title">Ý tưởng App</div>
+                    <div class="note-body">Thiết kế FAB (+) và màn hình editor chi tiết y hệt app, giao diện sáng.</div>
                     <div class="note-tags">
                         <span class="tag">Dev</span>
                     </div>
@@ -81,29 +80,58 @@
 
     <div class="note-editor-overlay" id="noteEditor">
         <div class="editor-header">
-            <button class="icon-btn" id="closeEditorBtn">
+            <button class="icon-btn close-btn" id="closeEditorBtn">
                 <i class="material-icons">arrow_back</i>
             </button>
-            <div class="editor-title-container">
-                <input type="text" id="editNoteTitle" placeholder="Tiêu đề (Không bắt buộc)" class="editor-title-input">
-            </div>
+            
             <div class="editor-header-actions">
-                <button class="icon-btn" id="saveNoteBtn">
+                <button class="icon-btn action-btn" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
+                    <i class="material-icons">lightbulb</i>
+                </button>
+                <div class="color-picker-container">
+                    <button class="icon-btn action-btn" id="colorPaletteBtn" title="Chọn màu nền">
+                        <i class="material-icons">palette</i>
+                    </button>
+                    <div class="color-palette-popup" id="colorPalettePopup">
+                        <div class="color-option default active" data-color="#ffffff" title="Mặc định"></div>
+                        <div class="color-option" data-color="#f8caca" title="Hồng"></div>
+                        <div class="color-option" data-color="#c8e6c9" title="Xanh lá"></div>
+                        <div class="color-option" data-color="#b3e5fc" title="Xanh dương"></div>
+                        <div class="color-option" data-color="#fce4ec" title="Hồng phấn"></div>
+                        <div class="color-option" data-color="#fff9c4" title="Vàng"></div>
+                    </div>
+                </div>
+                <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
+                    <i class="material-icons">image</i>
+                </button>
+                <button class="icon-btn action-btn save-btn" id="saveNoteBtn" title="Lưu ghi chú">
                     <i class="material-icons">done</i>
+                </button>
+                <button class="icon-btn action-btn" id="editNoteModeBtn" title="Chỉnh sửa">
+                    <i class="material-icons">edit</i>
                 </button>
             </div>
         </div>
         
-        <div class="editor-body">
-            <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
-        </div>
-
-        <div class="editor-tags-input-area">
-            <i class="material-icons" style="color: var(--text-light);">label</i>
-            <div id="editorTagList" class="editor-tag-list">
-                <span class="tag">GinoNote</span>
+        <div class="editor-body" id="editorBody">
+            <div class="editor-title-container">
+                <input type="text" id="editNoteTitle" placeholder="Tiêu đề (Không bắt buộc)" class="editor-title-input">
             </div>
-            <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
+            
+            <div class="editor-time-container">
+                <i class="material-icons">access_time</i>
+                <span id="editNoteTime">Tự động tạo thời gian...</span>
+            </div>
+
+            <div class="editor-tags-area">
+                <i class="material-icons" style="color: var(--text-light);">label</i>
+                <div id="editorTagList" class="editor-tag-list">
+                    <span class="tag">GinoNote</span>
+                </div>
+                <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
+            </div>
+
+            <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
         </div>
     </div>
 
