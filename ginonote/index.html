@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="GinoNote - Ứng dụng ghi chú thông minh kết hợp phương pháp Active Recall và Spaced Repetition, giúp bạn chuyển hóa thông tin thành tri thức dài hạn.">
+<title>GinoNote - Khắc ghi chú vào trí nhớ</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+/* Bảng màu chuẩn theo logo GinoNote */
+:root {
+    --primary-color: #0E4B75;
+    --primary-dark: #0A3552;
+    --text-main: #333333;
+    --text-light: #666666;
+    --bg-light: #f5f5f5;
+    --card-bg: #ffffff;
+}
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    padding-top: 64px;
+}
+/* --- Toolbar --- */
+.toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 64px;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+.toolbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--primary-color);
+}
+.toolbar-logo img {
+    height: 80px;
+    width: auto;
+}
+.lang-btn {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+.lang-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+/* --- Bố cục chung --- */
+.section-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+/* --- Phần 1: Hero --- */
+.hero-section {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+}
+.hero-logo {
+    width: 300px;
+    margin-bottom: 20px;
+}
+.hero-slogan {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--primary-dark);
+}
+.hero-subtitle {
+    font-size: 16px;
+    color: var(--text-light);
+    margin-bottom: 30px;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.playstore-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(14, 75, 117, 0.3);
+    transition: background-color 0.3s;
+}
+.playstore-btn:hover {
+    background-color: var(--primary-dark);
+}
+/* --- Container Content --- */
+.container {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.container__top-line {
+    height: 4px;
+    background-color: var(--primary-color);
+    width: 100%;
+}
+.container__top-photo {
+    text-align: center;
+    background-color: #f8fafe;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+.container__top-photo img {
+    max-width: 100%;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    display: inline-block;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.container__top-body {
+    padding: 20px;
+}
+.container__h2 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: var(--primary-dark);
+}
+.container__h2-description {
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.6;
+}
+.container__bottom {
+    padding: 15px 20px;
+    background-color: #fafafa;
+    border-top: 1px solid #eee;
+}
+.container__bottom-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-main);
+    line-height: 1.6;
+}
+@media (min-width: 768px) {
+    .container__top.has-image {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .container__top-photo {
+        flex: 0 0 40%;
+        border-bottom: none;
+        border-right: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+    }
+    .container__top-body {
+        flex: 1;
+        padding: 30px;
+    }
+}
+/* --- CSS RIÊNG CHO PHẦN ACTIVE RECALL --- */
+.active-recall-container .container__top.has-image {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+}
+.active-recall-container .container__top-part {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.active-recall-container .container__top-part:not(.container__top-body) {
+    background-color: #f8fafe;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    box-sizing: border-box;
+}
+.active-recall-container .container__top-part img {
+    max-width: 100%;
+    max-height: 500px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.active-recall-container .container__top-body {
+    padding: 20px;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (min-width: 768px) {
+    .active-recall-container .container__top.has-image {
+        flex-direction: row;
+        align-items: stretch;
+        padding: 20px;
+        gap: 20px;
+    }
+    .active-recall-container .container__top-part {
+        flex: 1;
+    }
+    .active-recall-container .container__top-part:not(.container__top-body) {
+        background-color: transparent;
+        border-bottom: none;
+        padding: 0;
+    }
+    .active-recall-container .container__top-body {
+        padding: 0;
+        justify-content: center;
+    }
+}
+/* --- Ưu điểm Grid --- */
+.advantages-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+@media (min-width: 600px) {
+    .advantages-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+.extra__section {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s;
+}
+.extra__section:hover {
+    transform: translateY(-5px);
+}
+.extra__section-icon i {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+.extra__section-text-h2 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+}
+.extra__section-text-description {
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+/* --- Kêu gọi hành động --- */
+.super__free {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 40px 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(14, 75, 117, 0.4);
+}
+.super__free-h3 {
+    font-size: 28px;
+    margin: 0 0 15px 0;
+}
+.super__free-description {
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0.9;
+}
+/* --- Footer --- */
+.footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid #ddd;
+    font-size: 14px;
+}
+.footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    margin: 0 10px;
+    font-weight: 500;
+}
+.footer a:hover {
+    text-decoration: underline;
+}
+/* Video Iframe */
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    width: 100%;
+}
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+</style>
+</head>
+<body>
+<div class="toolbar">
+    <div class="toolbar-logo">
+        <img src="logo.png" alt="GinoNote Logo">
+        GinoNote
+    </div>
+    <button class="lang-btn" id="langToggle" onclick="toggleLanguage()">VI / EN</button>
+</div>
+<div class="section-wrapper">
+    <div class="hero-section">
+        <img src="logo.png" alt="GinoNote" class="hero-logo">
+        <h1 class="hero-slogan" data-i18n="slogan">Khắc ghi chú vào trí nhớ</h1>
+        <p class="hero-subtitle" data-i18n="hero_desc">Ứng dụng ghi chú thông minh kết hợp phương pháp Active Recall và Spaced Repetition, giúp bạn chuyển hóa thông tin thành tri thức dài hạn.</p>
+        <a href="https://play.google.com/store/apps/details?id=com.lathedo.ginonote" class="playstore-btn" target="_blank">
+            <span class="material-icons">shop</span>
+            <span data-i18n="download">Tải ứng dụng từ Play Store</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="container__top has-image">
+            <div class="container__top-line"></div>
+            <div class="container__top-photo">
+                <img src="ghichu.png" alt="Màn hình ghi chú" title="Giao diện ghi chú GinoNote">
+            </div>
+            <div class="container__top-body">
+                <div class="container__wrap-h2">
+                    <h2 class="container__h2" data-i18n="box1_title">Không gian Ghi chú Tối giản, Tập trung và Hỗ trợ Học tập</h2>
+                    <div class="container__h2-description" data-i18n="box1_desc">
+                        Màn hình soạn thảo của GinoNote mang đến trải nghiệm viết hoàn toàn không gây phân tâm nhờ thiết kế tối giản và chế độ nền tối (dark mode) dịu mắt.
+                        Điểm ưu việt của màn hình này là sự kết hợp giữa hệ thống "Thẻ phân loại" (Tags) giúp tổ chức dữ liệu khoa học, và tính năng đánh dấu từ khóa thông minh bằng ngoặc nhọn {...}, rất lý tưởng để tạo các bài ôn tập dạng điền từ hoặc làm nổi bật những từ khóa cốt lõi.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container__bottom">
+            <div class="container__bottom-text">
+                <p style="margin-top: 0;"><strong data-i18n="box1_list_intro">Khám phá các tính năng đặc biệt:</strong></p>
+                <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">lightbulb</i>
+                        <span data-i18n="icon_lightbulb">Bôi đen từ khóa bạn cho là quan trọng/ cần ghi nhớ. Khi bôi đen từ khóa và nhấn vào biểu tượng bóng đèn, hệ thống sẽ bọc từ khóa trong ngoặc nhọn (ví dụ: {quan điểm}) để tạo thành các ô trống ẩn từ.</span>
+                    </li>
+                    <li style="margin-bottom: 0; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">play_arrow</i>
+                        <span data-i18n="icon_play">Khởi động chế độ ôn tập tập trung. Hệ thống sẽ chuyển sang giao diện thực hành, ẩn đi các từ khóa trong ngoặc nhọn để bạn chính thức kiểm tra trí nhớ.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container active-recall-container">
+        <div class="container__top-line"></div>
+        <div class="container__top has-image">
+            <div class="container__top-part">
+                <img src="test1.png" alt="Màn hình điền từ" title="Ôn tập điền từ">
+            </div>
+            <div class="container__top-part">
+                <img src="test.png" alt="Màn hình kết quả" title="Kết quả bài làm">
+            </div>
+            <div class="container__top-part container__top-body">
+                <div class="container__wrap-h2">
+                    <h2 class="container__h2" data-i18n="recall_title">Hệ thống Ôn tập Chủ động</h2>
+                    <div class="container__h2-description" data-i18n="recall_desc">
+                        GinoNote thay đổi hoàn toàn thói quen đọc lại thụ động bằng cách kết hợp sức mạnh của phương pháp Active Recall (Chủ động gọi nhớ) và Spaced Repetition (Lặp lại ngắt quãng).
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container__bottom">
+            <div class="container__bottom-text">
+                <p style="margin-top: 0;"><strong data-i18n="recall_list_intro">Chi tiết Chức năng & Cách thức Hoạt động:</strong></p>
+                <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">help_outline</i>
+                        <span data-i18n="recall_help">Icon Trợ giúp (?): Khi bạn "bí" từ, nhấn vào biểu tượng này để nhận một gợi ý nhỏ mà không làm mất đi nỗ lực tự hồi tưởng.</span>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">fact_check</i>
+                        <span data-i18n="recall_check">Nút Kiểm tra đáp án: Khóa đáp án của bạn và tiến hành đối chiếu với bản gốc để đưa ra kết quả ngay lập tức.</span>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">spellcheck</i>
+                        <span data-i18n="recall_detail">Sửa lỗi trực quan: Hệ thống chấm điểm %, tô xanh từ đúng và bôi đỏ từ sai kèm đáp án chính xác. Tính năng châm chước giúp sửa lỗi đánh máy nhanh.</span>
+                    </li>
+                    <li style="margin-bottom: 0; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">thumbs_up_down</i>
+                        <span data-i18n="recall_diff">Đánh giá độ khó (Again - Easy): Thuật toán căn cứ vào lựa chọn của bạn để lên lịch ôn tập hoàn hảo cho lần tiếp theo.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="container__top has-image">
+            <div class="container__top-line"></div>
+            <div class="container__top-photo">
+                <img src="lich.png" alt="Màn hình lịch" title="Nhật ký học tập GinoNote">
+            </div>
+            <div class="container__top-body">
+                <div class="container__wrap-h2">
+                    <h2 class="container__h2" data-i18n="cal_title">Nhật ký Học tập Trực quan</h2>
+                    <div class="container__h2-description" data-i18n="cal_desc">
+                        Màn hình Lịch đóng vai trò như một cuốn nhật ký cá nhân, nơi mọi ghi chép và tiến độ ôn tập của bạn được lưu vết cẩn thận theo thời gian thực.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container__bottom">
+            <div class="container__bottom-text">
+                <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: #ff5252; font-size: 14px; margin-right: 8px; margin-top: 4px;">lens</i>
+                        <span data-i18n="cal_dot">Dấu chấm đỏ dưới các ngày: Đánh dấu các mốc "Dấu chân tri thức" khi bạn tạo ghi chú hoặc ôn tập mới trong ngày.</span>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">restore</i>
+                        <span data-i18n="cal_today">Trở về hiện tại: Một chạm để quay lại lịch trình của ngày hôm nay dù bạn đang ở bất kỳ tháng nào.</span>
+                    </li>
+                    <li style="margin-bottom: 0; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">list_alt</i>
+                        <span data-i18n="cal_notes">Dòng thời gian bài học: Hiển thị chi tiết toàn bộ danh sách ghi chú đã tạo hoặc lịch sử ôn tập khi chọn một ngày cụ thể.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="container__top has-image">
+            <div class="container__top-line"></div>
+            <div class="container__top-photo">
+                <img src="thongke.jpg" alt="Màn hình thống kê" title="Thống kê GinoNote">
+            </div>
+            <div class="container__top-body">
+                <div class="container__wrap-h2">
+                    <h2 class="container__h2" data-i18n="stats_title">Trực Quan Hóa Mọi Hành Trình Ghi Nhớ</h2>
+                    <div class="container__h2-description" data-i18n="stats_desc">
+                        Trung tâm phân tích học tập giúp bạn nắm bắt thói quen, hiệu suất ôn tập và tiến độ ghi nhớ dài hạn thông qua dữ liệu thực tế.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container__bottom">
+            <div class="container__bottom-text">
+                <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">bar_chart</i>
+                        <span data-i18n="stats_metrics">Thống kê theo Tuần/Tháng/Năm: Đếm tổng lượng ghi chú và lượt tương tác để theo dõi sự tăng trưởng tri thức.</span>
+                    </li>
+                    <li style="margin-bottom: 0; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">psychology</i>
+                        <span data-i18n="stats_visual">Phân tích Ghi nhớ: Trực quan hóa số lượng ghi chú "Đang ôn" và "Đã thuộc" để đánh giá chất lượng học tập.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="container__top has-image">
+            <div class="container__top-line"></div>
+            <div class="container__top-photo">
+                <img src="dongbo.png" alt="Màn hình đồng bộ" title="Đồng bộ GinoNote">
+            </div>
+            <div class="container__top-body">
+                <div class="container__wrap-h2">
+                    <h2 class="container__h2" data-i18n="sync_title">Kết Nối Tri Thức Không Giới Hạn</h2>
+                    <div class="container__h2-description" data-i18n="sync_desc">
+                        Xóa tan nỗi lo mất mát thông tin nhờ giải pháp đồng bộ hóa tức thì và hệ thống xuất tệp tin độc quyền để chia sẻ kiến thức.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container__bottom">
+            <div class="container__bottom-text">
+                <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">cloud_sync</i>
+                        <span data-i18n="sync_drive">Đồng bộ Google Drive: Tự động sao lưu mọi chỉnh sửa lên đám mây, đảm bảo dữ liệu luôn nhất quán trên mọi thiết bị.</span>
+                    </li>
+                    <li style="margin-bottom: 0; display: flex; align-items: flex-start;">
+                        <i class="material-icons" style="color: var(--primary-color); margin-right: 8px;">share</i>
+                        <span data-i18n="sync_share">Chia sẻ file .gino: Đóng gói toàn bộ nội dung và hình ảnh thành một tệp tin duy nhất để trao đổi tài liệu cực kỳ nhanh chóng.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="container__top">
+            <div class="container__top-line"></div>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+            </div>
+            <div class="container__top-body">
+                <div class="container__wrap-h2">
+                    <h2 class="container__h2" data-i18n="box5_title">Khám phá sức mạnh của GinoNote</h2>
+                    <div class="container__h2-description" data-i18n="box5_desc">
+                        Xem video ngắn để nắm bắt cách ứng dụng có thể thay đổi cách bạn tổ chức cuộc sống và nâng tầm tư duy.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="advantages-grid">
+        <div class="extra__section">
+            <div class="extra__section-icon">
+                <i class="material-icons">psychology</i>
+            </div>
+            <div class="extra__section-text">
+                <h2 class="extra__section-text-h2" data-i18n="adv4_title">Tối ưu ghi nhớ khoa học</h2>
+                <p class="extra__section-text-description" data-i18n="adv4_desc">Khắc sâu kiến thức vào trí nhớ dài hạn nhờ sự kết hợp giữa Active Recall và Spaced Repetition, giúp tiết kiệm thời gian học mà vẫn đạt hiệu quả cao nhất.</p>
+            </div>
+        </div>
+        <div class="extra__section">
+            <div class="extra__section-icon">
+                <i class="material-icons">insert_chart</i>
+            </div>
+            <div class="extra__section-text">
+                <h2 class="extra__section-text-h2" data-i18n="adv5_title">Thống kê thông minh</h2>
+                <p class="extra__section-text-description" data-i18n="adv5_desc">Theo dõi tiến độ bản thân qua hệ thống trực quan, tự động dự báo khối lượng bài cần ôn để bạn luôn làm chủ kế hoạch học tập mỗi ngày.</p>
+            </div>
+        </div>
+        <div class="extra__section">
+            <div class="extra__section-icon">
+                <i class="material-icons">folder_shared</i>
+            </div>
+            <div class="extra__section-text">
+                <h2 class="extra__section-text-h2" data-i18n="adv6_title">Dễ dàng chia sẻ</h2>
+                <p class="extra__section-text-description" data-i18n="adv6_desc">Đóng gói và chia sẻ kho tàng kiến thức qua file .gino độc quyền, giúp trao đổi các bộ thẻ ghi chú tiện lợi và sử dụng ngoại tuyến dễ dàng.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="super__free">
+        <div class="super__free-text">
+            <h3 class="super__free-h3" data-i18n="free_title">Sẵn sàng khắc ghi chú vào trí nhớ?</h3>
+            <p class="super__free-description" data-i18n="free_desc">
+                Đừng chỉ ghi chép rồi để đó. Hãy để GinoNote giúp bạn chuyển hóa thông tin thành tri thức.
+                Ứng dụng hệ thống khoa học Active Recall và Spaced Repetition là khoản đầu tư bền vững nhất cho tư duy của bạn.
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 GinoNote. All rights reserved.</p>
+        <a href="policy_vi.html" id="link-policy" data-i18n="policy">Chính sách bảo mật</a> |
+        <a href="terms_vi.html" id="link-terms" data-i18n="terms">Điều khoản sử dụng</a>
+    </div>
+</div>
+
+<script>
+    const translations = {
+        "vi": {
+            "slogan": "Khắc ghi chú vào trí nhớ",
+            "hero_desc": "Ứng dụng ghi chú thông minh kết hợp phương pháp Active Recall và Spaced Repetition, giúp bạn chuyển hóa thông tin thành tri thức dài hạn.",
+            "download": "Tải ứng dụng từ Play Store",
+            "box1_title": "Không gian Ghi chú Tối giản, Tập trung và Hỗ trợ Học tập",
+            "box1_desc": "Màn hình soạn thảo của GinoNote mang đến trải nghiệm viết hoàn toàn không gây phân tâm nhờ thiết kế tối giản và chế độ nền tối (dark mode) dịu mắt. Điểm ưu việt của màn hình này là sự kết hợp giữa hệ thống \"Thẻ phân loại\" (Tags) giúp tổ chức dữ liệu khoa học, và tính năng đánh dấu từ khóa thông minh bằng ngoặc nhọn {...}, rất lý tưởng để tạo các bài ôn tập dạng điền từ hoặc làm nổi bật những từ khóa cốt lõi.",
+            "box1_list_intro": "Khám phá các tính năng đặc biệt:",
+            "icon_lightbulb": "Bôi đen từ khóa bạn cho là quan trọng/ cần ghi nhớ. Khi bôi đen từ khóa và nhấn vào biểu tượng bóng đèn, hệ thống sẽ bọc từ khóa trong ngoặc nhọn (ví dụ: {quan điểm}) để tạo thành các ô trống ẩn từ.",
+            "icon_play": "Khởi động chế độ ôn tập tập trung. Hệ thống sẽ chuyển sang giao diện thực hành, ẩn đi các từ khóa trong ngoặc nhọn để bạn chính thức kiểm tra trí nhớ.",
+            "recall_title": "Hệ thống Ôn tập Chủ động",
+            "recall_desc": "GinoNote thay đổi hoàn toàn thói quen đọc lại thụ động bằng cách kết hợp sức mạnh của phương pháp Active Recall (Chủ động gọi nhớ) và Spaced Repetition (Lặp lại ngắt quãng).",
+            "recall_list_intro": "Chi tiết Chức năng & Cách thức Hoạt động:",
+            "recall_help": "Icon Trợ giúp (?): Khi bạn \"bí\" từ, nhấn vào biểu tượng này để nhận một gợi ý nhỏ mà không làm mất đi nỗ lực tự hồi tưởng.",
+            "recall_check": "Nút Kiểm tra đáp án: Khóa đáp án của bạn và tiến hành đối chiếu với bản gốc để đưa ra kết quả ngay lập tức.",
+            "recall_detail": "Sửa lỗi trực quan: Hệ thống chấm điểm %, tô xanh từ đúng và bôi đỏ từ sai kèm đáp án chính xác. Tính năng châm chước giúp sửa lỗi đánh máy nhanh.",
+            "recall_diff": "Đánh giá độ khó (Again - Easy): Thuật toán căn cứ vào lựa chọn của bạn để lên lịch ôn tập hoàn hảo cho lần tiếp theo.",
+            "cal_title": "Nhật ký Học tập Trực quan",
+            "cal_desc": "Màn hình Lịch đóng vai trò như một cuốn nhật ký cá nhân, nơi mọi ghi chép và tiến độ ôn tập của bạn được lưu vết cẩn thận theo thời gian thực.",
+            "cal_dot": "Dấu chấm đỏ dưới các ngày: Đánh dấu các mốc \"Dấu chân tri thức\" khi bạn tạo ghi chú hoặc ôn tập mới trong ngày.",
+            "cal_today": "Trở về hiện tại: Một chạm để quay lại lịch trình của ngày hôm nay dù bạn đang ở bất kỳ tháng nào.",
+            "cal_notes": "Dòng thời gian bài học: Hiển thị chi tiết toàn bộ danh sách ghi chú đã tạo hoặc lịch sử ôn tập khi chọn một ngày cụ thể.",
+            "stats_title": "Trực Quan Hóa Mọi Hành Trình Ghi Nhớ",
+            "stats_desc": "Trung tâm phân tích học tập giúp bạn nắm bắt thói quen, hiệu suất ôn tập và tiến độ ghi nhớ dài hạn thông qua dữ liệu thực tế.",
+            "stats_metrics": "Thống kê theo Tuần/Tháng/Năm: Đếm tổng lượng ghi chú và lượt tương tác để theo dõi sự tăng trưởng tri thức.",
+            "stats_visual": "Phân tích Ghi nhớ: Trực quan hóa số lượng ghi chú \"Đang ôn\" và \"Đã thuộc\" để đánh giá chất lượng học tập.",
+            "sync_title": "Kết Nối Tri Thức Không Giới Hạn",
+            "sync_desc": "Xóa tan nỗi lo mất mát thông tin nhờ giải pháp đồng bộ hóa tức thì và hệ thống xuất tệp tin độc quyền để chia sẻ kiến thức.",
+            "sync_drive": "Đồng bộ Google Drive: Tự động sao lưu mọi chỉnh sửa lên đám mây, đảm bảo dữ liệu luôn nhất quán trên mọi thiết bị.",
+            "sync_share": "Chia sẻ file .gino: Đóng gói toàn bộ nội dung và hình ảnh thành một tệp tin duy nhất để trao đổi tài liệu cực kỳ nhanh chóng.",
+            "box5_title": "Khám phá sức mạnh của GinoNote",
+            "box5_desc": "Xem video ngắn để nắm bắt cách ứng dụng có thể thay đổi cách bạn tổ chức cuộc sống và nâng tầm tư duy.",
+            "adv4_title": "Tối ưu ghi nhớ khoa học",
+            "adv4_desc": "Khắc sâu kiến thức vào trí nhớ dài hạn nhờ sự kết hợp giữa Active Recall và Spaced Repetition, giúp tiết kiệm thời gian học mà vẫn đạt hiệu quả cao nhất.",
+            "adv5_title": "Thống kê thông minh",
+            "adv5_desc": "Theo dõi tiến độ bản thân qua hệ thống trực quan, tự động dự báo khối lượng bài cần ôn để bạn luôn làm chủ kế hoạch học tập mỗi ngày.",
+            "adv6_title": "Dễ dàng chia sẻ",
+            "adv6_desc": "Đóng gói và chia sẻ kho tàng kiến thức qua file .gino độc quyền, giúp trao đổi các bộ thẻ ghi chú tiện lợi và sử dụng ngoại tuyến dễ dàng.",
+            "free_title": "Sẵn sàng khắc ghi chú vào trí nhớ?",
+            "free_desc": "Đừng chỉ ghi chép rồi để đó. Hãy để GinoNote giúp bạn chuyển hóa thông tin thành tri thức. Ứng dụng hệ thống khoa học Active Recall và Spaced Repetition là khoản đầu tư bền vững nhất cho tư duy của bạn.",
+            "policy": "Chính sách bảo mật",
+            "terms": "Điều khoản sử dụng"
+        },
+        "en": {
+            "slogan": "Etch notes into your memory",
+            "hero_desc": "Smart note-taking app combining Active Recall and Spaced Repetition to turn information into long-term knowledge.",
+            "download": "Download on Google Play",
+            "box1_title": "Minimalist, Focused Note Space",
+            "box1_desc": "GinoNote's editor offers a completely distraction-free writing experience thanks to its minimalist design and soothing dark mode. Perfect for creating review exercises by emphasizing core keywords using curly brackets.",
+            "box1_list_intro": "Discover special features:",
+            "icon_lightbulb": "Select a keyword to memorize. Tapping this wraps it in curly brackets to create hidden blanks for active recall sessions.",
+            "icon_play": "Start focused review mode. The system hides bracketed keywords to test your memory.",
+            "recall_title": "Active Review System",
+            "recall_desc": "GinoNote transforms passive reading habits by combining the power of Active Recall and Spaced Repetition for long-term retention.",
+            "recall_list_intro": "Function Details & How It Works:",
+            "recall_help": "Help Icon (?): When stuck, tap for a small hint without losing the effort of self-retrieval.",
+            "recall_check": "Check Answer: Locks your answer and compares it with the original for immediate feedback.",
+            "recall_detail": "Visual Correction: Scores your session, highlights correct words in green and mistakes in red. Mercy feature fixes typos quickly.",
+            "recall_diff": "Difficulty Rating (Again - Easy): The algorithm uses your choice to schedule the perfect next review session.",
+            "cal_title": "Visual Learning Diary",
+            "cal_desc": "The Calendar acts as a personal diary, where every note and review progress is tracked in real-time.",
+            "cal_dot": "Red dots under dates: Marks 'Footprints of Knowledge' when you create notes or review sessions.",
+            "cal_today": "Return to Today: One tap to return to today's schedule from any month.",
+            "cal_notes": "Lesson Timeline: Displays a detailed list of notes and review history for a specific day.",
+            "stats_title": "Visualize Every Memory Journey",
+            "stats_desc": "An analysis center helping you grasp habits, review performance, and long-term memory progress through actual data.",
+            "stats_metrics": "Weekly/Monthly/Yearly Stats: Counts total notes and interactions to track knowledge growth.",
+            "stats_visual": "Memory Analysis: Visualizes 'Learning' vs 'Mastered' notes to evaluate study quality.",
+            "sync_title": "Unlimited Knowledge Connection",
+            "sync_desc": "Eliminate worries about data loss with instant synchronization and a proprietary file sharing system.",
+            "sync_drive": "Google Drive Sync: Automatically back up edits to the cloud, keeping data consistent across all devices.",
+            "sync_share": "Share .gino files: Pack content and images into a single file for incredibly fast material exchange.",
+            "box5_title": "Discover the Power of GinoNote",
+            "box5_desc": "Watch a short video to see how the app can change your organization and elevate your thinking.",
+            "adv4_title": "Scientific Memorization",
+            "adv4_desc": "Engrave knowledge into long-term memory using Active Recall and Spaced Repetition, maximizing learning efficiency.",
+            "adv5_title": "Smart Achievement Stats",
+            "adv5_desc": "Track progress through a visual system that forecasts upcoming review workloads to master your study plan.",
+            "adv6_title": "Easy Sharing",
+            "adv6_desc": "Share knowledge via proprietary .gino files, making deck exchanges convenient and accessible offline.",
+            "free_title": "Ready to etch notes into memory?",
+            "free_desc": "Don't just take notes. Let GinoNote transform information into knowledge. Using scientific systems is the best investment for your mind.",
+            "policy": "Privacy Policy",
+            "terms": "Terms of Use"
+        }
+    };
+
+    let currentLang = "vi";
+
+    function toggleLanguage() {
+        currentLang = currentLang === "vi" ? "en" : "vi";
+        const elements = document.querySelectorAll("[data-i18n]");
+        elements.forEach(element => {
+            const key = element.getAttribute("data-i18n");
+            if (translations[currentLang][key]) {
+                element.innerHTML = translations[currentLang][key];
+            }
+        });
+        document.getElementById("link-policy").href = currentLang === "vi" ? "policy_vi.html" : "policy_en.html";
+        document.getElementById("link-terms").href = currentLang === "vi" ? "terms_vi.html" : "terms_en.html";
+        document.getElementById("langToggle").innerText = currentLang === "vi" ? "VI / EN" : "EN / VI";
+    }
+</script>
+</body>
+</html>
