@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GinoNote - Đồng bộ Web (Giao diện App Sáng)</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>GinoNote - Đồng bộ Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="light-theme mobile-app-mode">
@@ -17,12 +15,7 @@
             <button class="icon-btn" id="menuBtn">
                 <i class="material-icons">menu</i>
             </button>
-            <a href="#" class="logo-container">
-                <img src="ginonote/logo.png" alt="GinoNote" onerror="this.style.display='none'">
-                <span>GinoNote</span>
-            </a>
-        </div>
-        
+            </div>
         <div class="header-right">
             <button class="sync-btn active-auth" id="btnAuthGoogle">
                 <i class="material-icons">cloud_sync</i>
@@ -32,22 +25,24 @@
     </header>
 
     <div class="app-body">
+        <div class="mobile-backdrop" id="mobileBackdrop"></div>
+
         <nav class="sidebar" id="sidebar">
             <ul class="nav-list">
                 <li>
-                    <a href="#" class="nav-item active">
+                    <a href="#" class="nav-item active" data-view="view-notes">
                         <i class="material-icons">lightbulb</i>
                         <span class="nav-text">Tất cả ghi chú</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-view="view-calendar">
                         <i class="material-icons">calendar_today</i>
                         <span class="nav-text">Lịch</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-view="view-tags">
                         <i class="material-icons">label</i>
                         <span class="nav-text">Tags</span>
                     </a>
@@ -56,21 +51,58 @@
         </nav>
 
         <main class="main-content">
-            <div class="notes-grid" id="notesGrid">
-                <div class="note-card">
-                    <div class="note-title">Ôn tập Tiếng Anh</div>
-                    <div class="note-body">Hôm nay cần học 50 từ vựng mới và làm bài tập ngữ pháp...</div>
-                    <div class="note-tags">
-                        <span class="tag">Tiếng Anh</span>
-                    </div>
+            
+            <div id="view-notes" class="view-section active">
+                <div id="filterMessage" class="filter-message" style="display: none;">
+                    Đang xem tag: <strong id="currentTagFilter"></strong> 
+                    <button id="clearFilterBtn" class="icon-btn"><i class="material-icons">close</i></button>
                 </div>
-                <div class="note-card note-urgent" style="background-color: #fce4ec;"> <div class="note-title">Ý tưởng App</div>
-                    <div class="note-body">Thiết kế FAB (+) và màn hình editor chi tiết y hệt app, giao diện sáng.</div>
-                    <div class="note-tags">
-                        <span class="tag">Dev</span>
+                <div class="notes-grid" id="notesGrid">
+                    <div class="note-card" data-tags="Tiếng Anh,Học tập">
+                        <div class="note-title">Ôn tập Tiếng Anh</div>
+                        <div class="note-body">Hôm nay cần học 50 từ vựng mới và làm bài tập ngữ pháp phần {Câu điều kiện}...</div>
+                        <div class="note-tags"><span class="tag">Tiếng Anh</span><span class="tag">Học tập</span></div>
+                    </div>
+                    <div class="note-card note-urgent" style="background-color: #fce4ec;" data-tags="Dev">
+                        <div class="note-title">Ý tưởng App</div>
+                        <div class="note-body">Cập nhật toolbar 2 trạng thái. Click đọc chỉ hiện cây bút.</div>
+                        <div class="note-tags"><span class="tag">Dev</span></div>
+                    </div>
+                    <div class="note-card" data-tags="Cá nhân">
+                        <div class="note-title">Nhật ký</div>
+                        <div class="note-body">Hôm nay thời tiết đẹp, mình đã hoàn thành xong tính năng lịch cho app...</div>
+                        <div class="note-tags"><span class="tag">Cá nhân</span></div>
                     </div>
                 </div>
             </div>
+
+            <div id="view-calendar" class="view-section">
+                <div class="calendar-header-bar">
+                    <h2 id="calendarMonthYear">Tháng...</h2>
+                    <button class="today-btn" id="btnToday">Hôm nay</button>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-weekdays">
+                        <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        </div>
+                </div>
+                <div class="notes-on-date" id="notesOnDate">
+                    <p style="color: var(--text-light); text-align: center; margin-top: 20px;">Chọn một ngày để xem ghi chú</p>
+                </div>
+            </div>
+
+            <div id="view-tags" class="view-section">
+                <h2 style="margin-bottom: 16px; font-weight: 500;">Danh sách thẻ</h2>
+                <div class="tags-list" id="tagsList">
+                    <div class="tag-item" data-tag="Tiếng Anh"><i class="material-icons">label</i> Tiếng Anh</div>
+                    <div class="tag-item" data-tag="Học tập"><i class="material-icons">label</i> Học tập</div>
+                    <div class="tag-item" data-tag="Dev"><i class="material-icons">label</i> Dev</div>
+                    <div class="tag-item" data-tag="Cá nhân"><i class="material-icons">label</i> Cá nhân</div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -85,37 +117,38 @@
             </button>
             
             <div class="editor-header-actions">
-                <button class="icon-btn action-btn" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
+                <button class="icon-btn action-btn read-only-icon" id="editNoteModeBtn" title="Chỉnh sửa">
+                    <i class="material-icons">edit</i>
+                </button>
+
+                <button class="icon-btn action-btn edit-only-icon" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
                     <i class="material-icons">lightbulb</i>
                 </button>
-                <div class="color-picker-container">
+                <div class="color-picker-container edit-only-icon">
                     <button class="icon-btn action-btn" id="colorPaletteBtn" title="Chọn màu nền">
                         <i class="material-icons">palette</i>
                     </button>
                     <div class="color-palette-popup" id="colorPalettePopup">
-                        <div class="color-option default active" data-color="#ffffff" title="Mặc định"></div>
-                        <div class="color-option" data-color="#f8caca" title="Hồng"></div>
-                        <div class="color-option" data-color="#c8e6c9" title="Xanh lá"></div>
-                        <div class="color-option" data-color="#b3e5fc" title="Xanh dương"></div>
-                        <div class="color-option" data-color="#fce4ec" title="Hồng phấn"></div>
-                        <div class="color-option" data-color="#fff9c4" title="Vàng"></div>
+                        <div class="color-option default active" data-color="#ffffff"></div>
+                        <div class="color-option" data-color="#f8caca"></div>
+                        <div class="color-option" data-color="#c8e6c9"></div>
+                        <div class="color-option" data-color="#b3e5fc"></div>
+                        <div class="color-option" data-color="#fce4ec"></div>
+                        <div class="color-option" data-color="#fff9c4"></div>
                     </div>
                 </div>
-                <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
+                <button class="icon-btn action-btn edit-only-icon" id="insertImageBtn" title="Chèn ảnh">
                     <i class="material-icons">image</i>
                 </button>
-                <button class="icon-btn action-btn save-btn" id="saveNoteBtn" title="Lưu ghi chú">
-                    <i class="material-icons">done</i>
-                </button>
-                <button class="icon-btn action-btn" id="editNoteModeBtn" title="Chỉnh sửa">
-                    <i class="material-icons">edit</i>
+                <button class="icon-btn action-btn save-btn edit-only-icon" id="saveNoteBtn" title="Lưu ghi chú">
+                    <i class="material-icons">save</i>
                 </button>
             </div>
         </div>
         
         <div class="editor-body" id="editorBody">
             <div class="editor-title-container">
-                <input type="text" id="editNoteTitle" placeholder="Tiêu đề (Không bắt buộc)" class="editor-title-input">
+                <input type="text" id="editNoteTitle" placeholder="Tiêu đề" class="editor-title-input">
             </div>
             
             <div class="editor-time-container">
@@ -125,10 +158,8 @@
 
             <div class="editor-tags-area">
                 <i class="material-icons" style="color: var(--text-light);">label</i>
-                <div id="editorTagList" class="editor-tag-list">
-                    <span class="tag">GinoNote</span>
-                </div>
-                <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
+                <div id="editorTagList" class="editor-tag-list"></div>
+                <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input edit-only-input">
             </div>
 
             <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
