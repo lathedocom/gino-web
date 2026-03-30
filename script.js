@@ -1,20 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- 1. ĐIỀU HƯỚNG SIDEBAR & MOBILE MENU ---
-    const menuBtn = document.getElementById('menuBtn');
+    // Các Element chung
     const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('mobileBackdrop');
+    const menuBtn = document.getElementById('menuBtn');
     const navItems = document.querySelectorAll('.nav-item');
-    const viewSections = document.querySelectorAll('.view-section');
+    const views = document.querySelectorAll('.view-section');
+    
+    // Toggle Menu Mobile
+    menuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+    });
 
-    function toggleMobileMenu() {
-        sidebar.classList.toggle('open');
-        backdrop.classList.toggle('open');
-    }
-
-    menuBtn.addEventListener('click', toggleMobileMenu);
-    backdrop.addEventListener('click', toggleMobileMenu);
-
+    // Chuyển đổi giữa các màn hình (Tất cả, Lịch, Tags)
     navItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -22,162 +18,152 @@ document.addEventListener('DOMContentLoaded', () => {
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
-            // Chuyển View
-            const targetView = this.getAttribute('data-view');
-            viewSections.forEach(view => view.classList.remove('active'));
-            document.getElementById(targetView).classList.add('active');
+            // Ẩn sidebar trên mobile sau khi click
+            sidebar.classList.remove('mobile-open');
 
-            // Đóng menu nếu ở mobile
-            if(window.innerWidth <= 600) toggleMobileMenu();
+            // Đổi view
+            const targetId = this.getAttribute('data-target');
+            views.forEach(view => {
+                view.style.display = view.id === targetId ? 'block' : 'none';
+            });
 
-            // Nếu mở lịch, render lại lịch
-            if(targetView === 'view-calendar') renderCalendar();
+            // Khôi phục hiển thị tất cả ghi chú nếu đang ở All Notes
+            if (targetId === 'viewNotes') {
+                document.querySelectorAll('.note-card').forEach(card => card.style.display = 'flex');
+            }
         });
     });
 
-    // --- 2. LOGIC LỊCH (CALENDAR) ---
-    const calendarGrid = document.getElementById('calendarGrid');
-    const monthYearText = document.getElementById('calendarMonthYear');
-    const btnToday = document.getElementById('btnToday');
-    const notesOnDate = document.getElementById('notesOnDate');
-
-    // Mảng giả lập các ngày có ghi chú trong tháng hiện tại (ví dụ ngày 5, 12, 18)
-    const daysWithNotes = [5, 12, 18]; 
-
+    // --- LOGIC LỊCH (CALENDAR) ---
     function renderCalendar() {
-        calendarGrid.innerHTML = '';
-        const date = new Date();
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const today = date.getDate();
+        const grid = document.querySelector('.calendar-grid');
+        // Xóa các ngày cũ (giữ lại header thứ)
+        const days = grid.querySelectorAll('.cal-day');
+        days.forEach(day => day.remove());
 
-        monthYearText.innerText = `Tháng ${month + 1}, ${year}`;
-
-        const firstDayIndex = new Date(year, month, 1).getDay() || 7; // 1: T2, 7: CN
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        // Ô trống đầu tháng
-        for(let x = 1; x < firstDayIndex; x++) {
-            const emptyDiv = document.createElement('div');
-            emptyDiv.classList.add('cal-day', 'other-month');
-            calendarGrid.appendChild(emptyDiv);
-        }
-
-        // Ngày trong tháng
-        for(let i = 1; i <= daysInMonth; i++) {
+        // Giả lập render 30 ngày của tháng
+        for(let i = 1; i <= 30; i++) {
             const dayDiv = document.createElement('div');
-            dayDiv.classList.add('cal-day');
+            dayDiv.className = 'cal-day';
             dayDiv.innerText = i;
             
-            if(i === today) dayDiv.classList.add('today');
+            // Đánh dấu hôm nay
+            if (i === 15) dayDiv.classList.add('today'); 
             
-            // Vẽ chấm đỏ nếu ngày có ghi chú
-            if(daysWithNotes.includes(i)) {
+            // Đánh dấu chấm đỏ (có ghi chú) cho ngày 12 và 18 (Giả lập)
+            if (i === 12 || i === 18) {
                 const dot = document.createElement('div');
-                dot.classList.add('cal-dot');
+                dot.className = 'note-dot';
                 dayDiv.appendChild(dot);
             }
 
+            // Click chọn ngày
             dayDiv.addEventListener('click', () => {
                 document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
                 dayDiv.classList.add('selected');
-                
-                if(daysWithNotes.includes(i)) {
-                    notesOnDate.innerHTML = `<div class="note-card"><div class="note-title">Ghi chú ngày ${i}/${month+1}</div><div class="note-body">Đây là nội dung ghi chú mô phỏng...</div></div>`;
-                } else {
-                    notesOnDate.innerHTML = `<p style="color: var(--text-light); text-align: center; margin-top:20px;">Không có ghi chú nào trong ngày này.</p>`;
-                }
             });
 
-            calendarGrid.appendChild(dayDiv);
+            grid.appendChild(dayDiv);
         }
     }
+    renderCalendar();
 
-    btnToday.addEventListener('click', () => {
-        renderCalendar();
-        notesOnDate.innerHTML = `<p style="color: var(--text-light); text-align: center; margin-top: 20px;">Chọn một ngày để xem ghi chú</p>`;
-    });
-
-
-    // --- 3. LOGIC TAGS (LỌC GHI CHÚ) ---
-    const tagItems = document.querySelectorAll('.tag-item');
-    const filterMessage = document.getElementById('filterMessage');
-    const currentTagFilter = document.getElementById('currentTagFilter');
-    const clearFilterBtn = document.getElementById('clearFilterBtn');
-    const noteCards = document.querySelectorAll('#view-notes .note-card');
-
-    tagItems.forEach(tagBtn => {
-        tagBtn.addEventListener('click', () => {
-            const selectedTag = tagBtn.getAttribute('data-tag');
-            
-            // Chuyển về màn hình Ghi chú
-            navItems[0].click(); 
-
-            // Hiện thanh báo đang lọc
-            filterMessage.style.display = 'flex';
-            currentTagFilter.innerText = selectedTag;
-
-            // Lọc card
-            noteCards.forEach(card => {
-                const tagsStr = card.getAttribute('data-tags') || "";
-                if(tagsStr.includes(selectedTag)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+    // --- LOGIC TAGS ---
+    function renderTags() {
+        const allTags = new Set();
+        // Lấy tất cả các tags từ các ghi chú đang có
+        document.querySelectorAll('.note-card').forEach(card => {
+            const tags = card.getAttribute('data-tags');
+            if(tags) tags.split(',').forEach(tag => allTags.add(tag.trim()));
         });
-    });
 
-    clearFilterBtn.addEventListener('click', () => {
-        filterMessage.style.display = 'none';
-        noteCards.forEach(card => card.style.display = 'flex');
-    });
+        const tagsContainer = document.getElementById('allTagsContainer');
+        tagsContainer.innerHTML = '';
+        allTags.forEach(tagText => {
+            const tagSpan = document.createElement('span');
+            tagSpan.className = 'tag';
+            tagSpan.innerText = tagText;
+            
+            // Click vào tag -> Mở màn Tất cả ghi chú -> Chỉ hiện ghi chú có tag này
+            tagSpan.addEventListener('click', () => {
+                // Đổi menu sang Notes
+                navItems.forEach(nav => nav.classList.remove('active'));
+                document.querySelector('[data-target="viewNotes"]').classList.add('active');
+                views.forEach(view => view.style.display = view.id === 'viewNotes' ? 'block' : 'none');
+                
+                // Lọc ghi chú
+                document.querySelectorAll('.note-card').forEach(card => {
+                    const cardTags = card.getAttribute('data-tags') || "";
+                    if (cardTags.includes(tagText)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            tagsContainer.appendChild(tagSpan);
+        });
+    }
+    renderTags();
 
-
-    // --- 4. EDITOR (2 TRẠNG THÁI: READ VÀ EDIT) ---
+    // --- MÀN HÌNH EDITOR ---
     const fabBtn = document.getElementById('fabBtn');
     const noteEditor = document.getElementById('noteEditor');
     const editorBody = document.getElementById('editorBody');
     const closeEditorBtn = document.getElementById('closeEditorBtn');
-    const saveNoteBtn = document.getElementById('saveNoteBtn');
-    const editNoteModeBtn = document.getElementById('editNoteModeBtn');
-    const wrapTextBtn = document.getElementById('wrapTextBtn');
-    const colorPaletteBtn = document.getElementById('colorPaletteBtn');
-    const colorPalettePopup = document.getElementById('colorPalettePopup');
     
+    // Nút trên Toolbar
+    const editNoteModeBtn = document.getElementById('editNoteModeBtn');
+    const editModeToolbar = document.getElementById('editModeToolbar');
+    const saveNoteBtn = document.getElementById('saveNoteBtn');
+    
+    // Vùng nhập liệu
     const editTitle = document.getElementById('editNoteTitle');
-    const editTime = document.getElementById('editNoteTime');
     const editBody = document.getElementById('editNoteBody');
+    const newTagInput = document.getElementById('newTagInput');
+    const colorPalettePopup = document.getElementById('colorPalettePopup');
 
-    // Mở bằng FAB -> Chế độ EDIT
+    // Hàm set chế độ Đọc hoặc Sửa
+    function setEditorMode(isEditing) {
+        if (isEditing) {
+            editNoteModeBtn.style.display = 'none'; // Ẩn nút cây bút
+            editModeToolbar.style.display = 'flex'; // Hiện 4 nút kia
+            editorBody.classList.remove('readonly-mode');
+            newTagInput.style.display = 'block';
+        } else {
+            editNoteModeBtn.style.display = 'flex'; // Hiện nút cây bút
+            editModeToolbar.style.display = 'none'; // Ẩn 4 nút kia
+            editorBody.classList.add('readonly-mode');
+            newTagInput.style.display = 'none'; // Không cho gõ tag
+        }
+    }
+
+    // Nút Bút Chì (Chuyển sang chế độ sửa)
+    editNoteModeBtn.addEventListener('click', () => {
+        setEditorMode(true);
+        editBody.focus();
+    });
+
+    // Mở bằng FAB (+) -> Tạo mới -> Bật sẵn chế độ SỬA
     fabBtn.addEventListener('click', () => {
         resetEditor();
-        setEditorMode('edit');
-        editTime.innerText = "Tự động tạo thời gian...";
+        setEditorMode(true); 
         noteEditor.classList.add('active');
         editTitle.focus();
     });
 
-    // Mở bằng click thẻ ghi chú -> Chế độ READ
+    // Mở Ghi chú có sẵn -> Bật chế độ ĐỌC
+    const noteCards = document.querySelectorAll('.note-card');
     noteCards.forEach(card => {
         card.addEventListener('click', function() {
             resetEditor();
-            setEditorMode('read');
-            
             editTitle.value = this.querySelector('.note-title').innerText;
             editBody.value = this.querySelector('.note-body').innerText;
             editorBody.style.backgroundColor = window.getComputedStyle(this).backgroundColor;
-            editTime.innerText = "10:30, Hôm nay"; // Fake time
             
+            setEditorMode(false); // Chế độ ĐỌC (chỉ có cây bút)
             noteEditor.classList.add('active');
         });
-    });
-
-    // Bấm nút Edit (Cây bút) -> Chuyển sang EDIT
-    editNoteModeBtn.addEventListener('click', () => {
-        setEditorMode('edit');
-        editBody.focus();
     });
 
     // Đóng Editor
@@ -186,69 +172,49 @@ document.addEventListener('DOMContentLoaded', () => {
         colorPalettePopup.classList.remove('open');
     });
 
-    // Lưu ghi chú
-    saveNoteBtn.addEventListener('click', () => {
-        const title = editTitle.value.trim();
-        const body = editBody.value.trim();
-        if (title || body) {
-            const timeString = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
-            editTime.innerText = timeString;
-            
-            alert("Lưu ghi chú thành công!");
-            setEditorMode('read'); // Lưu xong chuyển về chế độ đọc
-        } else {
-            alert("Vui lòng nhập nội dung.");
-        }
-    });
-
-    // Hàm đổi trạng thái UI của Editor
-    function setEditorMode(mode) {
-        if(mode === 'read') {
-            noteEditor.classList.remove('edit-mode');
-            noteEditor.classList.add('read-mode');
-            editTitle.setAttribute('readonly', true);
-            editBody.setAttribute('readonly', true);
-        } else {
-            noteEditor.classList.remove('read-mode');
-            noteEditor.classList.add('edit-mode');
-            editTitle.removeAttribute('readonly');
-            editBody.removeAttribute('readonly');
-        }
-    }
-
+    // Reset Editor
     function resetEditor() {
         editTitle.value = '';
         editBody.value = '';
         editorBody.style.backgroundColor = '#ffffff';
+        colorPalettePopup.classList.remove('open');
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-option.default').classList.add('active');
-        colorPalettePopup.classList.remove('open');
     }
 
-    // --- Các nút chức năng Edit ({} và Palette) ---
-    wrapTextBtn.addEventListener('click', () => {
+    // --- CÁC NÚT TOOLBAR (Bóng đèn, Palette, Image, Save) ---
+    document.getElementById('wrapTextBtn').addEventListener('click', () => {
         const startPos = editBody.selectionStart;
         const endPos = editBody.selectionEnd;
         const selectedText = editBody.value.substring(startPos, endPos);
         if (selectedText) {
-            const wrapped = `{${selectedText}}`;
-            editBody.value = editBody.value.substring(0, startPos) + wrapped + editBody.value.substring(endPos);
-            editBody.setSelectionRange(startPos, startPos + wrapped.length);
+            const wrappedText = `{${selectedText}}`;
+            editBody.value = editBody.value.substring(0, startPos) + wrappedText + editBody.value.substring(endPos);
+            editBody.setSelectionRange(startPos, startPos + wrappedText.length);
         } else {
-            alert("Bôi đen chữ để tạo ngoặc {}.");
+            alert("Vui lòng bôi đen đoạn chữ.");
         }
     });
 
-    colorPaletteBtn.addEventListener('click', () => colorPalettePopup.classList.toggle('open'));
-    document.querySelectorAll('.color-option').forEach(opt => {
-        opt.addEventListener('click', function() {
+    const colorPaletteBtn = document.getElementById('colorPaletteBtn');
+    colorPaletteBtn.addEventListener('click', () => {
+        colorPalettePopup.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
             editorBody.style.backgroundColor = this.getAttribute('data-color');
-            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
         });
     });
 
     document.getElementById('insertImageBtn').addEventListener('click', () => {
-        alert("Chức năng chèn ảnh.");
+        alert("Tính năng chèn ảnh sẽ được kết nối sau.");
+    });
+
+    saveNoteBtn.addEventListener('click', () => {
+        alert("Đã lưu ghi chú thành công!");
+        setEditorMode(false); // Lưu xong quay về chế độ đọc
     });
 });
