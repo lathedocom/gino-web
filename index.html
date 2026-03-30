@@ -1,5 +1,421 @@
 <!DOCTYPE html>
-<html>
-<head><title>Gino Web Sync</title></head>
-<body><h1>Trang Đồng bộ dữ liệu GinoNote đang được xây dựng</h1></body>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GinoNote - Đồng bộ Web</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0E4B75;
+            --primary-light: #e6eff5; /* Màu nền nhạt cho sidebar item đang chọn */
+            --text-main: #202124;
+            --text-light: #5f6368;
+            --bg-body: #ffffff;
+            --border-color: #e0e0e0;
+            --card-hover-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header (App Bar) --- */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            height: 64px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: white;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .icon-btn:hover {
+            background-color: #f1f3f4;
+            color: var(--text-main);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .logo-container img {
+            height: 40px;
+            width: auto;
+        }
+
+        .sync-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .sync-btn:hover {
+            background-color: #0a3552;
+        }
+
+        /* --- Main Layout --- */
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 280px;
+            background-color: white;
+            padding-top: 16px;
+            transition: width 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 72px; /* Thu gọn lại chỉ hiện icon */
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            height: 48px;
+            margin-right: 12px; /* Để chừa khoảng trống viền cong bên phải */
+            border-radius: 0 24px 24px 0; /* Viền cong đặc trưng của Keep */
+            cursor: pointer;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: background-color 0.2s;
+            gap: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            color: var(--text-light);
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .nav-item:hover {
+            background-color: #f1f3f4;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active i {
+            color: var(--primary-color);
+        }
+
+        .sidebar.collapsed .nav-item {
+            border-radius: 50%; /* Chuyển thành hình tròn khi thu gọn */
+            margin: 0 12px;
+            padding: 0;
+            width: 48px;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 32px 24px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        /* Input Note Box giả lập */
+        .input-box {
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-light);
+            font-weight: 500;
+            cursor: text;
+        }
+
+        /* --- Notes Grid --- */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+
+        .note-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            transition: box-shadow 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .note-card:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .note-title {
+            font-size: 16px;
+            font-weight: 500;
+            word-wrap: break-word;
+        }
+
+        .note-body {
+            font-size: 14px;
+            color: var(--text-main);
+            line-height: 1.5;
+            word-wrap: break-word;
+            /* Giới hạn số dòng hiển thị */
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 8px;
+            background-color: #f1f3f4;
+            color: var(--text-light);
+            border-radius: 12px;
+        }
+
+        /* Responsive cho Mobile */
+        @media (max-width: 600px) {
+            .sidebar {
+                position: absolute;
+                height: calc(100vh - 64px);
+                z-index: 99;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar.collapsed {
+                width: 280px; /* Bỏ hiệu ứng thu gọn icon trên mobile */
+            }
+            .input-box {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-left">
+            <button class="icon-btn" id="menuBtn">
+                <i class="material-icons">menu</i>
+            </button>
+            <a href="#" class="logo-container">
+                <img src="ginonote/logo.png" alt="GinoNote" onerror="this.style.display='none'">
+                <span>GinoNote</span>
+            </a>
+        </div>
+        
+        <div class="header-right">
+            <button class="sync-btn" id="btnAuthGoogle">
+                <i class="material-icons">cloud_sync</i>
+                <span id="syncText">Kết nối Drive</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <nav class="sidebar" id="sidebar">
+            <ul class="nav-list">
+                <li>
+                    <a href="#" class="nav-item active">
+                        <i class="material-icons">lightbulb</i>
+                        <span class="nav-text">Tất cả ghi chú</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item">
+                        <i class="material-icons">calendar_today</i>
+                        <span class="nav-text">Lịch</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item">
+                        <i class="material-icons">label</i>
+                        <span class="nav-text">Tags</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            
+            <div class="input-box">
+                <span>Tạo ghi chú mới...</span>
+                <i class="material-icons" style="color: var(--text-light);">check_box</i>
+            </div>
+
+            <div class="notes-grid" id="notesGrid">
+                
+                <div class="note-card">
+                    <div class="note-title">Ôn tập Tiếng Anh</div>
+                    <div class="note-body">Hôm nay cần học 50 từ vựng mới và làm bài tập ngữ pháp phần {Câu điều kiện} loại 1, 2. Nhớ kiểm tra lại tính năng Active Recall.</div>
+                    <div class="note-tags">
+                        <span class="tag">Tiếng Anh</span>
+                        <span class="tag">Học tập</span>
+                    </div>
+                </div>
+
+                <div class="note-card" style="background-color: #f8caca;"> <div class="note-title">Mua sắm cuối tuần</div>
+                    <div class="note-body">- Cà phê<br>- Sữa tươi<br>- Đồ ăn sáng<br>- Giấy in</div>
+                    <div class="note-tags">
+                        <span class="tag">Cá nhân</span>
+                    </div>
+                </div>
+
+                <div class="note-card">
+                    <div class="note-title">Ý tưởng tính năng web</div>
+                    <div class="note-body">Sử dụng Google Identity Services để lấy Access Token. Dùng Token gọi Drive API tải file JSON xuống, parse ra và đổ vào các thẻ card.</div>
+                    <div class="note-tags">
+                        <span class="tag">Dev</span>
+                        <span class="tag">GinoNote</span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div id="driveStatus" style="text-align: center; margin-top: 40px; color: var(--text-light); display: none;">
+                <i class="material-icons" style="font-size: 48px; color: #ccc;">cloud_off</i>
+                <p style="margin-top: 10px;">Vui lòng kết nối Google Drive để tải dữ liệu thực.</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Xử lý logic đóng/mở Sidebar
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+
+        menuBtn.addEventListener('click', () => {
+            if (window.innerWidth <= 600) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+
+        // Click ra ngoài sidebar trên mobile để đóng
+        document.addEventListener('click', (event) => {
+            const isClickInside = sidebar.contains(event.target) || menuBtn.contains(event.target);
+            if (!isClickInside && window.innerWidth <= 600 && sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        // Xử lý hiệu ứng chọn (Active) cho Menu
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Khung chờ chức năng kết nối Google Drive
+        const btnAuthGoogle = document.getElementById('btnAuthGoogle');
+        const syncText = document.getElementById('syncText');
+        const notesGrid = document.getElementById('notesGrid');
+        const driveStatus = document.getElementById('driveStatus');
+
+        btnAuthGoogle.addEventListener('click', () => {
+            // Đây là nơi bạn sẽ gọi thư viện Google Identity Services (GSI)
+            // Tạm thời giả lập trạng thái đã đăng nhập để bạn xem UI
+            alert("Sau này khi bấm vào đây, popup đăng nhập Google sẽ hiện ra để lấy quyền truy cập Drive!");
+            syncText.innerText = "Đã đồng bộ";
+            btnAuthGoogle.style.backgroundColor = "#4caf50"; // Đổi màu xanh lá
+            notesGrid.style.display = 'none'; // Ẩn data mẫu
+            driveStatus.style.display = 'block'; // Hiện trạng thái chờ tải data thật
+        });
+    </script>
+</body>
 </html>
