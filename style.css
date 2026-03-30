@@ -1,14 +1,15 @@
-/* --- Giao diện tối & Reset --- */
+/* --- Bảng màu Giao diện Sáng (Light Theme) --- */
 :root {
-    --primary-color: #f5a623; /* Màu vàng-cam như logo của bạn */
+    --primary-color: #f5a623; /* Màu vàng-cam thương hiệu */
     --primary-dark: #cc840f;
-    --text-main: #e0e0e0;
-    --text-light: #aaaaaa;
-    --bg-body: #121212; /* Nền tối */
-    --card-bg: #1e1e1e; /* Nền thẻ tối */
-    --primary-light: #2a2a2a; /* Nền item đang chọn */
-    --border-color: #333333;
+    --primary-light: #f9e7c3; /* Nền item đang chọn (Sáng) */
+    --text-main: #202124; /* Chữ tối */
+    --text-light: #5f6368; /* Chữ Medium Gray */
+    --bg-body: #ffffff; /* Nền trắng */
+    --card-bg: #f5f5f5; /* Nền thẻ xám nhẹ */
+    --border-color: #dddddd; /* Viền sáng */
     --fab-color: #f5a623;
+    --editor-active-color: #f5a623; /* Màu vàng cam cho các nút active */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,11 +24,11 @@ body {
     overflow: hidden;
 }
 
-/* --- Header & Sidebar (Ké thừa cơ bản từ bước trước) --- */
+/* --- Header & Sidebar (Giao diện sáng) --- */
 .app-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 16px; height: 64px; border-bottom: 1px solid var(--border-color);
-    background-color: var(--card-bg); z-index: 100;
+    background-color: #ffffff; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .header-left { display: flex; align-items: center; gap: 16px; }
@@ -37,20 +38,20 @@ body {
     padding: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     transition: background-color 0.2s;
 }
-.icon-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--text-main); }
+.icon-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-main); }
 
 .logo-container { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-main); font-size: 22px; font-weight: 500; }
 .logo-container img { height: 40px; }
 
 .sync-btn {
-    display: flex; align-items: center; gap: 8px; background-color: var(--border-color); color: var(--text-light);
+    display: flex; align-items: center; gap: 8px; background-color: var(--border-color); color: var(--text-main);
     border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
 }
 .sync-btn.active-auth { background-color: #4caf50; color: white; } /* Màu xanh lá cây cho "Đã đồng bộ" */
 
 /* Sidebar */
 .app-body { display: flex; flex: 1; overflow: hidden; }
-.sidebar { width: 280px; background-color: var(--bg-body); padding-top: 16px; overflow-y: auto; border-right: 1px solid var(--border-color); }
+.sidebar { width: 280px; background-color: #ffffff; padding-top: 16px; overflow-y: auto; border-right: 1px solid var(--border-color); }
 .nav-item {
     display: flex; align-items: center; padding: 0 24px; height: 48px; margin-right: 12px; border-radius: 0 24px 24px 0;
     cursor: pointer; color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
@@ -64,73 +65,94 @@ body {
 .main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--bg-body); position: relative; }
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
 .note-card {
-    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;
+    background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;
     transition: box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; gap: 12px;
 }
+.note-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .note-card.note-urgent { border-left: 4px solid var(--primary-color); } /* Nhanh màu vàng cam */
 .note-title { font-size: 16px; font-weight: 500; }
 .note-body { font-size: 14px; color: var(--text-main); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag { font-size: 12px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.08); color: var(--text-light); border-radius: 12px; }
+.tag { font-size: 12px; padding: 4px 8px; background-color: rgba(0,0,0,0.05); color: var(--text-light); border-radius: 12px; }
 
-/* --- RESPONSIVE: CHẾ ĐỘ APP TRÊN DI ĐỘNG --- */
+/* RESPONSIVE: CHẾ ĐỘ APP TRÊN DI ĐỘNG */
 @media (max-width: 600px) {
-    .sidebar { display: none; } /* Ẩn hoàn toàn sidebar */
-    .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .sidebar { display: none; } /* Ẩn sidebar */
+    .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .main-content { padding: 16px; }
 }
 
-/* --- Floating Action Button (+) --- */
+/* --- Floating Action Button (+) (Giao diện App) --- */
 .fab-btn {
     position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
-    background-color: var(--fab-color); color: #121212; /* Màu text đen bật trên nền vàng */
+    background-color: var(--fab-color); color: #ffffff; /* Text trắng trên nền vàng cam */
     border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 90;
+    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 90;
     transition: transform 0.2s, background-color 0.2s;
 }
 .fab-btn:hover { background-color: var(--primary-dark); }
 .fab-btn:active { transform: scale(1.1); }
 .fab-btn i { font-size: 24px; }
 
-/* --- MÀN HÌNH BÊN TẬP CHI TIẾT (Full-screen Editor) --- */
+/* --- MÀN HÌNH BÊN TẬP CHI TIẾT (GinoNote Editor chuẩn App) --- */
 .note-editor-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: var(--bg-body); display: flex; flex-direction: column;
-    z-index: 1000;
-    transform: translateY(100%); /* Bắt đầu ở dưới màn hình */
-    transition: transform 0.3s ease-out; /* Hiệu ứng slide-up */
+    background-color: #ffffff; display: flex; flex-direction: column;
+    z-index: 1000; transform: translateY(100%); transition: transform 0.3s ease-out;
 }
-
 .note-editor-overlay.active { transform: translateY(0); } /* Slide-up open */
 
-/* Editor Header */
+/* Editor Header (Sáng) */
 .editor-header {
     display: flex; align-items: center; justify-content: space-between;
     height: 64px; border-bottom: 1px solid var(--border-color); padding: 0 16px;
-    background-color: var(--card-bg);
+    background-color: #ffffff;
 }
-.editor-title-container { flex: 1; padding: 0 16px; }
+.close-btn { color: var(--text-light); }
+.editor-header-actions { display: flex; gap: 8px; }
+.action-btn { color: var(--text-light); }
+.action-btn:hover { color: var(--editor-active-color); }
+.save-btn { color: var(--editor-active-color); } /* Nút save màu thương hiệu */
+
+/* Color Picker Popup */
+.color-picker-container { position: relative; }
+.color-palette-popup {
+    position: absolute; top: 100%; right: 0; background: #ffffff; border: 1px solid var(--border-color);
+    border-radius: 8px; padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1001; display: none;
+}
+.color-palette-popup.open { display: grid; }
+.color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
+.color-option.active { border: 2px solid var(--editor-active-color); }
+.color-option.default { background-color: #ffffff; }
+
+/* Editor Body (Bố cục stack) */
+.editor-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; transition: background-color 0.3s; }
+
+/* Title & Time */
+.editor-title-container { }
 .editor-title-input {
     width: 100%; border: none; background: none; outline: none;
-    font-size: 18px; font-weight: 500; color: var(--text-main); font-family: inherit;
+    font-size: 20px; font-weight: 500; color: var(--text-main); font-family: inherit;
 }
-.editor-header-actions .icon-btn { color: var(--primary-color); }
-
-/* Editor Body */
-.editor-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; }
-.editor-textarea {
-    width: 100%; flex: 1; border: none; background: none; outline: none;
-    font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
-    resize: none; /* Bỏ nút resize của browser */
+.editor-time-container {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); font-weight: 300;
 }
+.editor-time-container i { font-size: 16px; }
 
-/* Tags Area (Phía trên Keyboard mô phỏng) */
-.editor-tags-input-area {
-    padding: 12px 16px; border-top: 1px solid var(--border-color);
-    background-color: var(--card-bg); display: flex; align-items: center; gap: 12px;
+/* Tags Area */
+.editor-tags-area {
+    padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 .editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
 .tag-input {
     width: 100px; border: none; background: none; outline: none;
-    font-size: 14px; color: var(--primary-color); font-family: inherit;
+    font-size: 14px; color: var(--editor-active-color); font-family: inherit;
+}
+
+/* Text Area */
+.editor-textarea {
+    width: 100%; flex: 1; border: none; background: none; outline: none;
+    font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
+    resize: none;
 }
