@@ -1,0 +1,136 @@
+/* --- Giao diện tối & Reset --- */
+:root {
+    --primary-color: #f5a623; /* Màu vàng-cam như logo của bạn */
+    --primary-dark: #cc840f;
+    --text-main: #e0e0e0;
+    --text-light: #aaaaaa;
+    --bg-body: #121212; /* Nền tối */
+    --card-bg: #1e1e1e; /* Nền thẻ tối */
+    --primary-light: #2a2a2a; /* Nền item đang chọn */
+    --border-color: #333333;
+    --fab-color: #f5a623;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- Header & Sidebar (Ké thừa cơ bản từ bước trước) --- */
+.app-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; height: 64px; border-bottom: 1px solid var(--border-color);
+    background-color: var(--card-bg); z-index: 100;
+}
+
+.header-left { display: flex; align-items: center; gap: 16px; }
+
+.icon-btn {
+    background: none; border: none; color: var(--text-light); cursor: pointer;
+    padding: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    transition: background-color 0.2s;
+}
+.icon-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--text-main); }
+
+.logo-container { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-main); font-size: 22px; font-weight: 500; }
+.logo-container img { height: 40px; }
+
+.sync-btn {
+    display: flex; align-items: center; gap: 8px; background-color: var(--border-color); color: var(--text-light);
+    border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
+}
+.sync-btn.active-auth { background-color: #4caf50; color: white; } /* Màu xanh lá cây cho "Đã đồng bộ" */
+
+/* Sidebar */
+.app-body { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 280px; background-color: var(--bg-body); padding-top: 16px; overflow-y: auto; border-right: 1px solid var(--border-color); }
+.nav-item {
+    display: flex; align-items: center; padding: 0 24px; height: 48px; margin-right: 12px; border-radius: 0 24px 24px 0;
+    cursor: pointer; color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
+    font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden;
+}
+.nav-item i { color: var(--text-light); font-size: 24px; }
+.nav-item.active { background-color: var(--primary-light); color: var(--primary-color); }
+.nav-item.active i { color: var(--primary-color); }
+
+/* Main Content & Grid */
+.main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--bg-body); position: relative; }
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.note-card {
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;
+    transition: box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; gap: 12px;
+}
+.note-card.note-urgent { border-left: 4px solid var(--primary-color); } /* Nhanh màu vàng cam */
+.note-title { font-size: 16px; font-weight: 500; }
+.note-body { font-size: 14px; color: var(--text-main); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.08); color: var(--text-light); border-radius: 12px; }
+
+/* --- RESPONSIVE: CHẾ ĐỘ APP TRÊN DI ĐỘNG --- */
+@media (max-width: 600px) {
+    .sidebar { display: none; } /* Ẩn hoàn toàn sidebar */
+    .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .main-content { padding: 16px; }
+}
+
+/* --- Floating Action Button (+) --- */
+.fab-btn {
+    position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
+    background-color: var(--fab-color); color: #121212; /* Màu text đen bật trên nền vàng */
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 90;
+    transition: transform 0.2s, background-color 0.2s;
+}
+.fab-btn:hover { background-color: var(--primary-dark); }
+.fab-btn:active { transform: scale(1.1); }
+.fab-btn i { font-size: 24px; }
+
+/* --- MÀN HÌNH BÊN TẬP CHI TIẾT (Full-screen Editor) --- */
+.note-editor-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--bg-body); display: flex; flex-direction: column;
+    z-index: 1000;
+    transform: translateY(100%); /* Bắt đầu ở dưới màn hình */
+    transition: transform 0.3s ease-out; /* Hiệu ứng slide-up */
+}
+
+.note-editor-overlay.active { transform: translateY(0); } /* Slide-up open */
+
+/* Editor Header */
+.editor-header {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; border-bottom: 1px solid var(--border-color); padding: 0 16px;
+    background-color: var(--card-bg);
+}
+.editor-title-container { flex: 1; padding: 0 16px; }
+.editor-title-input {
+    width: 100%; border: none; background: none; outline: none;
+    font-size: 18px; font-weight: 500; color: var(--text-main); font-family: inherit;
+}
+.editor-header-actions .icon-btn { color: var(--primary-color); }
+
+/* Editor Body */
+.editor-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; }
+.editor-textarea {
+    width: 100%; flex: 1; border: none; background: none; outline: none;
+    font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
+    resize: none; /* Bỏ nút resize của browser */
+}
+
+/* Tags Area (Phía trên Keyboard mô phỏng) */
+.editor-tags-input-area {
+    padding: 12px 16px; border-top: 1px solid var(--border-color);
+    background-color: var(--card-bg); display: flex; align-items: center; gap: 12px;
+}
+.editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.tag-input {
+    width: 100px; border: none; background: none; outline: none;
+    font-size: 14px; color: var(--primary-color); font-family: inherit;
+}
