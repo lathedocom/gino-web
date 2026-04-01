@@ -3,147 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GinoNote - Đồng bộ Web</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>GinoNote Web</title>
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .btn { padding: 10px 20px; background-color: #4285F4; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-right: 10px;}
+        .btn:hover { background-color: #357ae8; }
+        #content { margin-top: 20px; }
+        .note-item { padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; background-color: #f9f9f9;}
+        .note-title { font-weight: bold; font-size: 18px; color: #333; }
+        .note-time { font-size: 12px; color: #777; margin-top: 5px; }
+    </style>
 </head>
-<body class="light-theme mobile-app-mode">
-    <header class="app-header">
-        <div class="header-left">
-            <button class="icon-btn" id="menuBtn">
-                <i class="material-icons">menu</i>
-            </button>
-            </div>
-        <div class="header-right">
-            <button class="sync-btn active-auth" id="btnAuthGoogle">
-                <i class="material-icons">cloud_sync</i>
-                <span id="syncText">Đã đồng bộ</span>
-            </button>
-        </div>
-    </header>
+<body>
 
-    <div class="app-body">
-        <nav class="sidebar" id="sidebar">
-            <ul class="nav-list">
-                <li>
-                    <a href="#" class="nav-item active" data-target="viewNotes">
-                        <i class="material-icons">lightbulb</i>
-                        <span class="nav-text">Tất cả ghi chú</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-item" data-target="viewCalendar">
-                        <i class="material-icons">calendar_today</i>
-                        <span class="nav-text">Lịch</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-item" data-target="viewTags">
-                        <i class="material-icons">label</i>
-                        <span class="nav-text">Tags</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+    <h1>GinoNote Web - Quản lý Ghi chú</h1>
+    <p>Đồng bộ dữ liệu trực tiếp từ thư mục ẩn Google Drive.</p>
+    
+    <button id="authorize_button" class="btn" style="display: none;" onclick="handleAuthClick()">Đăng nhập Google</button>
+    <button id="signout_button" class="btn" style="display: none;" onclick="handleSignoutClick()">Đăng xuất</button>
 
-        <main class="main-content">
-            <div id="viewNotes" class="view-section active-view">
-                <div class="notes-grid" id="notesGrid">
-                    <div class="note-card" data-tags="Tiếng Anh">
-                        <div class="note-title">Ôn tập Tiếng Anh</div>
-                        <div class="note-body">Hôm nay cần học 50 từ vựng mới và làm bài tập ngữ pháp...</div>
-                        <div class="note-tags"><span class="tag">Tiếng Anh</span></div>
-                    </div>
-                    <div class="note-card note-urgent" style="background-color: #fce4ec;" data-tags="Dev"> 
-                        <div class="note-title">Ý tưởng App</div>
-                        <div class="note-body">Thiết kế FAB (+) và màn hình editor chi tiết y hệt app.</div>
-                        <div class="note-tags"><span class="tag">Dev</span></div>
-                    </div>
-                </div>
-            </div>
+    <div id="content">Đang tải cấu hình Google...</div>
 
-            <div id="viewCalendar" class="view-section" style="display: none;">
-                <div class="calendar-container">
-                    <div class="calendar-header">
-                        <button class="icon-btn"><i class="material-icons">chevron_left</i></button>
-                        <h3 id="calendarMonthYear">Tháng 4, 2026</h3>
-                        <button class="icon-btn"><i class="material-icons">chevron_right</i></button>
-                    </div>
-                    <div class="calendar-grid">
-                        <div class="cal-day-name">T2</div><div class="cal-day-name">T3</div><div class="cal-day-name">T4</div><div class="cal-day-name">T5</div><div class="cal-day-name">T6</div><div class="cal-day-name">T7</div><div class="cal-day-name">CN</div>
-                        </div>
-                </div>
-            </div>
+    <script>
+        // MÃ CLIENT ID CỦA BẠN ĐÃ ĐƯỢC ĐIỀN SẴN
+        const CLIENT_ID = '631532964907-hi703ubcopoqjmv0e5fn6ui3h2u2mi5b.apps.googleusercontent.com'; 
+        
+        // Yêu cầu quyền truy cập thư mục ẩn (Khớp với quyền trên app GinoNote Android)
+        const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 
-            <div id="viewTags" class="view-section" style="display: none;">
-                <h3 style="margin-bottom: 16px;">Danh sách Tags</h3>
-                <div class="tags-container" id="allTagsContainer">
-                    </div>
-            </div>
-        </main>
-    </div>
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
 
-    <button class="fab-btn" id="fabBtn">
-        <i class="material-icons">add</i>
-    </button>
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
 
-    <div class="note-editor-overlay" id="noteEditor">
-        <div class="editor-header">
-            <button class="icon-btn close-btn" id="closeEditorBtn">
-                <i class="material-icons">arrow_back</i>
-            </button>
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+            });
+            gapiInited = true;
+            maybeEnableButtons();
+        }
 
-            <div class="editor-header-actions">
-                <button class="icon-btn action-btn" id="editNoteModeBtn" title="Chỉnh sửa">
-                    <i class="material-icons">edit</i>
-                </button>
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', 
+            });
+            gisInited = true;
+            maybeEnableButtons();
+        }
 
-                <div id="editModeToolbar" style="display: none; align-items: center; gap: 8px;">
-                    <button class="icon-btn action-btn" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
-                        <i class="material-icons">lightbulb</i>
-                    </button>
-                    
-                    <div class="color-picker-container">
-                        <button class="icon-btn action-btn" id="colorPaletteBtn" title="Chọn màu nền">
-                            <i class="material-icons">palette</i>
-                        </button>
-                        <div class="color-palette-popup" id="colorPalettePopup">
-                            <div class="color-option default active" data-color="#ffffff"></div>
-                            <div class="color-option" data-color="#f8caca"></div>
-                            <div class="color-option" data-color="#c8e6c9"></div>
-                            <div class="color-option" data-color="#b3e5fc"></div>
-                            <div class="color-option" data-color="#fce4ec"></div>
-                            <div class="color-option" data-color="#fff9c4"></div>
-                        </div>
-                    </div>
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                document.getElementById('authorize_button').style.display = 'inline-block';
+                document.getElementById('content').innerText = 'Hãy đăng nhập để xem danh sách ghi chú.';
+            }
+        }
 
-                    <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
-                        <i class="material-icons">image</i>
-                    </button>
-                    <button class="icon-btn action-btn save-btn" id="saveNoteBtn" title="Lưu ghi chú">
-                        <i class="material-icons">save</i> </button>
-                </div>
-            </div>
-        </div>
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                document.getElementById('signout_button').style.display = 'inline-block';
+                document.getElementById('authorize_button').style.display = 'none';
+                document.getElementById('content').innerText = 'Đang tải danh sách file...';
+                
+                // Sau khi đăng nhập thành công, tự động tải danh sách file
+                listFiles();
+            };
 
-        <div class="editor-body" id="editorBody">
-            <div class="editor-title-container">
-                <input type="text" id="editNoteTitle" placeholder="Tiêu đề" class="editor-title-input">
-            </div>
-            <div class="editor-time-container">
-                <i class="material-icons">access_time</i>
-                <span id="editNoteTime">Tự động tạo thời gian...</span>
-            </div>
-            <div class="editor-tags-area" id="editorTagsArea">
-                <i class="material-icons" style="color: var(--text-light);">label</i>
-                <div id="editorTagList" class="editor-tag-list"></div>
-                <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
-            </div>
-            <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
-        </div>
-    </div>
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
 
-    <script src="script.js"></script>
+        function handleSignoutClick() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token);
+                gapi.client.setToken('');
+                document.getElementById('content').innerText = 'Đã đăng xuất.';
+                document.getElementById('authorize_button').style.display = 'inline-block';
+                document.getElementById('signout_button').style.display = 'none';
+            }
+        }
+
+        async function listFiles() {
+            let response;
+            try {
+                // Gọi API lấy file, CHỈ TÌM TRONG appDataFolder (Thư mục ẩn)
+                response = await gapi.client.drive.files.list({
+                    spaces: 'appDataFolder',
+                    fields: 'files(id, name, modifiedTime)',
+                    pageSize: 100
+                });
+            } catch (err) {
+                document.getElementById('content').innerText = "Lỗi khi tải file: " + err.message;
+                return;
+            }
+
+            const files = response.result.files;
+            if (!files || files.length == 0) {
+                document.getElementById('content').innerText = 'Không tìm thấy ghi chú nào trong thư mục ẩn. Hãy chắc chắn bạn đã đồng bộ từ app Android lên.';
+                return;
+            }
+
+            // In danh sách file ra màn hình
+            let output = '<h3>Các file .gino của bạn:</h3>';
+            files.forEach((file) => {
+                output += `<div class="note-item">
+                            <div class="note-title">${file.name}</div>
+                            <div class="note-time">Sửa lần cuối: ${new Date(file.modifiedTime).toLocaleString('vi-VN')}</div>
+                           </div>`;
+            });
+            document.getElementById('content').innerHTML = output;
+        }
+    </script>
+
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
