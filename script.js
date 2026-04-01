@@ -152,9 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         editTitle.focus();
     });
 
-    // Mở Ghi chú có sẵn -> Bật chế độ ĐỌC
-    const noteCards = document.querySelectorAll('.note-card');
-    noteCards.forEach(card => {
+    // Mở Ghi chú có sẵn (Logic chung cho cả hardcode và tự sinh từ Drive)
+    window.attachNoteClickEvent = function(card) {
         card.addEventListener('click', function() {
             resetEditor();
             editTitle.value = this.querySelector('.note-title').innerText;
@@ -164,6 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
             setEditorMode(false); // Chế độ ĐỌC (chỉ có cây bút)
             noteEditor.classList.add('active');
         });
+    }
+
+    // Gắn event cho các card hardcode ban đầu
+    document.querySelectorAll('.note-card').forEach(card => {
+        window.attachNoteClickEvent(card);
     });
 
     // Đóng Editor
@@ -214,7 +218,176 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveNoteBtn.addEventListener('click', () => {
-        alert("Đã lưu ghi chú thành công!");
+        alert("Tính năng lưu lên Drive sẽ được phát triển sau. Dữ liệu hiện tại chỉ hiển thị.");
         setEditorMode(false); // Lưu xong quay về chế độ đọc
     });
 });
+
+
+// =====================================================================
+// KẾT NỐI GOOGLE DRIVE SYNC (THƯ MỤC ẨN) - SCOPE GLOBAL
+// =====================================================================
+
+const CLIENT_ID = '631532964907-hi703ubcopoqjmv0e5fn6ui3h2u2mi5b.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+const SYNC_FILE_NAME = 'ginonote_SyncData.json'; // Khớp 100% với tên file Android tạo ra
+
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+
+// 1. Hàm khởi tạo GAPI (gọi từ thẻ script trong HTML)
+window.gapiLoaded = function() {
+    gapi.load('client', initializeGapiClient);
+};
+
+async function initializeGapiClient() {
+    await gapi.client.init({
+        discoveryDocs: [DISCOVERY_DOC],
+    });
+    gapiInited = true;
+    maybeEnableAuthButton();
+}
+
+// 2. Hàm khởi tạo Google Sign-In (gọi từ thẻ script trong HTML)
+window.gisLoaded = function() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // Sẽ được gán lúc click
+    });
+    gisInited = true;
+    maybeEnableAuthButton();
+};
+
+// 3. Mở khóa nút bấm khi thư viện tải xong
+function maybeEnableAuthButton() {
+    const btnAuthGoogle = document.getElementById('btnAuthGoogle');
+    const syncText = document.getElementById('syncText');
+    if (gapiInited && gisInited && btnAuthGoogle) {
+        syncText.innerText = "Đăng nhập Google";
+        btnAuthGoogle.classList.remove('active-auth');
+        
+        // Gắn sự kiện click để đăng nhập
+        btnAuthGoogle.addEventListener('click', handleAuthClick);
+    }
+}
+
+// 4. Xử lý khi người dùng bấm nút Đăng nhập / Đồng bộ
+function handleAuthClick(e) {
+    e.preventDefault();
+    const btnAuthGoogle = document.getElementById('btnAuthGoogle');
+    const syncText = document.getElementById('syncText');
+    
+    tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            console.error("Lỗi đăng nhập:", resp);
+            return;
+        }
+        
+        // Đăng nhập thành công, đổi UI và bắt đầu tải file
+        syncText.innerText = "Đang đồng bộ...";
+        btnAuthGoogle.classList.add('active-auth');
+        await fetchNotesFromHiddenDrive();
+    };
+
+    if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+        tokenClient.requestAccessToken({prompt: ''});
+    }
+}
+
+// 5. Tải file ginonote_SyncData.json từ appDataFolder
+async function fetchNotesFromHiddenDrive() {
+    const btnAuthGoogle = document.getElementById('btnAuthGoogle');
+    const syncText = document.getElementById('syncText');
+
+    try {
+        // Tìm file trong thư mục ẩn
+        let response = await gapi.client.drive.files.list({
+            spaces: 'appDataFolder',
+            q: `name = '${SYNC_FILE_NAME}' and trashed = false`,
+            fields: 'files(id, name)'
+        });
+
+        const files = response.result.files;
+        if (!files || files.length === 0) {
+            alert('Chưa có dữ liệu. Bạn hãy dùng app Android đồng bộ lên Drive trước nhé!');
+            syncText.innerText = "Đăng nhập Google";
+            btnAuthGoogle.classList.remove('active-auth');
+            return;
+        }
+
+        const fileId = files[0].id;
+
+        // Tải nội dung text của file JSON
+        let fileContent = await gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: 'media'
+        });
+
+        // Phân tích chuỗi JSON thành mảng Object ghi chú
+        const notesArray = typeof fileContent.body === 'string' 
+                            ? JSON.parse(fileContent.body) 
+                            : fileContent.result;
+        
+        syncText.innerText = "Đã đồng bộ";
+        
+        // Gọi hàm Render UI
+        renderSyncedNotesToWeb(notesArray);
+
+    } catch (err) {
+        console.error("Lỗi khi tải dữ liệu từ Google Drive:", err);
+        alert("Lỗi khi tải dữ liệu từ Google Drive. Bạn có thể cần cấp lại quyền hoặc file bị lỗi format.");
+        syncText.innerText = "Lỗi đồng bộ";
+        btnAuthGoogle.classList.remove('active-auth');
+    }
+}
+
+// 6. Xử lý hiển thị danh sách ghi chú lên lưới
+function renderSyncedNotesToWeb(notesArray) {
+    const notesGrid = document.getElementById('notesGrid');
+    if (!notesGrid) return;
+
+    // Xóa toàn bộ ghi chú mẫu đang có trên giao diện
+    notesGrid.innerHTML = '';
+
+    // Duyệt qua từng ghi chú lấy từ Google Drive và vẽ HTML
+    notesArray.forEach(note => {
+        const card = document.createElement('div');
+        card.className = 'note-card';
+        
+        // Màu nền (nếu note của bạn có thuộc tính color, ngược lại dùng trắng)
+        card.style.backgroundColor = note.color || '#ffffff';
+
+        // Xử lý render Tags
+        let tagsHtml = '';
+        let tagsString = '';
+        if (note.tags && Array.isArray(note.tags) && note.tags.length > 0) {
+            tagsString = note.tags.join(',');
+            note.tags.forEach(tag => {
+                tagsHtml += `<span class="tag">${tag}</span>`;
+            });
+        }
+        card.setAttribute('data-tags', tagsString);
+
+        // Ghép ruột HTML cho thẻ ghi chú
+        card.innerHTML = `
+            <div class="note-title">${note.title || 'Không có tiêu đề'}</div>
+            <div class="note-body">${note.content || ''}</div>
+            <div class="note-tags">${tagsHtml}</div>
+        `;
+
+        // Gắn sự kiện click để mở Editor (gọi lại hàm đã tạo ở trên)
+        if(window.attachNoteClickEvent) {
+            window.attachNoteClickEvent(card);
+        }
+
+        // Thêm thẻ vào giao diện
+        notesGrid.appendChild(card);
+    });
+
+    alert(`Đồng bộ thành công! Đã tải ${notesArray.length} ghi chú từ Google Drive.`);
+}
