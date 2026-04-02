@@ -5,42 +5,41 @@ window.syncFileId = null;
 window.globalNotesArray = [];       
 window.currentEditingNoteId = null; 
 
-window.globalImagesMap = {}; 
-window.imageBlobUrls = {};   
-window.currentEditingImages = []; 
+// MIDDLEMAN: Bản đồ ánh xạ ảnh
+window.globalImagesMap = {}; // Lưu trữ Blob thực tế với key chuẩn: "images/uuid.jpg"
+window.imageBlobUrls = {};   // Lưu Blob URL để hiển thị: "images/uuid.jpg" -> "blob:http..."
+window.currentEditingImages = []; // Mảng tạm cho Editor
 
 let isDOMReady = false;
 let gapiInited = false;
 let gisInited = false;
 
-// Tự động tiêm (inject) CSS để sửa lỗi không cuộn được ghi chú dài
+// Hàm tạo UUID hỗ trợ cả các trình duyệt cũ hoặc chạy localhost
+function generateUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+}
+
+// CSS Fix cho khung Editor cuộn mượt mà
 const styleFix = document.createElement('style');
 styleFix.innerHTML = `
-    .editor-body {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 70px) !important; 
-        overflow-y: auto !important; 
-    }
-    .editor-textarea {
-        flex-grow: 1;
-        min-height: 50vh;
-        overflow-y: auto !important;
-        resize: none;
-        padding-bottom: 50px; /* Thêm khoảng trống đáy để lướt mượt hơn */
-    }
-    .note-editor-overlay {
-        overflow: hidden !important; /* Khóa cuộn lớp nền bên ngoài */
-    }
+    .editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
+    .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
+    .note-editor-overlay { overflow: hidden !important; }
 `;
 document.head.appendChild(styleFix);
 
 // =====================================================================
-// PHẦN 1: KHỞI TẠO GIAO DIỆN (UI) KHI TRANG TẢI XONG
+// PHẦN 1: KHỞI TẠO GIAO DIỆN (UI)
 // =====================================================================
 document.addEventListener('DOMContentLoaded', () => {
     isDOMReady = true;
 
+    // --- ĐIỀU HƯỚNG ---
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
     const navItems = document.querySelectorAll('.nav-item');
@@ -72,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- EDITOR ---
     const noteEditor = document.getElementById('noteEditor');
     const editorBody = document.getElementById('editorBody');
     const editTitle = document.getElementById('editNoteTitle');
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- MỞ EDITOR ĐÃ NÂNG CẤP XỬ LÝ ẢNH ANDROID ---
+    // MỞ EDITOR & ĐỌC DỮ LIỆU MIDDLEMAN
     window.openNoteInEditor = function(noteData) {
         editTitle.value = '';
         editBody.value = '';
@@ -108,8 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.color-option.default').classList.add('active');
         
         window.currentEditingImages = []; 
-        let imageArea = document.getElementById('editorImageArea');
-        if (imageArea) imageArea.innerHTML = '';
 
         if (noteData) { 
             window.currentEditingNoteId = noteData.id;
@@ -124,29 +122,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            if (noteData.tags && Array.isArray(noteData.tags)) {
-                newTagInput.value = noteData.tags.join(', ');
-            } else if (typeof noteData.tags === 'string') {
-                newTagInput.value = noteData.tags;
-            }
+            // Gắn tags
+            let tagsArray = [];
+            if (Array.isArray(noteData.tags)) tagsArray = noteData.tags;
+            else if (typeof noteData.tags === 'string') tagsArray = noteData.tags.split(',');
+            newTagInput.value = tagsArray.join(', ');
 
-            // [HACK]: Kỹ thuật bóc tách ảnh mờ (Fuzzy Parsing) để hỗ trợ file từ Android
-            // Thay vì tìm đúng biến, ta ép toàn bộ Ghi chú thành chữ, và xem có tên file ảnh nào trong đó không.
-            const noteStr = JSON.stringify(noteData);
-            const addedImages = new Set();
+            // TÁCH ẢNH KIỂU TRUNG GIAN (MIDDLEMAN)
+            let pathsToExtract = noteData.imagePaths || noteData.images || [];
+            if (typeof pathsToExtract === 'string') pathsToExtract = pathsToExtract.split(',');
 
-            for (let path in window.globalImagesMap) {
-                const fileName = path.split('/').pop().split('\\').pop(); // Lấy đúng tên file cuối cùng (VD: IMG_123.jpg)
-                
-                // Nếu tên file ảnh xuất hiện BẤT KỲ ĐÂU trong dữ liệu ghi chú này
-                if (noteStr.includes(fileName) && !addedImages.has(fileName)) {
-                    window.currentEditingImages.push({
-                        path: path,
-                        blob: window.globalImagesMap[path],
-                        url: window.imageBlobUrls[path] 
-                    });
-                    addedImages.add(fileName); // Đánh dấu để tránh bị lặp
-                }
+            if (Array.isArray(pathsToExtract)) {
+                pathsToExtract.forEach(pathStr => {
+                    if(!pathStr) return;
+                    // Bóc tách lấy đúng tên file bất chấp Android đang dùng đường dẫn vật lý hay Web dùng tên gốc
+                    const rawFileName = pathStr.split('/').pop().split('\\').pop(); 
+                    const mapKey = `images/${rawFileName}`; // Chuẩn hóa về đúng key trong file ZIP
+
+                    if (window.globalImagesMap[mapKey]) {
+                        window.currentEditingImages.push({
+                            fileName: rawFileName,     // "uuid.jpg" -> Dùng lưu vào JSON
+                            mapKey: mapKey,            // "images/uuid.jpg" -> Dùng lưu vào ZIP
+                            blob: window.globalImagesMap[mapKey],
+                            url: window.imageBlobUrls[mapKey] 
+                        });
+                    }
+                });
             }
 
             renderEditorImages(); 
@@ -156,14 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
             renderEditorImages(); 
             setEditorMode(true); 
         }
-
         noteEditor.classList.add('active');
     };
 
     function renderEditorImages() {
-        let editorBody = document.getElementById('editorBody');
         let imageArea = document.getElementById('editorImageArea');
-        
         if (!imageArea) {
             imageArea = document.createElement('div');
             imageArea.id = 'editorImageArea';
@@ -173,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         imageArea.innerHTML = ''; 
-        
         if (window.currentEditingImages.length === 0) {
             imageArea.style.display = 'none';
             return;
@@ -209,22 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = isEditing ? 'flex' : 'none');
     }
 
-    document.getElementById('fabBtn').addEventListener('click', () => {
-        window.openNoteInEditor(null); 
-        editTitle.focus();
-    });
+    // --- SỰ KIỆN TOOLBAR ---
+    document.getElementById('fabBtn').addEventListener('click', () => { window.openNoteInEditor(null); editTitle.focus(); });
+    editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
+    document.getElementById('closeEditorBtn').addEventListener('click', () => { noteEditor.classList.remove('active'); colorPalettePopup.classList.remove('open'); });
 
-    editNoteModeBtn.addEventListener('click', () => {
-        setEditorMode(true);
-        editBody.focus();
-    });
-
-    document.getElementById('closeEditorBtn').addEventListener('click', () => {
-        noteEditor.classList.remove('active');
-        colorPalettePopup.classList.remove('open');
-    });
-
-    // --- XỬ LÝ NÚT CHÈN ẢNH VÀO WEB ---
+    // --- CHỌN ẢNH VÀO TẠO UUID CHO WEB ---
     const insertImageBtn = document.getElementById('insertImageBtn');
     const hiddenImageInput = document.getElementById('hiddenImageInput');
 
@@ -234,22 +221,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
         const file = files[0];
-        
-        if (!file.type.startsWith('image/')) {
-            alert('Vui lòng chỉ chọn tệp tin hình ảnh.');
-            return;
-        }
+        if (!file.type.startsWith('image/')) { alert('Chỉ được chọn hình ảnh.'); return; }
         
         const reader = new FileReader();
         reader.onload = function(event) {
             const blob = new Blob([event.target.result], { type: file.type });
             const blobUrl = URL.createObjectURL(blob);
             
+            // TẠO UUID ĐỂ KHỚP VỚI CƠ CHẾ MIDDLEMAN
             const extension = file.name.split('.').pop() || 'jpg';
-            const randomFileName = `images/web_${new Date().getTime()}.${extension}`;
+            const uniqueFileName = `${generateUUID()}.${extension}`; // VD: crypto-uuid.jpg
+            const mapKey = `images/${uniqueFileName}`; // VD: images/crypto-uuid.jpg
             
             window.currentEditingImages.push({
-                path: randomFileName,
+                fileName: uniqueFileName, 
+                mapKey: mapKey,
                 blob: blob,
                 url: blobUrl
             });
@@ -277,20 +263,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- LƯU LÊN DRIVE (CẬP NHẬT BIẾN ẢNH ĐA DẠNG ĐỂ ANDROID DỄ ĐỌC) ---
+    // --- GÓI DỮ LIỆU ĐỂ LƯU MIDDLEMAN ---
     document.getElementById('saveNoteBtn').addEventListener('click', async () => {
-        if (!gapi.client.getToken()) {
-            alert("Bạn cần đăng nhập Google trước!");
-            return;
-        }
+        if (!gapi.client.getToken()) { alert("Bạn cần đăng nhập Google trước!"); return; }
 
         const title = editTitle.value.trim();
         const content = editBody.value.trim();
         const color = editorBody.style.backgroundColor;
         const tags = newTagInput.value ? newTagInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
 
-        // Lấy danh sách tên file đang có trên giao diện web
-        const finalImagePaths = window.currentEditingImages.map(imgObj => imgObj.path);
+        // Trích xuất list Tên File duy nhất (uuid.jpg) để lưu JSON
+        const finalFileNames = window.currentEditingImages.map(imgObj => imgObj.fileName);
 
         if (!window.globalNotesArray) window.globalNotesArray = [];
         
@@ -301,11 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.globalNotesArray[index].content = content;
                 window.globalNotesArray[index].color = color;
                 window.globalNotesArray[index].tags = tags;
-                
-                // Lưu vào đa dạng các tên biến phổ biến để App Android kiểu gì cũng quét ra được
-                window.globalNotesArray[index].images = finalImagePaths; 
-                window.globalNotesArray[index].imagePaths = finalImagePaths; 
-                
+                window.globalNotesArray[index].imagePaths = finalFileNames; // Ghi tên gốc vào file json
+                window.globalNotesArray[index].images = finalFileNames;     // Backup
                 window.globalNotesArray[index].updatedAt = new Date().getTime();
             }
         } else {
@@ -315,8 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: content,
                 color: color,
                 tags: tags,
-                images: finalImagePaths, 
-                imagePaths: finalImagePaths,
+                imagePaths: finalFileNames,
+                images: finalFileNames,
                 updatedAt: new Date().getTime(),
                 createdAt: new Date().getTime()
             };
@@ -324,18 +304,16 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentEditingNoteId = newNote.id; 
         }
 
+        // Cập nhật thư viện MAP ngầm
         window.currentEditingImages.forEach(imgObj => {
-            if (!window.globalImagesMap[imgObj.path]) {
-                window.globalImagesMap[imgObj.path] = imgObj.blob;
-                window.imageBlobUrls[imgObj.path] = imgObj.url;
-            }
+            window.globalImagesMap[imgObj.mapKey] = imgObj.blob;
+            window.imageBlobUrls[imgObj.mapKey] = imgObj.url;
         });
         
         const saveBtn = document.getElementById('saveNoteBtn');
         saveBtn.innerHTML = '<i class="material-icons">sync</i>';
         
         const isSuccess = await window.saveNotesToDrive(window.globalNotesArray);
-        
         saveBtn.innerHTML = '<i class="material-icons">save</i>';
 
         if (isSuccess) {
@@ -349,9 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // =====================================================================
-// PHẦN 2: GOOGLE DRIVE API & XỬ LÝ FILE ZIP (Giữ nguyên cấu trúc)
+// PHẦN 2: GOOGLE DRIVE API & JSZIP
 // =====================================================================
-
 const CLIENT_ID = '631532964907-hi703ubcopoqjmv0e5fn6ui3h2u2mi5b.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -366,18 +343,13 @@ window.gapiLoaded = function() {
 };
 
 window.gisLoaded = function() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', 
-    });
+    tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
     gisInited = true;
     checkAndFetchDriveData();
 };
 
 function checkAndFetchDriveData() {
     if (!isDOMReady || !gapiInited || !gisInited) return;
-
     const btnAuthGoogle = document.getElementById('btnAuthGoogle');
     const syncText = document.getElementById('syncText');
     
@@ -392,9 +364,7 @@ function checkAndFetchDriveData() {
         syncText.innerText = "Đang tải dữ liệu...";
         btnAuthGoogle.classList.add('active-auth');
         fetchNotesFromHiddenDrive();
-    } else {
-        clearDriveSession();
-    }
+    } else { clearDriveSession(); }
 }
 
 function handleAuthClick(e) {
@@ -427,7 +397,6 @@ function handleDriveApiError(err) {
         alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         clearDriveSession();
     } else {
-        console.error(err);
         document.getElementById('syncText').innerText = "Lỗi đồng bộ";
     }
 }
@@ -435,9 +404,7 @@ function handleDriveApiError(err) {
 async function fetchNotesFromHiddenDrive() {
     try {
         let response = await gapi.client.drive.files.list({
-            spaces: 'appDataFolder',
-            q: `name = '${SYNC_FILE_NAME}' and trashed = false`,
-            fields: 'files(id, name)'
+            spaces: 'appDataFolder', q: `name = '${SYNC_FILE_NAME}' and trashed = false`, fields: 'files(id, name)'
         });
 
         const files = response.result.files;
@@ -452,7 +419,6 @@ async function fetchNotesFromHiddenDrive() {
         }
 
         window.syncFileId = files[0].id;
-        
         const token = gapi.client.getToken().access_token;
         const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${window.syncFileId}?alt=media`, {
             headers: { 'Authorization': 'Bearer ' + token }
@@ -466,13 +432,9 @@ async function fetchNotesFromHiddenDrive() {
         if (zip.file("data.json")) {
             const jsonStr = await zip.file("data.json").async("string");
             window.globalNotesArray = JSON.parse(jsonStr);
-        } else {
-            window.globalNotesArray = [];
-        }
+        } else { window.globalNotesArray = []; }
 
-        for (let path in window.imageBlobUrls) {
-            URL.revokeObjectURL(window.imageBlobUrls[path]);
-        }
+        for (let path in window.imageBlobUrls) { URL.revokeObjectURL(window.imageBlobUrls[path]); }
         window.globalImagesMap = {};
         window.imageBlobUrls = {};
         
@@ -481,40 +443,34 @@ async function fetchNotesFromHiddenDrive() {
             const filePath = zipFiles[i];
             if (filePath.startsWith('images/') && !zip.files[filePath].dir) {
                 const blob = await zip.files[filePath].async("blob");
-                window.globalImagesMap[filePath] = blob;
+                window.globalImagesMap[filePath] = blob; // Key dạng: "images/uuid.jpg"
                 window.imageBlobUrls[filePath] = URL.createObjectURL(blob);
             }
         }
 
         document.getElementById('syncText').innerText = "Đã đồng bộ";
         window.renderSyncedNotesToWeb(window.globalNotesArray);
-
-    } catch (err) {
-        handleDriveApiError(err);
-    }
+    } catch (err) { handleDriveApiError(err); }
 }
 
+// LƯU ĐÓNG GÓI CHUẨN THƯ MỤC IMAGES/ VÀO ZIP
 window.saveNotesToDrive = async function(notesArray) {
     const syncText = document.getElementById('syncText');
-    
     const tokenObj = gapi.client.getToken();
-    if (!tokenObj) {
-        clearDriveSession();
-        return false;
-    }
+    if (!tokenObj) { clearDriveSession(); return false; }
     const token = tokenObj.access_token;
 
     try {
         const zip = new JSZip();
         zip.file('data.json', JSON.stringify(notesArray));
         
+        // Nhét ảnh vào ZIP theo key "images/uuid.jpg"
         for (let imagePath in window.globalImagesMap) {
             zip.file(imagePath, window.globalImagesMap[imagePath]);
         }
 
         syncText.innerText = "Đang nén ZIP...";
         const zipBlob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
-
         syncText.innerText = "Đang tải lên...";
 
         if (window.syncFileId) {
@@ -524,10 +480,7 @@ window.saveNotesToDrive = async function(notesArray) {
                 headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/zip' },
                 body: zipBlob
             });
-            if (!response.ok) {
-                if (response.status === 401) throw { status: 401 };
-                throw new Error("Lỗi update file");
-            }
+            if (!response.ok) { if (response.status === 401) throw { status: 401 }; throw new Error("Lỗi update file"); }
         } else {
             const metadata = { name: SYNC_FILE_NAME, parents: ['appDataFolder'] };
             const form = new FormData();
@@ -540,24 +493,18 @@ window.saveNotesToDrive = async function(notesArray) {
                 headers: { 'Authorization': 'Bearer ' + token },
                 body: form
             });
-            if (!response.ok) {
-                if (response.status === 401) throw { status: 401 };
-                throw new Error("Lỗi tạo file mới");
-            }
+            if (!response.ok) { if (response.status === 401) throw { status: 401 }; throw new Error("Lỗi tạo mới"); }
             const result = await response.json();
             window.syncFileId = result.id; 
         }
 
         syncText.innerText = "Đã đồng bộ";
         return true;
-    } catch (err) {
-        handleDriveApiError(err);
-        return false;
-    }
+    } catch (err) { handleDriveApiError(err); return false; }
 }
 
 // =====================================================================
-// PHẦN 3: VẼ GIAO DIỆN TRANG CHỦ (PREVIEW CÓ ẢNH & CHỐNG LỆCH ĐƯỜNG DẪN)
+// PHẦN 3: VẼ GIAO DIỆN TRANG CHỦ
 // =====================================================================
 window.renderSyncedNotesToWeb = function(notesArray) {
     const notesGrid = document.getElementById('notesGrid');
@@ -571,42 +518,45 @@ window.renderSyncedNotesToWeb = function(notesArray) {
         card.style.backgroundColor = note.color || note.bgColor || '#ffffff';
 
         let tagsHtml = '';
-        let tagsString = '';
         let tagsArray = [];
-        if (note.tags && Array.isArray(note.tags)) tagsArray = note.tags;
+        if (Array.isArray(note.tags)) tagsArray = note.tags;
         else if (typeof note.tags === 'string') tagsArray = note.tags.split(',').map(t => t.trim());
         if (tagsArray.length > 0) {
-            tagsString = tagsArray.join(',');
+            card.setAttribute('data-tags', tagsArray.join(','));
             tagsArray.forEach(tag => { if(tag) tagsHtml += `<span class="tag">${tag}</span>`; });
         }
-        card.setAttribute('data-tags', tagsString);
 
-        // BÓC TÁCH ẢNH THÔNG MINH CHO TRANG CHỦ: 
-        // Thay vì dựa vào biến "note.images", ta quét cả ghi chú xem có nhắc tên ảnh nào không
-        const noteStr = JSON.stringify(note);
+        // TÁCH ẢNH KIỂU MIDDLEMAN CHO TRANG CHỦ
         let imagesPreviewHtml = '';
         let matchCount = 0;
-        
-        imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
-        
-        for (let path in window.globalImagesMap) {
-            if (matchCount >= 4) break; // Chỉ hiện tối đa 4 ảnh ở trang chủ
-            const fileName = path.split('/').pop().split('\\').pop();
-            
-            if (noteStr.includes(fileName) && window.imageBlobUrls[path]) {
-                imagesPreviewHtml += `<img src="${window.imageBlobUrls[path]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
-                matchCount++;
-            }
-        }
-        imagesPreviewHtml += '</div>';
+        let pathsToExtract = note.imagePaths || note.images || [];
+        if (typeof pathsToExtract === 'string') pathsToExtract = pathsToExtract.split(',');
 
-        // Lọc nội dung chữ: Nếu Android có chèn đường dẫn ảnh thẳng vào chữ thì phải ẩn nó đi hoặc biến nó thành ảnh ảo
+        if (Array.isArray(pathsToExtract) && pathsToExtract.length > 0) {
+            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
+            pathsToExtract.forEach(pathStr => {
+                if (matchCount >= 4 || !pathStr) return;
+                // Bóc tách tên file, dù là file path Android hay Web
+                const rawFileName = pathStr.split('/').pop().split('\\').pop(); 
+                const mapKey = `images/${rawFileName}`;
+                
+                if (window.imageBlobUrls[mapKey]) {
+                    imagesPreviewHtml += `<img src="${window.imageBlobUrls[mapKey]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
+                    matchCount++;
+                }
+            });
+            imagesPreviewHtml += '</div>';
+        }
+
         let displayContent = note.content || note.memoContent || note.text || '';
-        for (let path in window.imageBlobUrls) {
-            const fileName = path.split('/').pop().split('\\').pop();
-            // Xóa bớt đường dẫn loằng ngoằng trong chữ hiển thị
-            const regex = new RegExp(`(?:file:\\/\\/|\\/storage\\/|\\/data\\/|images\\/)?[\\w\\/\\.\\-]*${fileName}`, 'g');
-            displayContent = displayContent.replace(regex, '[Hình ảnh đính kèm]');
+        
+        // Ẩn bớt các đường dẫn ảnh rác trong nội dung chữ (nếu có do Android chèn)
+        if (Array.isArray(pathsToExtract)) {
+            pathsToExtract.forEach(pathStr => {
+                const rawFileName = pathStr.split('/').pop().split('\\').pop();
+                const regex = new RegExp(`(?:file:\\/\\/|\\/storage\\/|\\/data\\/|images\\/)?[\\w\\/\\.\\-]*${rawFileName}`, 'g');
+                displayContent = displayContent.replace(regex, '[Hình ảnh đính kèm]');
+            });
         }
 
         card.innerHTML = `
@@ -616,10 +566,7 @@ window.renderSyncedNotesToWeb = function(notesArray) {
             <div class="note-tags">${tagsHtml}</div>
         `;
 
-        card.addEventListener('click', () => {
-            window.openNoteInEditor(note);
-        });
-
+        card.addEventListener('click', () => { window.openNoteInEditor(note); });
         notesGrid.appendChild(card);
     });
 
