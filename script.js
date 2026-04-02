@@ -5,20 +5,18 @@ window.syncFileId = null;
 window.globalNotesArray = [];       
 window.currentEditingNoteId = null; 
 
-// MIDDLEMAN: Bản đồ ánh xạ ảnh
-window.globalImagesMap = {}; // Lưu trữ Blob thực tế với key chuẩn: "images/uuid.jpg"
-window.imageBlobUrls = {};   // Lưu Blob URL để hiển thị: "images/uuid.jpg" -> "blob:http..."
+// MIDDLEMAN SIÊU QUÉT: Ánh xạ ảnh chỉ dựa trên Tên File gốc (VD: "uuid.jpg")
+window.globalImagesMap = {}; // Lưu trữ Blob thực tế: { "uuid.jpg": Blob }
+window.imageBlobUrls = {};   // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
 window.currentEditingImages = []; // Mảng tạm cho Editor
 
 let isDOMReady = false;
 let gapiInited = false;
 let gisInited = false;
 
-// Hàm tạo UUID hỗ trợ cả các trình duyệt cũ hoặc chạy localhost
+// Hàm tạo UUID 
 function generateUUID() {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        return crypto.randomUUID();
-    }
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
@@ -97,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // MỞ EDITOR & ĐỌC DỮ LIỆU MIDDLEMAN
+    // MỞ EDITOR & TÌM ẢNH BẰNG SIÊU QUÉT (DEEP SCAN)
     window.openNoteInEditor = function(noteData) {
         editTitle.value = '';
         editBody.value = '';
@@ -122,32 +120,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Gắn tags
             let tagsArray = [];
             if (Array.isArray(noteData.tags)) tagsArray = noteData.tags;
             else if (typeof noteData.tags === 'string') tagsArray = noteData.tags.split(',');
             newTagInput.value = tagsArray.join(', ');
 
-            // TÁCH ẢNH KIỂU TRUNG GIAN (MIDDLEMAN)
-            let pathsToExtract = noteData.imagePaths || noteData.images || [];
-            if (typeof pathsToExtract === 'string') pathsToExtract = pathsToExtract.split(',');
+            // SIÊU QUÉT TÌM ẢNH BẤT CHẤP CẤU TRÚC JSON CỦA ANDROID
+            const noteStr = JSON.stringify(noteData);
+            const addedImages = new Set();
 
-            if (Array.isArray(pathsToExtract)) {
-                pathsToExtract.forEach(pathStr => {
-                    if(!pathStr) return;
-                    // Bóc tách lấy đúng tên file bất chấp Android đang dùng đường dẫn vật lý hay Web dùng tên gốc
-                    const rawFileName = pathStr.split('/').pop().split('\\').pop(); 
-                    const mapKey = `images/${rawFileName}`; // Chuẩn hóa về đúng key trong file ZIP
-
-                    if (window.globalImagesMap[mapKey]) {
-                        window.currentEditingImages.push({
-                            fileName: rawFileName,     // "uuid.jpg" -> Dùng lưu vào JSON
-                            mapKey: mapKey,            // "images/uuid.jpg" -> Dùng lưu vào ZIP
-                            blob: window.globalImagesMap[mapKey],
-                            url: window.imageBlobUrls[mapKey] 
-                        });
-                    }
-                });
+            for (let rawFileName in window.globalImagesMap) {
+                if (noteStr.includes(rawFileName) && !addedImages.has(rawFileName)) {
+                    window.currentEditingImages.push({
+                        fileName: rawFileName,
+                        blob: window.globalImagesMap[rawFileName],
+                        url: window.imageBlobUrls[rawFileName] 
+                    });
+                    addedImages.add(rawFileName);
+                }
             }
 
             renderEditorImages(); 
@@ -206,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = isEditing ? 'flex' : 'none');
     }
 
-    // --- SỰ KIỆN TOOLBAR ---
     document.getElementById('fabBtn').addEventListener('click', () => { window.openNoteInEditor(null); editTitle.focus(); });
     editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
     document.getElementById('closeEditorBtn').addEventListener('click', () => { noteEditor.classList.remove('active'); colorPalettePopup.classList.remove('open'); });
@@ -228,14 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const blob = new Blob([event.target.result], { type: file.type });
             const blobUrl = URL.createObjectURL(blob);
             
-            // TẠO UUID ĐỂ KHỚP VỚI CƠ CHẾ MIDDLEMAN
             const extension = file.name.split('.').pop() || 'jpg';
-            const uniqueFileName = `${generateUUID()}.${extension}`; // VD: crypto-uuid.jpg
-            const mapKey = `images/${uniqueFileName}`; // VD: images/crypto-uuid.jpg
+            const uniqueFileName = `${generateUUID()}.${extension}`; 
             
             window.currentEditingImages.push({
                 fileName: uniqueFileName, 
-                mapKey: mapKey,
                 blob: blob,
                 url: blobUrl
             });
@@ -272,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const color = editorBody.style.backgroundColor;
         const tags = newTagInput.value ? newTagInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
 
-        // Trích xuất list Tên File duy nhất (uuid.jpg) để lưu JSON
+        // Chỉ lưu danh sách tên file chuẩn hóa (uuid.jpg)
         const finalFileNames = window.currentEditingImages.map(imgObj => imgObj.fileName);
 
         if (!window.globalNotesArray) window.globalNotesArray = [];
@@ -284,8 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.globalNotesArray[index].content = content;
                 window.globalNotesArray[index].color = color;
                 window.globalNotesArray[index].tags = tags;
-                window.globalNotesArray[index].imagePaths = finalFileNames; // Ghi tên gốc vào file json
-                window.globalNotesArray[index].images = finalFileNames;     // Backup
+                window.globalNotesArray[index].imagePaths = finalFileNames; 
+                window.globalNotesArray[index].images = finalFileNames;     
                 window.globalNotesArray[index].updatedAt = new Date().getTime();
             }
         } else {
@@ -304,10 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentEditingNoteId = newNote.id; 
         }
 
-        // Cập nhật thư viện MAP ngầm
+        // Đổ mảng ảnh mới vào thư viện chung
         window.currentEditingImages.forEach(imgObj => {
-            window.globalImagesMap[imgObj.mapKey] = imgObj.blob;
-            window.imageBlobUrls[imgObj.mapKey] = imgObj.url;
+            window.globalImagesMap[imgObj.fileName] = imgObj.blob;
+            window.imageBlobUrls[imgObj.fileName] = imgObj.url;
         });
         
         const saveBtn = document.getElementById('saveNoteBtn');
@@ -441,10 +427,13 @@ async function fetchNotesFromHiddenDrive() {
         const zipFiles = Object.keys(zip.files);
         for (let i = 0; i < zipFiles.length; i++) {
             const filePath = zipFiles[i];
-            if (filePath.startsWith('images/') && !zip.files[filePath].dir) {
+            
+            // CẬP NHẬT: Lọc MỌI FILE không phải json bất chấp thư mục
+            if (!zip.files[filePath].dir && !filePath.toLowerCase().endsWith('.json')) {
+                const rawFileName = filePath.split('/').pop().split('\\').pop(); // Lấy tên gốc
                 const blob = await zip.files[filePath].async("blob");
-                window.globalImagesMap[filePath] = blob; // Key dạng: "images/uuid.jpg"
-                window.imageBlobUrls[filePath] = URL.createObjectURL(blob);
+                window.globalImagesMap[rawFileName] = blob; 
+                window.imageBlobUrls[rawFileName] = URL.createObjectURL(blob);
             }
         }
 
@@ -453,7 +442,6 @@ async function fetchNotesFromHiddenDrive() {
     } catch (err) { handleDriveApiError(err); }
 }
 
-// LƯU ĐÓNG GÓI CHUẨN THƯ MỤC IMAGES/ VÀO ZIP
 window.saveNotesToDrive = async function(notesArray) {
     const syncText = document.getElementById('syncText');
     const tokenObj = gapi.client.getToken();
@@ -464,9 +452,9 @@ window.saveNotesToDrive = async function(notesArray) {
         const zip = new JSZip();
         zip.file('data.json', JSON.stringify(notesArray));
         
-        // Nhét ảnh vào ZIP theo key "images/uuid.jpg"
-        for (let imagePath in window.globalImagesMap) {
-            zip.file(imagePath, window.globalImagesMap[imagePath]);
+        // Khi đóng gói lên Web sẽ nhét tất cả vào thư mục "images/" để sạch sẽ ZIP
+        for (let rawFileName in window.globalImagesMap) {
+            zip.file("images/" + rawFileName, window.globalImagesMap[rawFileName]);
         }
 
         syncText.innerText = "Đang nén ZIP...";
@@ -504,7 +492,7 @@ window.saveNotesToDrive = async function(notesArray) {
 }
 
 // =====================================================================
-// PHẦN 3: VẼ GIAO DIỆN TRANG CHỦ
+// PHẦN 3: VẼ GIAO DIỆN TRANG CHỦ & DEEP SCAN ẢNH TRANG CHỦ
 // =====================================================================
 window.renderSyncedNotesToWeb = function(notesArray) {
     const notesGrid = document.getElementById('notesGrid');
@@ -526,37 +514,30 @@ window.renderSyncedNotesToWeb = function(notesArray) {
             tagsArray.forEach(tag => { if(tag) tagsHtml += `<span class="tag">${tag}</span>`; });
         }
 
-        // TÁCH ẢNH KIỂU MIDDLEMAN CHO TRANG CHỦ
+        // SIÊU QUÉT TÌM ẢNH CHO TRANG CHỦ
+        const noteStr = JSON.stringify(note);
         let imagesPreviewHtml = '';
         let matchCount = 0;
-        let pathsToExtract = note.imagePaths || note.images || [];
-        if (typeof pathsToExtract === 'string') pathsToExtract = pathsToExtract.split(',');
-
-        if (Array.isArray(pathsToExtract) && pathsToExtract.length > 0) {
-            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
-            pathsToExtract.forEach(pathStr => {
-                if (matchCount >= 4 || !pathStr) return;
-                // Bóc tách tên file, dù là file path Android hay Web
-                const rawFileName = pathStr.split('/').pop().split('\\').pop(); 
-                const mapKey = `images/${rawFileName}`;
-                
-                if (window.imageBlobUrls[mapKey]) {
-                    imagesPreviewHtml += `<img src="${window.imageBlobUrls[mapKey]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
-                    matchCount++;
-                }
-            });
-            imagesPreviewHtml += '</div>';
-        }
-
-        let displayContent = note.content || note.memoContent || note.text || '';
         
-        // Ẩn bớt các đường dẫn ảnh rác trong nội dung chữ (nếu có do Android chèn)
-        if (Array.isArray(pathsToExtract)) {
-            pathsToExtract.forEach(pathStr => {
-                const rawFileName = pathStr.split('/').pop().split('\\').pop();
+        imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
+        
+        for (let rawFileName in window.globalImagesMap) {
+            if (matchCount >= 4) break; 
+            
+            if (noteStr.includes(rawFileName) && window.imageBlobUrls[rawFileName]) {
+                imagesPreviewHtml += `<img src="${window.imageBlobUrls[rawFileName]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
+                matchCount++;
+            }
+        }
+        imagesPreviewHtml += '</div>';
+
+        // Lọc nội dung chữ để giấu đường dẫn rác
+        let displayContent = note.content || note.memoContent || note.text || '';
+        for (let rawFileName in window.globalImagesMap) {
+            if (displayContent.includes(rawFileName)) {
                 const regex = new RegExp(`(?:file:\\/\\/|\\/storage\\/|\\/data\\/|images\\/)?[\\w\\/\\.\\-]*${rawFileName}`, 'g');
                 displayContent = displayContent.replace(regex, '[Hình ảnh đính kèm]');
-            });
+            }
         }
 
         card.innerHTML = `
