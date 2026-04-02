@@ -1,9 +1,9 @@
 // =====================================================================
 // KHAI BÁO BIẾN TOÀN CỤC & VÁ LỖI GIAO DIỆN CUỘN
 // =====================================================================
-window.syncFileId = null;           
-window.globalNotesArray = [];       
-window.currentEditingNoteId = null; 
+window.syncFileId = null;            
+window.globalNotesArray = [];        
+window.currentEditingNoteId = null;  
 
 // MIDDLEMAN SIÊU QUÉT: Ánh xạ ảnh chỉ dựa trên Tên File gốc (VD: "uuid.jpg")
 window.globalImagesMap = {}; // Lưu trữ Blob thực tế: { "uuid.jpg": Blob }
@@ -120,9 +120,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
+            // ĐÃ SỬA: Đọc Tags an toàn (Hỗ trợ Stringified JSON từ Android)
             let tagsArray = [];
-            if (Array.isArray(noteData.tags)) tagsArray = noteData.tags;
-            else if (typeof noteData.tags === 'string') tagsArray = noteData.tags.split(',');
+            if (noteData.tags) {
+                try {
+                    let parsed = JSON.parse(noteData.tags);
+                    if (Array.isArray(parsed)) tagsArray = parsed;
+                    else tagsArray = noteData.tags.split(',');
+                } catch(e) {
+                    tagsArray = typeof noteData.tags === 'string' ? noteData.tags.split(',') : [];
+                }
+            }
             newTagInput.value = tagsArray.join(', ');
 
             // SIÊU QUÉT TÌM ẢNH BẤT CHẤP CẤU TRÚC JSON CỦA ANDROID
@@ -256,10 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = editTitle.value.trim();
         const content = editBody.value.trim();
         const color = editorBody.style.backgroundColor;
+        
+        // ĐÃ SỬA: Chuyển đổi thành Chuỗi JSON (Stringified) để Android đọc được
         const tags = newTagInput.value ? newTagInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
+        const tagsStr = tags.length > 0 ? JSON.stringify(tags) : null;
 
-        // Chỉ lưu danh sách tên file chuẩn hóa (uuid.jpg)
         const finalFileNames = window.currentEditingImages.map(imgObj => imgObj.fileName);
+        const imagesStr = finalFileNames.length > 0 ? JSON.stringify(finalFileNames) : null;
 
         if (!window.globalNotesArray) window.globalNotesArray = [];
         
@@ -269,9 +280,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.globalNotesArray[index].title = title;
                 window.globalNotesArray[index].content = content;
                 window.globalNotesArray[index].color = color;
-                window.globalNotesArray[index].tags = tags;
-                window.globalNotesArray[index].imagePaths = finalFileNames; 
-                window.globalNotesArray[index].images = finalFileNames;     
+                window.globalNotesArray[index].tags = tagsStr;
+                window.globalNotesArray[index].imagePaths = imagesStr; 
+                window.globalNotesArray[index].images = imagesStr;     
                 window.globalNotesArray[index].updatedAt = new Date().getTime();
             }
         } else {
@@ -280,9 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 title: title,
                 content: content,
                 color: color,
-                tags: tags,
-                imagePaths: finalFileNames,
-                images: finalFileNames,
+                tags: tagsStr,
+                imagePaths: imagesStr,
+                images: imagesStr,
                 updatedAt: new Date().getTime(),
                 createdAt: new Date().getTime()
             };
@@ -428,9 +439,8 @@ async function fetchNotesFromHiddenDrive() {
         for (let i = 0; i < zipFiles.length; i++) {
             const filePath = zipFiles[i];
             
-            // CẬP NHẬT: Lọc MỌI FILE không phải json bất chấp thư mục
             if (!zip.files[filePath].dir && !filePath.toLowerCase().endsWith('.json')) {
-                const rawFileName = filePath.split('/').pop().split('\\').pop(); // Lấy tên gốc
+                const rawFileName = filePath.split('/').pop().split('\\').pop(); 
                 const blob = await zip.files[filePath].async("blob");
                 window.globalImagesMap[rawFileName] = blob; 
                 window.imageBlobUrls[rawFileName] = URL.createObjectURL(blob);
@@ -452,7 +462,6 @@ window.saveNotesToDrive = async function(notesArray) {
         const zip = new JSZip();
         zip.file('data.json', JSON.stringify(notesArray));
         
-        // Khi đóng gói lên Web sẽ nhét tất cả vào thư mục "images/" để sạch sẽ ZIP
         for (let rawFileName in window.globalImagesMap) {
             zip.file("images/" + rawFileName, window.globalImagesMap[rawFileName]);
         }
@@ -505,16 +514,23 @@ window.renderSyncedNotesToWeb = function(notesArray) {
         card.className = 'note-card';
         card.style.backgroundColor = note.color || note.bgColor || '#ffffff';
 
+        // ĐÃ SỬA: Đọc Tags an toàn trên trang chủ
         let tagsHtml = '';
         let tagsArray = [];
-        if (Array.isArray(note.tags)) tagsArray = note.tags;
-        else if (typeof note.tags === 'string') tagsArray = note.tags.split(',').map(t => t.trim());
+        if (note.tags) {
+            try {
+                let parsed = JSON.parse(note.tags);
+                if (Array.isArray(parsed)) tagsArray = parsed;
+                else tagsArray = note.tags.split(',').map(t => t.trim());
+            } catch(e) {
+                tagsArray = typeof note.tags === 'string' ? note.tags.split(',').map(t => t.trim()) : [];
+            }
+        }
         if (tagsArray.length > 0) {
             card.setAttribute('data-tags', tagsArray.join(','));
             tagsArray.forEach(tag => { if(tag) tagsHtml += `<span class="tag">${tag}</span>`; });
         }
 
-        // SIÊU QUÉT TÌM ẢNH CHO TRANG CHỦ
         const noteStr = JSON.stringify(note);
         let imagesPreviewHtml = '';
         let matchCount = 0;
@@ -531,7 +547,6 @@ window.renderSyncedNotesToWeb = function(notesArray) {
         }
         imagesPreviewHtml += '</div>';
 
-        // Lọc nội dung chữ để giấu đường dẫn rác
         let displayContent = note.content || note.memoContent || note.text || '';
         for (let rawFileName in window.globalImagesMap) {
             if (displayContent.includes(rawFileName)) {
