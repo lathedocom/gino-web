@@ -5,7 +5,10 @@ window.syncFileId = null;
 window.globalNotesArray = [];       
 window.currentEditingNoteId = null; 
 
-// Biến kiểm soát đồng bộ thời gian (Tránh Race Condition)
+// Quản lý ảnh từ file ZIP
+window.globalImagesMap = {}; // Lưu giữ file ảnh gốc (Blob) để lát nén lại
+window.imageBlobUrls = {};   // Lưu đường dẫn ảo (blob:http...) để hiển thị trên web
+
 let isDOMReady = false;
 let gapiInited = false;
 let gisInited = false;
@@ -16,7 +19,6 @@ let gisInited = false;
 document.addEventListener('DOMContentLoaded', () => {
     isDOMReady = true;
 
-    // --- XỬ LÝ THANH ĐIỀU HƯỚNG & MENU ---
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
     const navItems = document.querySelectorAll('.nav-item');
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- XỬ LÝ EDITOR (TRÌNH SOẠN THẢO) ---
+    // --- XỬ LÝ EDITOR ---
     const noteEditor = document.getElementById('noteEditor');
     const editorBody = document.getElementById('editorBody');
     const editTitle = document.getElementById('editNoteTitle');
@@ -67,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const editNoteModeBtn = document.getElementById('editNoteModeBtn');
     const editModeToolbar = document.getElementById('editModeToolbar');
 
-    // Hàm đổi giữa chế độ Xem và Sửa
     function setEditorMode(isEditing) {
         if (isEditing) {
             editNoteModeBtn.style.display = 'none';
@@ -82,9 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Hàm gọi khi muốn mở 1 ghi chú (cũ hoặc tạo mới)
     window.openNoteInEditor = function(noteData) {
-        // Reset sạch sẽ editor
         editTitle.value = '';
         editBody.value = '';
         newTagInput.value = '';
@@ -93,13 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-option.default').classList.add('active');
 
-        if (noteData) { // MỞ GHI CHÚ ĐÃ CÓ
+        if (noteData) { 
             window.currentEditingNoteId = noteData.id;
-            // Bao phủ các trường hợp tên biến json từ Android
             editTitle.value = noteData.title || noteData.memoTitle || '';
             editBody.value = noteData.content || noteData.memoContent || noteData.text || '';
             
-            // Xử lý màu sắc
             if (noteData.color || noteData.bgColor) {
                 const hexColor = noteData.color || noteData.bgColor;
                 editorBody.style.backgroundColor = hexColor;
@@ -108,25 +105,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Xử lý mảng Tags
             if (noteData.tags && Array.isArray(noteData.tags)) {
                 newTagInput.value = noteData.tags.join(', ');
             } else if (typeof noteData.tags === 'string') {
                 newTagInput.value = noteData.tags;
             }
 
-            setEditorMode(false); // Mode ĐỌC
-        } else { // TẠO GHI CHÚ MỚI
+            setEditorMode(false); 
+        } else { 
             window.currentEditingNoteId = null;
-            setEditorMode(true); // Mode SỬA
+            setEditorMode(true); 
         }
-
         noteEditor.classList.add('active');
     };
 
-    // Gắn sự kiện các nút cơ bản trong Editor
     document.getElementById('fabBtn').addEventListener('click', () => {
-        window.openNoteInEditor(null); // Tạo mới
+        window.openNoteInEditor(null); 
         editTitle.focus();
     });
 
@@ -161,10 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // LƯU GHI CHÚ & ĐỒNG BỘ LÊN DRIVE
+    // LƯU GHI CHÚ
     document.getElementById('saveNoteBtn').addEventListener('click', async () => {
         if (!gapi.client.getToken()) {
-            alert("Bạn cần bấm 'Đăng nhập Google' ở góc trên để có thể lưu dữ liệu!");
+            alert("Bạn cần đăng nhập Google ở góc trên trước!");
             return;
         }
 
@@ -176,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!window.globalNotesArray) window.globalNotesArray = [];
         
         if (window.currentEditingNoteId) {
-            // Cập nhật
             const index = window.globalNotesArray.findIndex(n => n.id === window.currentEditingNoteId);
             if (index !== -1) {
                 window.globalNotesArray[index].title = title;
@@ -186,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.globalNotesArray[index].updatedAt = new Date().getTime();
             }
         } else {
-            // Tạo mới
             const newNote = {
                 id: new Date().getTime(),
                 title: title,
@@ -213,25 +205,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Bắt đầu kiểm tra và tải dữ liệu nếu Google API đã tải xong
     checkAndFetchDriveData();
 });
 
 
 // =====================================================================
-// PHẦN 2: GOOGLE DRIVE API & ĐỒNG BỘ
+// PHẦN 2: GOOGLE DRIVE API & XỬ LÝ FILE ZIP
 // =====================================================================
 
 const CLIENT_ID = '631532964907-hi703ubcopoqjmv0e5fn6ui3h2u2mi5b.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-const SYNC_FILE_NAME = 'ginonote_SyncData.json';
+const SYNC_FILE_NAME = 'ginonote_SyncData.zip'; // Đã đổi sang file ZIP
 
 window.gapiLoaded = function() {
     gapi.load('client', async () => {
         await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
         gapiInited = true;
-        checkAndFetchDriveData(); // Kích hoạt kiểm tra
+        checkAndFetchDriveData();
     });
 };
 
@@ -242,21 +233,18 @@ window.gisLoaded = function() {
         callback: '', 
     });
     gisInited = true;
-    checkAndFetchDriveData(); // Kích hoạt kiểm tra
+    checkAndFetchDriveData();
 };
 
-// Hàm điều phối trung tâm: Chỉ chạy khi CẢ HTML VÀ GOOGLE đều đã sẵn sàng
 function checkAndFetchDriveData() {
     if (!isDOMReady || !gapiInited || !gisInited) return;
 
     const btnAuthGoogle = document.getElementById('btnAuthGoogle');
     const syncText = document.getElementById('syncText');
     
-    // Gắn sự kiện click
     btnAuthGoogle.removeEventListener('click', handleAuthClick);
     btnAuthGoogle.addEventListener('click', handleAuthClick);
 
-    // Kiểm tra phiên đăng nhập trong LocalStorage
     const savedToken = localStorage.getItem('gino_gdrive_token');
     const savedExpires = localStorage.getItem('gino_gdrive_expires');
 
@@ -275,7 +263,6 @@ function handleAuthClick(e) {
     tokenClient.callback = async (resp) => {
         if (resp.error !== undefined) return;
 
-        // Lưu Token 1 tiếng vào LocalStorage
         const expiresAt = Date.now() + (resp.expires_in * 1000);
         localStorage.setItem('gino_gdrive_token', resp.access_token);
         localStorage.setItem('gino_gdrive_expires', expiresAt.toString());
@@ -305,14 +292,17 @@ function clearDriveSession() {
 
 function handleDriveApiError(err) {
     if (err.status === 401) {
-        alert("Phiên đăng nhập đã hết hạn. Vui lòng bấm 'Đăng nhập Google' lại.");
+        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         clearDriveSession();
     } else {
+        console.error(err);
         document.getElementById('syncText').innerText = "Lỗi đồng bộ";
     }
 }
 
-// TẢI FILE TỪ DRIVE XUỐNG
+// ==========================================
+// TẢI FILE ZIP TỪ DRIVE & GIẢI NÉN
+// ==========================================
 async function fetchNotesFromHiddenDrive() {
     try {
         let response = await gapi.client.drive.files.list({
@@ -331,12 +321,44 @@ async function fetchNotesFromHiddenDrive() {
         }
 
         window.syncFileId = files[0].id;
-        let fileContent = await gapi.client.drive.files.get({ fileId: window.syncFileId, alt: 'media' });
         
-        window.globalNotesArray = typeof fileContent.body === 'string' 
-                            ? JSON.parse(fileContent.body) 
-                            : fileContent.result;
+        // Vì tải file ZIP là file nhị phân, ta dùng fetch API gốc thay cho gapi
+        const token = gapi.client.getToken().access_token;
+        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${window.syncFileId}?alt=media`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
         
+        if (!fileRes.ok) throw new Error("Lỗi tải file");
+        
+        const arrayBuffer = await fileRes.arrayBuffer();
+
+        // 1. Dùng JSZip để đọc file
+        const zip = await JSZip.loadAsync(arrayBuffer);
+
+        // 2. Lấy file data.json
+        if (zip.file("data.json")) {
+            const jsonStr = await zip.file("data.json").async("string");
+            window.globalNotesArray = JSON.parse(jsonStr);
+        } else {
+            window.globalNotesArray = [];
+        }
+
+        // 3. Trích xuất toàn bộ file trong thư mục images/
+        window.globalImagesMap = {};
+        window.imageBlobUrls = {};
+        
+        const zipFiles = Object.keys(zip.files);
+        for (let i = 0; i < zipFiles.length; i++) {
+            const filePath = zipFiles[i];
+            // Lọc ra các file ảnh (không lấy folder)
+            if (filePath.startsWith('images/') && !zip.files[filePath].dir) {
+                const blob = await zip.files[filePath].async("blob");
+                window.globalImagesMap[filePath] = blob;
+                // Tạo URL ảo để hiển thị hình ảnh trên HTML
+                window.imageBlobUrls[filePath] = URL.createObjectURL(blob);
+            }
+        }
+
         document.getElementById('syncText').innerText = "Đã đồng bộ";
         window.renderSyncedNotesToWeb(window.globalNotesArray);
 
@@ -345,40 +367,58 @@ async function fetchNotesFromHiddenDrive() {
     }
 }
 
-// ĐẨY FILE LÊN DRIVE
+// ==========================================
+// NÉN ZIP & ĐẨY LÊN DRIVE
+// ==========================================
 window.saveNotesToDrive = async function(notesArray) {
     const syncText = document.getElementById('syncText');
-    syncText.innerText = "Đang tải lên...";
+    syncText.innerText = "Đang nén ZIP...";
     
     const tokenObj = gapi.client.getToken();
     if (!tokenObj) {
         clearDriveSession();
         return false;
     }
-
     const token = tokenObj.access_token;
-    const fileContent = JSON.stringify(notesArray);
 
     try {
+        // TẠO FILE ZIP MỚI TRÊN TRÌNH DUYỆT
+        const zip = new JSZip();
+        
+        // Nhét data.json vào
+        zip.file('data.json', JSON.stringify(notesArray));
+        
+        // Nhét tất cả ảnh cũ vào lại thư mục images/
+        for (let imagePath in window.globalImagesMap) {
+            zip.file(imagePath, window.globalImagesMap[imagePath]);
+        }
+
+        // Xuất ra file ZIP dạng Blob
+        const zipBlob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
+
+        syncText.innerText = "Đang tải lên...";
+
         if (window.syncFileId) {
+            // Cập nhật đè file cũ
             const url = 'https://www.googleapis.com/upload/drive/v3/files/' + window.syncFileId + '?uploadType=media';
             const response = await fetch(url, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/zip'
                 },
-                body: fileContent
+                body: zipBlob
             });
             if (!response.ok) {
                 if (response.status === 401) throw { status: 401 };
                 throw new Error("Lỗi update file");
             }
         } else {
+            // Tạo mới file ZIP trên Drive
             const metadata = { name: SYNC_FILE_NAME, parents: ['appDataFolder'] };
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', new Blob([fileContent], { type: 'application/json' }));
+            form.append('file', zipBlob, SYNC_FILE_NAME);
 
             const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
             const response = await fetch(url, {
@@ -409,7 +449,6 @@ window.renderSyncedNotesToWeb = function(notesArray) {
     const notesGrid = document.getElementById('notesGrid');
     if (!notesGrid) return;
     
-    // Xóa sạch ghi chú mẫu
     notesGrid.innerHTML = '';
 
     notesArray.forEach(note => {
@@ -421,7 +460,6 @@ window.renderSyncedNotesToWeb = function(notesArray) {
         let tagsString = '';
         let tagsArray = [];
         
-        // Chuẩn hóa định dạng tags từ Android 
         if (note.tags && Array.isArray(note.tags)) {
             tagsArray = note.tags;
         } else if (typeof note.tags === 'string') {
@@ -437,13 +475,19 @@ window.renderSyncedNotesToWeb = function(notesArray) {
 
         card.setAttribute('data-tags', tagsString);
 
+        // Lọc nội dung để biến đường dẫn "images/..." thành link ảnh ảo nếu có (Chỉ dùng lúc hiển thị Preview)
+        let displayContent = note.content || note.memoContent || note.text || '';
+        for (let path in window.imageBlobUrls) {
+            const regex = new RegExp(path, 'g');
+            displayContent = displayContent.replace(regex, window.imageBlobUrls[path]);
+        }
+
         card.innerHTML = `
             <div class="note-title">${note.title || note.memoTitle || 'Không có tiêu đề'}</div>
-            <div class="note-body">${note.content || note.memoContent || note.text || ''}</div>
+            <div class="note-body">${displayContent}</div>
             <div class="note-tags">${tagsHtml}</div>
         `;
 
-        // Gắn sự kiện click mở Editor ĐÃ SỬA LỖI
         card.addEventListener('click', () => {
             window.openNoteInEditor(note);
         });
@@ -451,7 +495,6 @@ window.renderSyncedNotesToWeb = function(notesArray) {
         notesGrid.appendChild(card);
     });
 
-    // Cập nhật lại thanh menu Tags bên trái
     renderTagsSidebar();
 }
 
