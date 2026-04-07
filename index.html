@@ -14,7 +14,7 @@
             <button class="icon-btn" id="menuBtn">
                 <i class="material-icons">menu</i>
             </button>
-            </div>
+        </div>
         <div class="header-right">
             <button class="sync-btn active-auth" id="btnAuthGoogle">
                 <i class="material-icons">cloud_sync</i>
@@ -22,7 +22,6 @@
             </button>
         </div>
     </header>
-
     <div class="app-body">
         <nav class="sidebar" id="sidebar">
             <ul class="nav-list">
@@ -46,36 +45,30 @@
                 </li>
             </ul>
         </nav>
-
         <main class="main-content">
             <div id="viewNotes" class="view-section active-view">
                 <div class="notes-grid" id="notesGrid">
-                    <div class="note-card" data-tags="Tiếng Anh">
-                        <div class="note-title">Ôn tập Tiếng Anh</div>
-                        <div class="note-body">Hôm nay cần học 50 từ vựng mới và làm bài tập ngữ pháp...</div>
-                        <div class="note-tags"><span class="tag">Tiếng Anh</span></div>
                     </div>
-                    <div class="note-card note-urgent" style="background-color: #fce4ec;" data-tags="Dev"> 
-                        <div class="note-title">Ý tưởng App</div>
-                        <div class="note-body">Thiết kế FAB (+) và màn hình editor chi tiết y hệt app.</div>
-                        <div class="note-tags"><span class="tag">Dev</span></div>
-                    </div>
-                </div>
             </div>
-
             <div id="viewCalendar" class="view-section" style="display: none;">
                 <div class="calendar-container">
                     <div class="calendar-header">
-                        <button class="icon-btn"><i class="material-icons">chevron_left</i></button>
+                        <button class="icon-btn" id="prevMonthBtn"><i class="material-icons">chevron_left</i></button>
                         <h3 id="calendarMonthYear">Tháng 4, 2026</h3>
-                        <button class="icon-btn"><i class="material-icons">chevron_right</i></button>
+                        <button class="icon-btn" id="nextMonthBtn"><i class="material-icons">chevron_right</i></button>
+                        <button class="icon-btn" id="todayBtn" title="Hôm nay"><i class="material-icons">today</i></button>
                     </div>
                     <div class="calendar-grid">
-                        <div class="cal-day-name">T2</div><div class="cal-day-name">T3</div><div class="cal-day-name">T4</div><div class="cal-day-name">T5</div><div class="cal-day-name">T6</div><div class="cal-day-name">T7</div><div class="cal-day-name">CN</div>
+                        <div class="cal-day-name">T2</div>
+                        <div class="cal-day-name">T3</div>
+                        <div class="cal-day-name">T4</div>
+                        <div class="cal-day-name">T5</div>
+                        <div class="cal-day-name">T6</div>
+                        <div class="cal-day-name">T7</div>
+                        <div class="cal-day-name">CN</div>
                         </div>
                 </div>
             </div>
-
             <div id="viewTags" class="view-section" style="display: none;">
                 <h3 style="margin-bottom: 16px;">Danh sách Tags</h3>
                 <div class="tags-container" id="allTagsContainer">
@@ -83,27 +76,24 @@
             </div>
         </main>
     </div>
-
+    
     <button class="fab-btn" id="fabBtn">
         <i class="material-icons">add</i>
     </button>
-
+    
     <div class="note-editor-overlay" id="noteEditor">
         <div class="editor-header">
             <button class="icon-btn close-btn" id="closeEditorBtn">
                 <i class="material-icons">arrow_back</i>
             </button>
-
             <div class="editor-header-actions">
                 <button class="icon-btn action-btn" id="editNoteModeBtn" title="Chỉnh sửa">
                     <i class="material-icons">edit</i>
                 </button>
-
                 <div id="editModeToolbar" style="display: none; align-items: center; gap: 8px;">
                     <button class="icon-btn action-btn" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
                         <i class="material-icons">lightbulb</i>
                     </button>
-                    
                     <div class="color-picker-container">
                         <button class="icon-btn action-btn" id="colorPaletteBtn" title="Chọn màu nền">
                             <i class="material-icons">palette</i>
@@ -117,16 +107,15 @@
                             <div class="color-option" data-color="#fff9c4"></div>
                         </div>
                     </div>
-
                     <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
                         <i class="material-icons">image</i>
                     </button>
                     <button class="icon-btn action-btn save-btn" id="saveNoteBtn" title="Lưu ghi chú">
-                        <i class="material-icons">save</i> </button>
+                        <i class="material-icons">save</i>
+                    </button>
                 </div>
             </div>
         </div>
-
         <div class="editor-body" id="editorBody">
             <div class="editor-title-container">
                 <input type="text" id="editNoteTitle" placeholder="Tiêu đề" class="editor-title-input">
@@ -144,12 +133,10 @@
         </div>
     </div>
 
-    <<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="script.js"></script>
-
     <input type="file" id="hiddenImageInput" accept="image/jpeg, image/png, image/gif" style="display: none;">
 </body>
 </html>
