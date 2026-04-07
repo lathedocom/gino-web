@@ -1,0 +1,21 @@
+{
+  "name": "GinoNote",
+  "short_name": "GinoNote",
+  "description": "Ứng dụng tạo và lưu ghi chú trực tiếp vào Google Drive",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f5a623",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
