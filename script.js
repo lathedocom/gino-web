@@ -10,6 +10,10 @@ window.globalImagesMap = {}; // Lưu trữ Blob thực tế: { "uuid.jpg": Blob 
 window.imageBlobUrls = {};   // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
 window.currentEditingImages = []; // Mảng tạm cho Editor
 
+// [MỚI] Các biến phục vụ Incremental Sync
+window.lastSyncTime = parseInt(localStorage.getItem('gino_last_sync_time') || '0');
+window.pendingUploadImages = []; // Hàng đợi ảnh mới cần upload
+
 let isDOMReady = false;
 let gapiInited = false;
 let gisInited = false;
@@ -37,7 +41,7 @@ styleFix.innerHTML = `
 document.head.appendChild(styleFix);
 
 // =====================================================================
-// TÍNH NĂNG LỊCH (CALENDAR) VÀ TAGS (MỚI THÊM)
+// TÍNH NĂNG LỊCH (CALENDAR) VÀ TAGS
 // =====================================================================
 function initCalendar() {
     document.getElementById('prevMonthBtn').addEventListener('click', () => {
@@ -81,6 +85,7 @@ function renderCalendarView() {
     const daysWithNotes = new Set();
     if (window.globalNotesArray) {
         window.globalNotesArray.forEach(note => {
+            if (note.isDeleted) return; // [MỚI] Bỏ qua ghi chú đã xóa
             const noteDate = new Date(note.updatedAt || note.createdAt);
             if (noteDate.getFullYear() === year && noteDate.getMonth() === month) {
                 daysWithNotes.add(noteDate.getDate());
@@ -137,6 +142,7 @@ function renderTagsSidebar() {
     const tagCountMap = {}; 
 
     window.globalNotesArray.forEach(note => {
+        if (note.isDeleted) return; // [MỚI] Bỏ qua ghi chú đã xóa
         let tagsArray = [];
         if (note.tags) {
             try {
@@ -362,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
     document.getElementById('closeEditorBtn').addEventListener('click', () => { noteEditor.classList.remove('active'); colorPalettePopup.classList.remove('open'); });
 
-    // --- CHỌN ẢNH VÀO TẠO UUID CHO WEB ---
+    // --- CHỌN ẢNH VÀ TẠO UUID CHO WEB ---
     const insertImageBtn = document.getElementById('insertImageBtn');
     const hiddenImageInput = document.getElementById('hiddenImageInput');
     insertImageBtn.addEventListener('click', () => hiddenImageInput.click());
@@ -382,7 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentEditingImages.push({
                 fileName: uniqueFileName,
                 blob: blob,
-                url: blobUrl
+                url: blobUrl,
+                isNew: true // [MỚI] Đánh dấu là ảnh mới để chờ upload
             });
 
             renderEditorImages();
@@ -440,21 +447,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 imagePaths: imagesStr,
                 images: imagesStr,
                 updatedAt: new Date().getTime(),
-                createdAt: new Date().getTime()
+                createdAt: new Date().getTime(),
+                isDeleted: false // [MỚI] Tương thích trường Soft Delete của App
             };
             window.globalNotesArray.unshift(newNote);
             window.currentEditingNoteId = newNote.id;
         }
 
+        // Đưa ảnh mới vào bản đồ cục bộ và Hàng đợi Upload
         window.currentEditingImages.forEach(imgObj => {
             window.globalImagesMap[imgObj.fileName] = imgObj.blob;
             window.imageBlobUrls[imgObj.fileName] = imgObj.url;
+            if (imgObj.isNew) {
+                if (!window.pendingUploadImages) window.pendingUploadImages = [];
+                window.pendingUploadImages.push(imgObj);
+                imgObj.isNew = false; // Đã đưa vào hàng đợi
+            }
         });
 
         const saveBtn = document.getElementById('saveNoteBtn');
         saveBtn.innerHTML = '<i class="material-icons">sync</i>';
 
-        const isSuccess = await window.saveNotesToDrive(window.globalNotesArray);
+        const isSuccess = await window.saveNotesToDrive();
         saveBtn.innerHTML = '<i class="material-icons">save</i>';
         if (isSuccess) {
             setEditorMode(false);
@@ -468,12 +482,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =====================================================================
-// PHẦN 2: GOOGLE DRIVE API & JSZIP
+// PHẦN 2: GOOGLE DRIVE API (INCREMENTAL SYNC - KHÔNG DÙNG JSZIP)
 // =====================================================================
 const CLIENT_ID = '631532964907-hi703ubcopoqjmv0e5fn6ui3h2u2mi5b.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-const SYNC_FILE_NAME = 'ginonote_SyncData.zip';
 
 window.gapiLoaded = function() {
     gapi.load('client', async () => {
@@ -541,95 +554,165 @@ function handleDriveApiError(err) {
     }
 }
 
+// [MỚI] Tải dữ liệu Delta thay vì File ZIP
 async function fetchNotesFromHiddenDrive() {
     try {
-        let response = await gapi.client.drive.files.list({
-            spaces: 'appDataFolder', q: `name = '${SYNC_FILE_NAME}' and trashed = false`, fields: 'files(id, name)'
-        });
-        const files = response.result.files;
-        if (!files || files.length === 0) {
+        let allFiles = [];
+        let pageToken = null;
+        
+        // 1. Quét toàn bộ file trong thư mục AppData
+        do {
+            let response = await gapi.client.drive.files.list({
+                spaces: 'appDataFolder',
+                fields: 'nextPageToken, files(id, name, mimeType)',
+                pageToken: pageToken,
+                pageSize: 1000
+            });
+            if (response.result.files) {
+                allFiles = allFiles.concat(response.result.files);
+            }
+            pageToken = response.result.nextPageToken;
+        } while (pageToken);
+
+        if (allFiles.length === 0) {
             document.getElementById('syncText').innerText = "Sẵn sàng lưu";
-            window.syncFileId = null;
             window.globalNotesArray = [];
-            window.globalImagesMap = {};
-            window.imageBlobUrls = {};
             window.renderSyncedNotesToWeb(window.globalNotesArray);
             return;
         }
-        window.syncFileId = files[0].id;
-        const token = gapi.client.getToken().access_token;
-        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${window.syncFileId}?alt=media`, {
-            headers: { 'Authorization': 'Bearer ' + token }
+
+        let deltaFilesToDownload = [];
+        let imagesToDownload = [];
+
+        // 2. Phân loại File (Chỉ lấy Delta JSON mới và ảnh chưa có)
+        allFiles.forEach(f => {
+            if (!f.name) return;
+            if (f.name.startsWith('ginonote_delta_') && f.name.endsWith('.json')) {
+                let tsStr = f.name.replace('ginonote_delta_', '').replace('.json', '');
+                let fileTs = parseInt(tsStr);
+                if (!isNaN(fileTs) && fileTs > window.lastSyncTime) {
+                    deltaFilesToDownload.push({ file: f, ts: fileTs });
+                }
+            } else if (f.name.endsWith('.jpg') || f.name.endsWith('.png') || f.name.endsWith('.webp') || f.mimeType === 'image/jpeg') {
+                if (!window.globalImagesMap[f.name]) {
+                    imagesToDownload.push(f);
+                }
+            }
         });
 
-        if (!fileRes.ok) throw new Error("Lỗi tải file");
+        // Sắp xếp Delta tăng dần theo thời gian để merge dữ liệu đúng thứ tự
+        deltaFilesToDownload.sort((a, b) => a.ts - b.ts);
+        const token = gapi.client.getToken().access_token;
 
-        const arrayBuffer = await fileRes.arrayBuffer();
-        const zip = await JSZip.loadAsync(arrayBuffer);
-        if (zip.file("data.json")) {
-            const jsonStr = await zip.file("data.json").async("string");
-            window.globalNotesArray = JSON.parse(jsonStr);
-        } else { window.globalNotesArray = []; }
-        
-        for (let path in window.imageBlobUrls) { URL.revokeObjectURL(window.imageBlobUrls[path]); }
-        window.globalImagesMap = {};
-        window.imageBlobUrls = {};
-
-        const zipFiles = Object.keys(zip.files);
-        for (let i = 0; i < zipFiles.length; i++) {
-            const filePath = zipFiles[i];
-
-            if (!zip.files[filePath].dir && !filePath.toLowerCase().endsWith('.json')) {
-                const rawFileName = filePath.split('/').pop().split('\\').pop();
-                const blob = await zip.files[filePath].async("blob");
-                window.globalImagesMap[rawFileName] = blob;
-                window.imageBlobUrls[rawFileName] = URL.createObjectURL(blob);
+        // 3. Tải và gộp các file JSON Delta
+        for (let i = 0; i < deltaFilesToDownload.length; i++) {
+            const fileId = deltaFilesToDownload[i].file.id;
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const deltaNotes = await res.json();
+                mergeDeltaIntoGlobals(deltaNotes);
             }
         }
+
+        // 4. Tải trực tiếp các file ảnh mới
+        for (let i = 0; i < imagesToDownload.length; i++) {
+            const f = imagesToDownload[i];
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const blob = await res.blob();
+                window.globalImagesMap[f.name] = blob;
+                window.imageBlobUrls[f.name] = URL.createObjectURL(blob);
+            }
+        }
+
+        // 5. Cập nhật mốc thời gian đồng bộ
+        if (deltaFilesToDownload.length > 0) {
+            window.lastSyncTime = deltaFilesToDownload[deltaFilesToDownload.length - 1].ts;
+            localStorage.setItem('gino_last_sync_time', window.lastSyncTime.toString());
+        }
+
         document.getElementById('syncText').innerText = "Đã đồng bộ";
         window.renderSyncedNotesToWeb(window.globalNotesArray);
     } catch (err) { handleDriveApiError(err); }
 }
 
-window.saveNotesToDrive = async function(notesArray) {
+// [MỚI] Hàm trộn dữ liệu Delta vào Mảng chính
+function mergeDeltaIntoGlobals(deltaNotes) {
+    if (!Array.isArray(deltaNotes)) return;
+    deltaNotes.forEach(cloudNote => {
+        let existingIndex = window.globalNotesArray.findIndex(n => n.id === cloudNote.id);
+        if (existingIndex !== -1) {
+            if (cloudNote.updatedAt > window.globalNotesArray[existingIndex].updatedAt) {
+                window.globalNotesArray[existingIndex] = cloudNote;
+            }
+        } else {
+            window.globalNotesArray.push(cloudNote);
+        }
+    });
+    // Sắp xếp lại theo thời gian cập nhật mới nhất
+    window.globalNotesArray.sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+// [MỚI] Đẩy dữ liệu lên Drive bằng cơ chế Delta (Không JSZip)
+window.saveNotesToDrive = async function() {
     const syncText = document.getElementById('syncText');
     const tokenObj = gapi.client.getToken();
     if (!tokenObj) { clearDriveSession(); return false; }
     const token = tokenObj.access_token;
+    
     try {
-        const zip = new JSZip();
-        zip.file('data.json', JSON.stringify(notesArray));
-
-        for (let rawFileName in window.globalImagesMap) {
-            zip.file("images/" + rawFileName, window.globalImagesMap[rawFileName]);
-        }
-        syncText.innerText = "Đang nén ZIP...";
-        const zipBlob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
-        syncText.innerText = "Đang tải lên...";
+        const syncStartTime = Date.now();
         
-        if (window.syncFileId) {
-            const url = 'https://www.googleapis.com/upload/drive/v3/files/' + window.syncFileId + '?uploadType=media';
-            const response = await fetch(url, {
-                method: 'PATCH',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/zip' },
-                body: zipBlob
-            });
-            if (!response.ok) { if (response.status === 401) throw { status: 401 }; throw new Error("Lỗi update file"); }
-        } else {
-            const metadata = { name: SYNC_FILE_NAME, parents: ['appDataFolder'] };
+        // 1. Chỉ lọc ra các ghi chú có thay đổi kể từ lần Sync cuối
+        const deltaNotes = window.globalNotesArray.filter(note => note.updatedAt > window.lastSyncTime);
+        
+        if (deltaNotes.length > 0) {
+            syncText.innerText = "Đang đẩy JSON...";
+            const deltaFileName = `ginonote_delta_${syncStartTime}.json`;
+            const deltaBlob = new Blob([JSON.stringify(deltaNotes)], { type: 'application/json' });
+            
+            const metadata = { name: deltaFileName, parents: ['appDataFolder'] };
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', zipBlob, SYNC_FILE_NAME);
+            form.append('file', deltaBlob, deltaFileName);
+            
             const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token },
                 body: form
             });
-            if (!response.ok) { if (response.status === 401) throw { status: 401 }; throw new Error("Lỗi tạo mới"); }
-            const result = await response.json();
-            window.syncFileId = result.id;
+            if (!response.ok) { if (response.status === 401) throw { status: 401 }; throw new Error("Lỗi tải lên Delta"); }
         }
+
+        // 2. Upload Ảnh mới trực tiếp (Rời rạc)
+        if (window.pendingUploadImages && window.pendingUploadImages.length > 0) {
+            syncText.innerText = "Đang tải ảnh lên...";
+            for (let i = 0; i < window.pendingUploadImages.length; i++) {
+                let imgObj = window.pendingUploadImages[i];
+                const imgMetadata = { name: imgObj.fileName, parents: ['appDataFolder'] };
+                const imgForm = new FormData();
+                imgForm.append('metadata', new Blob([JSON.stringify(imgMetadata)], { type: 'application/json' }));
+                imgForm.append('file', imgObj.blob, imgObj.fileName);
+                
+                const imgUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+                await fetch(imgUrl, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: imgForm
+                });
+            }
+            window.pendingUploadImages = []; // Xóa hàng đợi sau khi upload thành công
+        }
+
+        // 3. Ghi nhận mốc Sync mới nhất
+        window.lastSyncTime = syncStartTime;
+        localStorage.setItem('gino_last_sync_time', syncStartTime.toString());
+
         syncText.innerText = "Đã đồng bộ";
         return true;
     } catch (err) { handleDriveApiError(err); return false; }
@@ -643,8 +726,10 @@ window.renderSyncedNotesToWeb = function(notesArray) {
     if (!notesGrid) return;
     notesGrid.innerHTML = '';
 
-    // Lọc Notes dựa vào Date hoặc Tag
+    // Lọc Notes dựa vào Date, Tag, và trường isDeleted (Soft Delete của App)
     let filteredNotes = notesArray.filter(note => {
+        if (note.isDeleted) return false; // [MỚI] Ẩn các ghi chú đã bị xóa từ App
+        
         if (selectedFilterTag) {
             const cardTags = note.tags || "";
             if (!cardTags.includes(selectedFilterTag)) return false;
