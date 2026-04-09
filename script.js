@@ -10,7 +10,7 @@ window.globalImagesMap = {}; // Lưu trữ Blob thực tế: { "uuid.jpg": Blob 
 window.imageBlobUrls = {};   // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
 window.currentEditingImages = []; // Mảng tạm cho Editor
 
-// [MỚI] Các biến phục vụ Incremental Sync
+// Các biến phục vụ Incremental Sync
 window.lastSyncTime = parseInt(localStorage.getItem('gino_last_sync_time') || '0');
 window.pendingUploadImages = []; // Hàng đợi ảnh mới cần upload
 
@@ -85,7 +85,7 @@ function renderCalendarView() {
     const daysWithNotes = new Set();
     if (window.globalNotesArray) {
         window.globalNotesArray.forEach(note => {
-            if (note.isDeleted) return; // [MỚI] Bỏ qua ghi chú đã xóa
+            if (note.isDeleted) return; // Bỏ qua ghi chú đã xóa
             const noteDate = new Date(note.updatedAt || note.createdAt);
             if (noteDate.getFullYear() === year && noteDate.getMonth() === month) {
                 daysWithNotes.add(noteDate.getDate());
@@ -142,7 +142,7 @@ function renderTagsSidebar() {
     const tagCountMap = {}; 
 
     window.globalNotesArray.forEach(note => {
-        if (note.isDeleted) return; // [MỚI] Bỏ qua ghi chú đã xóa
+        if (note.isDeleted) return; // Bỏ qua ghi chú đã xóa
         let tagsArray = [];
         if (note.tags) {
             try {
@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileName: uniqueFileName,
                 blob: blob,
                 url: blobUrl,
-                isNew: true // [MỚI] Đánh dấu là ảnh mới để chờ upload
+                isNew: true // Đánh dấu là ảnh mới để chờ upload
             });
 
             renderEditorImages();
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 images: imagesStr,
                 updatedAt: new Date().getTime(),
                 createdAt: new Date().getTime(),
-                isDeleted: false // [MỚI] Tương thích trường Soft Delete của App
+                isDeleted: false // Tương thích trường Soft Delete của App
             };
             window.globalNotesArray.unshift(newNote);
             window.currentEditingNoteId = newNote.id;
@@ -522,17 +522,37 @@ function checkAndFetchDriveData() {
 
 function handleAuthClick(e) {
     e.preventDefault();
+    
+    // 1. NẾU ĐÃ ĐĂNG NHẬP RỒI -> Bấm vào sẽ ép đồng bộ thủ công
+    if (gapi.client.getToken() !== null) {
+        document.getElementById('syncText').innerText = "Đang đồng bộ...";
+        // Kéo dữ liệu mới nhất từ Cloud về
+        fetchNotesFromHiddenDrive().then(() => {
+            // Sau khi kéo về, đẩy các thay đổi cục bộ (nếu có) lên Cloud
+            window.saveNotesToDrive(); 
+        });
+        return; // Dừng hàm tại đây, không gọi lệnh đăng nhập nữa
+    }
+
+    // 2. NẾU CHƯA ĐĂNG NHẬP -> Hiện cửa sổ chọn tài khoản Google
     tokenClient.callback = async (resp) => {
-        if (resp.error !== undefined) return;
+        if (resp.error !== undefined) {
+            console.error("Lỗi đăng nhập:", resp.error);
+            return;
+        }
+        // Lưu token duy trì đăng nhập khi F5
         const expiresAt = Date.now() + (resp.expires_in * 1000);
         localStorage.setItem('gino_gdrive_token', resp.access_token);
         localStorage.setItem('gino_gdrive_expires', expiresAt.toString());
+        
         document.getElementById('syncText').innerText = "Đang đồng bộ...";
         document.getElementById('btnAuthGoogle').classList.add('active-auth');
+        
+        // Tải dữ liệu lần đầu
         await fetchNotesFromHiddenDrive();
     };
-    if (gapi.client.getToken() === null) tokenClient.requestAccessToken({prompt: 'consent'});
-    else tokenClient.requestAccessToken({prompt: ''});
+    
+    tokenClient.requestAccessToken({prompt: 'consent'});
 }
 
 function clearDriveSession() {
@@ -554,7 +574,7 @@ function handleDriveApiError(err) {
     }
 }
 
-// [MỚI] Tải dữ liệu Delta thay vì File ZIP
+// Tải dữ liệu Delta thay vì File ZIP
 async function fetchNotesFromHiddenDrive() {
     try {
         let allFiles = [];
@@ -640,7 +660,7 @@ async function fetchNotesFromHiddenDrive() {
     } catch (err) { handleDriveApiError(err); }
 }
 
-// [MỚI] Hàm trộn dữ liệu Delta vào Mảng chính
+// Hàm trộn dữ liệu Delta vào Mảng chính
 function mergeDeltaIntoGlobals(deltaNotes) {
     if (!Array.isArray(deltaNotes)) return;
     deltaNotes.forEach(cloudNote => {
@@ -657,7 +677,7 @@ function mergeDeltaIntoGlobals(deltaNotes) {
     window.globalNotesArray.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-// [MỚI] Đẩy dữ liệu lên Drive bằng cơ chế Delta (Không JSZip)
+// Đẩy dữ liệu lên Drive bằng cơ chế Delta (Không JSZip)
 window.saveNotesToDrive = async function() {
     const syncText = document.getElementById('syncText');
     const tokenObj = gapi.client.getToken();
@@ -728,7 +748,7 @@ window.renderSyncedNotesToWeb = function(notesArray) {
 
     // Lọc Notes dựa vào Date, Tag, và trường isDeleted (Soft Delete của App)
     let filteredNotes = notesArray.filter(note => {
-        if (note.isDeleted) return false; // [MỚI] Ẩn các ghi chú đã bị xóa từ App
+        if (note.isDeleted) return false; // Ẩn các ghi chú đã bị xóa từ App
         
         if (selectedFilterTag) {
             const cardTags = note.tags || "";
