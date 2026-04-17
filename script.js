@@ -39,20 +39,29 @@ function generateUUID() {
 }
  
 // Hàm chuyển đổi mã Hex tĩnh từ Android sang Biến CSS động
-window.getThemeAwareColor = function(hex) {
-    if (!hex) return 'var(--note-default)';
-    const hexUpper = hex.toUpperCase();
-    if (hexUpper === '#FFF9C4' || hexUpper === '#3E3B2E') return 'var(--note-yellow)';
-    if (hexUpper === '#FFCDD2' || hexUpper === '#3E2723') return 'var(--note-red)';
-    if (hexUpper === '#BBDEFB' || hexUpper === '#1A2835') return 'var(--note-blue)';
-    if (hexUpper === '#C8E6C9' || hexUpper === '#1B3320') return 'var(--note-green)';
-    if (hexUpper === '#E1BEE7' || hexUpper === '#2D2033') return 'var(--note-purple)';
-    if (hexUpper === '#FFFFFF' || hexUpper === '#1E1E1E') return 'var(--note-default)';
+window.getThemeAwareColor = function(colorValue) {
+    if (!colorValue) return 'var(--note-bg-default)';
     
-    // Nếu là mã màu var(--...) thì trả về nguyên bản
-    if (hexUpper.startsWith('VAR')) return hex;
-    return 'var(--note-default)';
-}
+    // Chuẩn hóa về Hex viết hoa để so sánh
+    const hex = colorValue.toString().toUpperCase();
+ 
+    const colorMap = {
+        '#FFFFFF': 'var(--note-bg-default)',
+        '#1E1E1E': 'var(--note-bg-default)',
+        '#FFF9C4': 'var(--note-bg-yellow)',
+        '#3E3B2E': 'var(--note-bg-yellow)',
+        '#FFCDD2': 'var(--note-bg-red)',
+        '#3E2723': 'var(--note-bg-red)',
+        '#BBDEFB': 'var(--note-bg-blue)',
+        '#1A2835': 'var(--note-bg-blue)',
+        '#C8E6C9': 'var(--note-bg-green)',
+        '#1B3320': 'var(--note-bg-green)',
+        '#E1BEE7': 'var(--note-bg-purple)',
+        '#2D2033': 'var(--note-bg-purple)'
+    };
+ 
+    return colorMap[hex] || colorValue; // Nếu là var(--) thì giữ nguyên
+};
  
 // [TỐI ƯU 2]: Quản lý Blob URL để tránh Memory Leak
 async function getImageUrlSafe(fileName) {
@@ -466,48 +475,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const hiddenImageInput = document.getElementById('hiddenImageInput');
     insertImageBtn.addEventListener('click', () => hiddenImageInput.click());
     hiddenImageInput.addEventListener('change', async function(e) {
-        const files = e.target.files;
-        if (!files || files.length === 0) return;
-        const file = files[0];
-        if (!file.type.startsWith('image/')) {
-            alert('Chỉ được chọn hình ảnh.');
-            return;
-        }
-        const extension = file.name.split('.').pop() || 'jpg';
-        const uniqueFileName = `${generateUUID()}.${extension}`;
-        
-        const blob = new Blob([file], { type: file.type });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        await db.images.put({
-            fileName: uniqueFileName,
-            blob: blob,
-            syncStatus: 'pending' 
-        });
-        
-        window.currentEditingImages.push({
-            fileName: uniqueFileName,
-            url: blobUrl,
-            blob: blob,
-            isNew: true
-        });
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+     
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = async function() {
+                // Thiết lập kích thước tối đa (ví dụ 1200px)
+                const MAX_WIDTH = 1200;
+                let width = img.width;
+                let height = img.height;
+     
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+     
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+     
+                // Nén ảnh sang định dạng JPEG, chất lượng 0.8
+                canvas.toBlob(async (blob) => {
+                    const uniqueFileName = `${generateUUID()}.jpg`;
+                    const blobUrl = URL.createObjectURL(blob);
+     
+                    await db.images.put({
+                        fileName: uniqueFileName,
+                        blob: blob,
+                        syncStatus: 'pending'
+                    });
+     
+                    window.currentEditingImages.push({
+                        fileName: uniqueFileName,
+                        url: blobUrl,
+                        blob: blob,
+                        isNew: true
+                    });
+     
+                    // Tự động chèn thẻ HTML chứa đường dẫn ảnh vào nội dung chữ để Android Editor đọc được
+                    const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
+                    const imagePathForAndroid = `${androidPrefix}${uniqueFileName}`;
+                    
+                    const startPos = editBody.selectionStart;
+                    const endPos = editBody.selectionEnd;
+                    
+                    // Lưu ý: Nếu app Android của bạn dùng Markdown (![img](path)) hoặc đường dẫn trơn, 
+                    // bạn hãy thay đổi chuỗi <img src="..."> bên dưới cho phù hợp với app.
+                    const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
+                    
+                    editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
 
-        // --- ĐOẠN CODE MỚI THÊM VÀO ĐÂY ---
-        // Tự động chèn thẻ HTML chứa đường dẫn ảnh vào nội dung chữ để Android Editor đọc được
-        const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
-        const imagePathForAndroid = `${androidPrefix}${uniqueFileName}`;
-        
-        const startPos = editBody.selectionStart;
-        const endPos = editBody.selectionEnd;
-        
-        // Lưu ý: Nếu app Android của bạn dùng Markdown (![img](path)) hoặc đường dẫn trơn, 
-        // bạn hãy thay đổi chuỗi <img src="..."> bên dưới cho phù hợp với app.
-        const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
-        
-        editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
-        // ----------------------------------
-
-        renderEditorImages();
+                    renderEditorImages();
+                }, 'image/jpeg', 0.8);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
         hiddenImageInput.value = '';
     });
     
