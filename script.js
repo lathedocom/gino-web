@@ -8,6 +8,7 @@ window.currentEditingImages = [];
 window.currentEditingTags = []; // Mảng tạm lưu tags khi đang chỉnh sửa
 window.lastSyncTime = parseInt(localStorage.getItem('gino_last_sync_time') || '0');
 window.pendingUploadImages = [];
+window.currentNoteColorHex = '#FFFFFF'; // Thêm biến lưu mã Hex gốc
  
 let isDOMReady = false;
 let gapiInited = false;
@@ -359,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editBody.value = '';
         if (newTagInput) newTagInput.value = '';
         editorBody.style.backgroundColor = 'var(--note-default)'; // Sử dụng biến CSS mặc định
+        window.currentNoteColorHex = '#FFFFFF'; // Reset màu Hex khi mở editor mới
         colorPalettePopup.classList.remove('open');
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-option.default').classList.add('active');
@@ -378,13 +380,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (timeDisplay) timeDisplay.innerText = "Cập nhật: " + dateObj.toLocaleString('vi-VN');
             
             if (noteData.color || noteData.bgColor) {
-                const themeColor = window.getThemeAwareColor(noteData.color || noteData.bgColor);
-                editorBody.style.backgroundColor = themeColor;
+                window.currentNoteColorHex = noteData.color || noteData.bgColor; // Lấy mã Hex từ DB
+                const themeColor = window.getThemeAwareColor(window.currentNoteColorHex);
+                
+                editorBody.style.backgroundColor = themeColor; // Áp dụng biến CSS cho giao diện
+                
                 document.querySelectorAll('.color-option').forEach(opt => {
-                    if(opt.getAttribute('data-color') === themeColor) {
+                    if(opt.getAttribute('data-color').toUpperCase() === window.currentNoteColorHex.toUpperCase()) {
                         opt.classList.add('active');
                     }
                 });
+            } else {
+                window.currentNoteColorHex = '#FFFFFF'; // Reset màu
             }
             
             // Render Tags bằng Logic UI mới
@@ -528,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
                     
                     editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
-
+ 
                     renderEditorImages();
                 }, 'image/jpeg', 0.8);
             };
@@ -546,9 +553,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     document.getElementById('colorPaletteBtn').addEventListener('click', () => colorPalettePopup.classList.toggle('open'));
+    
+    // Xử lý sự kiện click trên các tùy chọn màu sắc
     document.querySelectorAll('.color-option').forEach(option => {
         option.addEventListener('click', function() {
-            editorBody.style.backgroundColor = this.getAttribute('data-color');
+            // Lưu mã Hex gốc để dành cho lúc Save
+            window.currentNoteColorHex = this.getAttribute('data-color'); 
+            
+            // Cập nhật giao diện Web bằng biến CSS thông qua hàm Mapper
+            editorBody.style.backgroundColor = window.getThemeAwareColor(window.currentNoteColorHex);
+            
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
         });
@@ -558,7 +572,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveNoteBtn').addEventListener('click', async () => {
         const title = editTitle.value.trim();
         const content = editBody.value.trim();
-        const color = editorBody.style.backgroundColor;
+        
+        // Dùng mã Hex gốc thay vì lấy từ giao diện để App Android hiểu được
+        const color = window.currentNoteColorHex; 
         
         // TỰ ĐỘNG THÊM TAG NẾU NGƯỜI DÙNG QUÊN BẤM ENTER
         if (newTagInput && newTagInput.value.trim() !== '') {
@@ -571,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const tags = window.currentEditingTags; // Lấy tags từ mảng tạm thay vì DOM
-
+ 
         // [SỬA LỖI ẢNH ANDROID]: Thêm đường dẫn bộ nhớ trong của app GinoNote
         const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
         const finalFileNames = window.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
