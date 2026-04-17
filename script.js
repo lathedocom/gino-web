@@ -3,7 +3,7 @@
 // =====================================================================
 window.currentEditingNoteId = null;
 window.globalImagesMap = {}; // Lưu trữ Blob thực tế: { "uuid.jpg": Blob }
-window.imageBlobUrls = {};  // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
+window.imageBlobUrls = {}; // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
 window.currentEditingImages = []; 
 window.currentEditingTags = []; // Mảng tạm lưu tags khi đang chỉnh sửa
 window.lastSyncTime = parseInt(localStorage.getItem('gino_last_sync_time') || '0');
@@ -39,29 +39,22 @@ function generateUUID() {
     );
 }
  
-// Hàm chuyển đổi mã Hex tĩnh từ Android sang Biến CSS động
-window.getThemeAwareColor = function(colorValue) {
-    if (!colorValue) return 'var(--note-bg-default)';
+// Hàm dán nhãn màu cho Element, giao quyền đổi Sáng/Tối cho CSS
+window.applyThemeColor = function(element, hexColor) {
+    if (!hexColor) hexColor = '#FFFFFF';
+    hexColor = hexColor.toUpperCase();
     
-    // Chuẩn hóa về Hex viết hoa để so sánh
-    const hex = colorValue.toString().toUpperCase();
- 
-    const colorMap = {
-        '#FFFFFF': 'var(--note-bg-default)',
-        '#1E1E1E': 'var(--note-bg-default)',
-        '#FFF9C4': 'var(--note-bg-yellow)',
-        '#3E3B2E': 'var(--note-bg-yellow)',
-        '#FFCDD2': 'var(--note-bg-red)',
-        '#3E2723': 'var(--note-bg-red)',
-        '#BBDEFB': 'var(--note-bg-blue)',
-        '#1A2835': 'var(--note-bg-blue)',
-        '#C8E6C9': 'var(--note-bg-green)',
-        '#1B3320': 'var(--note-bg-green)',
-        '#E1BEE7': 'var(--note-bg-purple)',
-        '#2D2033': 'var(--note-bg-purple)'
-    };
- 
-    return colorMap[hex] || colorValue; // Nếu là var(--) thì giữ nguyên
+    // Danh sách mã Hex chuẩn của app (Sáng và Tối)
+    const knownColors = ['#FFFFFF', '#1E1E1E', '#FFF9C4', '#3E3B2E', '#FFCDD2', '#3E2723', '#BBDEFB', '#1A2835', '#C8E6C9', '#1B3320', '#E1BEE7', '#2D2033'];
+    
+    if (knownColors.includes(hexColor)) {
+        element.setAttribute('data-theme-color', hexColor);
+        element.style.backgroundColor = ''; // Xóa inline style để CSS quản lý
+    } else {
+        // Nếu là màu lạ không có trong bảng màu, giữ nguyên inline style
+        element.removeAttribute('data-theme-color');
+        element.style.backgroundColor = hexColor; 
+    }
 };
  
 // [TỐI ƯU 2]: Quản lý Blob URL để tránh Memory Leak
@@ -359,8 +352,11 @@ document.addEventListener('DOMContentLoaded', () => {
         editTitle.value = '';
         editBody.value = '';
         if (newTagInput) newTagInput.value = '';
-        editorBody.style.backgroundColor = 'var(--note-default)'; // Sử dụng biến CSS mặc định
+        
+        // Đặt màu mặc định ban đầu bằng hàm mới
+        window.applyThemeColor(editorBody, '#FFFFFF');
         window.currentNoteColorHex = '#FFFFFF'; // Reset màu Hex khi mở editor mới
+        
         colorPalettePopup.classList.remove('open');
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-option.default').classList.add('active');
@@ -380,10 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (timeDisplay) timeDisplay.innerText = "Cập nhật: " + dateObj.toLocaleString('vi-VN');
             
             if (noteData.color || noteData.bgColor) {
-                window.currentNoteColorHex = noteData.color || noteData.bgColor; // Lấy mã Hex từ DB
-                const themeColor = window.getThemeAwareColor(window.currentNoteColorHex);
-                
-                editorBody.style.backgroundColor = themeColor; // Áp dụng biến CSS cho giao diện
+                window.currentNoteColorHex = noteData.color || noteData.bgColor;
+                window.applyThemeColor(editorBody, window.currentNoteColorHex);
                 
                 document.querySelectorAll('.color-option').forEach(opt => {
                     if(opt.getAttribute('data-color').toUpperCase() === window.currentNoteColorHex.toUpperCase()) {
@@ -391,7 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             } else {
-                window.currentNoteColorHex = '#FFFFFF'; // Reset màu
+                window.currentNoteColorHex = '#FFFFFF';
+                window.applyThemeColor(editorBody, '#FFFFFF');
             }
             
             // Render Tags bằng Logic UI mới
@@ -527,12 +522,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
                     const imagePathForAndroid = `${androidPrefix}${uniqueFileName}`;
                     
-                    const startPos = editBody.selectionStart;
-                    const endPos = editBody.selectionEnd;
-                    
                     // Lưu ý: Nếu app Android của bạn dùng Markdown (![img](path)) hoặc đường dẫn trơn, 
                     // bạn hãy thay đổi chuỗi <img src="..."> bên dưới cho phù hợp với app.
                     const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
+                    
+                    const startPos = editBody.selectionStart;
+                    const endPos = editBody.selectionEnd;
                     
                     editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
  
@@ -554,14 +549,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('colorPaletteBtn').addEventListener('click', () => colorPalettePopup.classList.toggle('open'));
     
-    // Xử lý sự kiện click trên các tùy chọn màu sắc
+    // Xử lý sự kiện click trên các tùy chọn màu sắc bằng hàm mới
     document.querySelectorAll('.color-option').forEach(option => {
         option.addEventListener('click', function() {
-            // Lưu mã Hex gốc để dành cho lúc Save
-            window.currentNoteColorHex = this.getAttribute('data-color'); 
+            window.currentNoteColorHex = this.getAttribute('data-color');
             
-            // Cập nhật giao diện Web bằng biến CSS thông qua hàm Mapper
-            editorBody.style.backgroundColor = window.getThemeAwareColor(window.currentNoteColorHex);
+            // Cập nhật nền Editor ngay lập tức
+            window.applyThemeColor(editorBody, window.currentNoteColorHex);
             
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
@@ -930,7 +924,9 @@ window.renderSyncedNotesToWeb = async function() {
     for (const note of filteredNotes) {
         const card = document.createElement('div');
         card.className = 'note-card';
-        card.style.backgroundColor = window.getThemeAwareColor(note.color || note.bgColor);
+        
+        const noteColor = note.color || note.bgColor || '#FFFFFF';
+        window.applyThemeColor(card, noteColor);
         
         let tagsHtml = '';
         const tagsArray = extractTagsFromNote(note);
