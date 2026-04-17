@@ -3,15 +3,15 @@
     --primary-color: #455A64;
     --primary-variant: #263238;
     --accent-color: #4DB6AC;
-
+    
     --bg-body: #F5F5F5;
     --surface-bg: #F5F5F5;
     --card-bg: #FFFFFF;
-
+    
     --text-main: #212121;
     --text-light: #757575;
     --border-color: #BDBDBD;
-
+    
     --fab-color: #4DB6AC;
     --editor-active-color: #2196F3;
 
@@ -22,7 +22,7 @@
     --note-bg-blue: #BBDEFB;
     --note-bg-green: #C8E6C9;
     --note-bg-purple: #E1BEE7;
-
+    
     /* Biến tương thích ngược cho file HTML/JS cũ nếu chưa đổi tên */
     --note-default: var(--note-bg-default);
     --note-yellow: var(--note-bg-yellow);
@@ -34,36 +34,35 @@
 
 /* Tự động nhận diện giao diện tối của hệ thống */
 @media (prefers-color-scheme: dark) {
-    :root {
-        /* Map từ file colors.xml (Night) */
-        --primary-color: #90A4AE;
-        --primary-variant: #263238;
-        --accent-color: #DDA15E;
+  :root {
+      /* Map từ file colors.xml (Night) */
+      --primary-color: #90A4AE;
+      --primary-variant: #263238;
+      --accent-color: #DDA15E;
+      
+      --bg-body: #121212;
+      --surface-bg: #121212;
+      --card-bg: #1E1E1E;
+      
+      /* FIX LỖI TEXT: Dịch chuẩn mã Alpha của Android sang CSS */
+      --text-main: rgba(255, 255, 255, 0.87); /* Tương đương #DEFFFFFF */
+      --text-light: rgba(255, 255, 255, 0.70); /* Tương đương #B3FFFFFF */
+      --border-color: #424242;
+      
+      --fab-color: #DDA15E;
+      --editor-active-color: #64B5F6;
 
-        --bg-body: #121212;
-        --surface-bg: #121212;
-        --card-bg: #1E1E1E;
-
-        /* FIX LỖI TEXT: Dịch chuẩn mã Alpha của Android sang CSS */
-        --text-main: rgba(255, 255, 255, 0.87); /* Tương đương #DEFFFFFF */
-        --text-light: rgba(255, 255, 255, 0.70); /* Tương đương #B3FFFFFF */
-        --border-color: #424242;
-
-        --fab-color: #DDA15E;
-        --editor-active-color: #64B5F6;
-
-        /* Màu nền ghi chú - Chế độ Tối (Khớp colors-night.xml) */
-        --note-bg-default: #1E1E1E;
-        --note-bg-yellow: #3E3B2E;
-        --note-bg-red: #3E2723;
-        --note-bg-blue: #1A2835;
-        --note-bg-green: #1B3320;
-        --note-bg-purple: #2D2033;
-    }
+      /* Màu nền ghi chú - Chế độ Tối (Khớp colors-night.xml) */
+      --note-bg-default: #1E1E1E;
+      --note-bg-yellow: #3E3B2E;
+      --note-bg-red: #3E2723;
+      --note-bg-blue: #1A2835;
+      --note-bg-green: #1B3320;
+      --note-bg-purple: #2D2033;
+  }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
     font-family: 'Roboto', Arial, sans-serif;
     background-color: var(--surface-bg);
@@ -77,310 +76,112 @@ body {
 /* Header */
 .app-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: center; justify-content: space-between;
     padding: 8px 16px;
-    height: 64px;
-    border-bottom: 1px solid var(--border-color);
+    height: 64px; border-bottom: 1px solid var(--border-color);
     background-color: var(--card-bg);
     z-index: 1000;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
+.header-left { display: flex; align-items: center; gap: 16px; }
 .icon-btn {
     background: none;
-    border: none;
-    color: var(--text-light);
-    cursor: pointer;
+    border: none; color: var(--text-light); cursor: pointer;
     padding: 12px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
     transition: background-color 0.2s;
 }
-
-.icon-btn:hover {
-    background-color: rgba(128,128,128,0.1);
-    color: var(--text-main);
-}
-
+.icon-btn:hover { background-color: rgba(128,128,128,0.1); color: var(--text-main); }
 .sync-btn {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--border-color);
-    color: var(--text-main);
+    align-items: center; gap: 8px; background-color: var(--border-color); color: var(--text-main);
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
+    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
 }
-
-.sync-btn.active-auth {
-    background-color: #388E3C;
-    color: white;
-} /* status_good */
+.sync-btn.active-auth { background-color: #388E3C; color: white; } /* status_good */
 
 /* Sidebar */
-.app-body {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-}
-
+.app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
 .sidebar {
     width: 280px;
     background-color: var(--card-bg);
     padding-top: 16px;
-    overflow-y: auto;
-    border-right: 1px solid var(--border-color);
+    overflow-y: auto; border-right: 1px solid var(--border-color);
     transition: transform 0.3s ease;
 }
-
 .nav-item {
     display: flex;
-    align-items: center;
-    padding: 0 24px;
-    height: 48px;
-    margin-right: 12px;
-    border-radius: 0 24px 24px 0;
+    align-items: center; padding: 0 24px; height: 48px; margin-right: 12px; border-radius: 0 24px 24px 0;
     cursor: pointer;
-    color: var(--text-main);
-    text-decoration: none;
-    transition: background-color 0.2s;
-    gap: 20px;
-    font-weight: 500;
-    font-size: 14px;
+    color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
+    font-weight: 500; font-size: 14px;
 }
-
-.nav-item i {
-    color: var(--text-light);
-    font-size: 24px;
-}
-
-.nav-item.active {
-    background-color: rgba(77, 182, 172, 0.15);
-    color: var(--accent-color);
-}
-
-.nav-item.active i {
-    color: var(--accent-color);
-}
+.nav-item i { color: var(--text-light); font-size: 24px; }
+.nav-item.active { background-color: rgba(77, 182, 172, 0.15); color: var(--accent-color); }
+.nav-item.active i { color: var(--accent-color); }
 
 @media (max-width: 600px) {
     .sidebar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        z-index: 900;
+        position: absolute; left: 0; top: 0; bottom: 0; z-index: 900;
         box-shadow: 4px 0 8px rgba(0,0,0,0.1);
         transform: translateX(-100%);
     }
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-    .app-header {
-        border-bottom: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .main-content {
-        padding: 16px;
-    }
+    .sidebar.mobile-open { transform: translateX(0); }
+    .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .main-content { padding: 16px; }
 }
 
 /* Main Content & Views */
-.main-content {
-    flex: 1;
-    padding: 32px 24px;
-    overflow-y: auto;
-    background-color: var(--surface-bg);
-}
-
-.notes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-    align-items: start;
-}
-
+.main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--surface-bg); }
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
 .note-card {
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px; /* Đồng bộ cornerRadius Android */
+    border: 1px solid var(--border-color); border-radius: 12px; /* Đồng bộ cornerRadius Android */
     padding: 16px;
-    transition: box-shadow 0.2s;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    transition: box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; gap: 12px;
 }
-
-.note-card:hover {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.note-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--text-main);
-}
-
-.note-body {
-    font-size: 14px;
-    color: var(--text-light);
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 6;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.note-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.tag {
-    font-size: 12px;
-    padding: 6px 12px;
-    background-color: rgba(128,128,128,0.1);
-    color: var(--text-main);
-    border-radius: 12px;
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-}
-
-.tag:hover {
-    background-color: rgba(77, 182, 172, 0.1);
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
+.note-card:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.note-title { font-size: 18px; font-weight: bold; color: var(--text-main); }
+.note-body { font-size: 14px; color: var(--text-light); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; padding: 6px 12px; background-color: rgba(128,128,128,0.1); color: var(--text-main); border-radius: 12px; cursor: pointer; border: 1px solid var(--border-color);}
+.tag:hover { background-color: rgba(77, 182, 172, 0.1); border-color: var(--accent-color); color: var(--accent-color);}
 
 /* Calendar */
-.calendar-container {
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: var(--card-bg);
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    text-align: center;
-}
-
-.cal-day-name {
-    font-weight: bold;
-    color: var(--text-light);
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.cal-day {
-    padding: 12px 0;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 14px;
-    position: relative;
-}
-
-.cal-day:hover {
-    background-color: rgba(128,128,128,0.1);
-}
-
-.cal-day.today {
-    background-color: rgba(77, 182, 172, 0.2);
-    color: var(--accent-color);
-    font-weight: bold;
-}
-
-.cal-day.selected {
-    background-color: var(--accent-color);
-    color: white;
-}
-
-.note-dot {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
-    background-color: var(--editor-active-color);
-    border-radius: 50%;
-}
+.calendar-container { max-width: 600px; margin: 0 auto; background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
+.cal-day-name { font-weight: bold; color: var(--text-light); font-size: 14px; margin-bottom: 8px;}
+.cal-day { padding: 12px 0; border-radius: 50%; cursor: pointer; font-size: 14px; position: relative; }
+.cal-day:hover { background-color: rgba(128,128,128,0.1); }
+.cal-day.today { background-color: rgba(77, 182, 172, 0.2); color: var(--accent-color); font-weight: bold;}
+.cal-day.selected { background-color: var(--accent-color); color: white; }
+.note-dot { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background-color: var(--editor-active-color); border-radius: 50%; }
 
 /* Tags View */
-.tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.tags-container .tag {
-    font-size: 16px;
-    padding: 8px 16px;
-}
+.tags-container { display: flex; flex-wrap: wrap; gap: 12px; }
+.tags-container .tag { font-size: 16px; padding: 8px 16px; }
 
 /* FAB */
 .fab-btn {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    width: 56px;
-    height: 56px;
-    background-color: var(--fab-color);
-    color: #ffffff;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    z-index: 90;
+    position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
+    background-color: var(--fab-color); color: #ffffff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 90;
     transition: transform 0.2s, background-color 0.2s;
 }
-
 .fab-btn:hover { filter: brightness(0.9); }
 .fab-btn:active { transform: scale(1.1); }
 
 /* Editor Overlay (Làm mờ nền) */
 .note-editor-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 1001;
     background-color: rgba(0, 0, 0, 0.4); /* Làm tối nền xung quanh */
     display: none;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+    flex-direction: column; 
     padding: 20px;
     transform: none; /* Bỏ slide-up cũ */
 }
@@ -391,48 +192,24 @@ body {
 
 /* Header cố định trong chế độ Editor */
 .editor-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 600px;
-    height: 64px;
-    padding: 0 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; max-width: 600px;
+    height: 64px; padding: 0 16px;
     flex-shrink: 0;
     border-bottom: none;
     background-color: transparent;
 }
-
 .editor-header-actions { display: flex; gap: 8px; }
 .action-btn:hover { color: var(--editor-active-color); }
 .save-btn { color: var(--editor-active-color); }
 .color-picker-container { position: relative; }
-
 .color-palette-popup {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 12px;
-    display: none;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    z-index: 1002;
+    position: absolute; top: 100%; right: 0; background-color: var(--card-bg);
+    border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none; 
+    grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
 }
-
 .color-palette-popup.open { display: grid; }
-
-.color-option {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border-color);
-    cursor: pointer;
-}
-
+.color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
 .color-option.active { border: 2px solid var(--editor-active-color); }
 
 /* Khung ghi chú kiểu Keep */
@@ -473,75 +250,17 @@ body {
     padding: 20px;
 }
 
-.editor-title-input {
-    width: 100%;
-    border: none;
-    background: none;
-    outline: none;
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--text-main);
-    font-family: inherit;
-    margin-bottom: 12px;
-}
-
-.editor-time-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text-light);
-    margin-bottom: 12px;
-}
-
-.editor-tags-area {
-    padding: 8px 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 12px;
-}
-
-.editor-tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.tag-input {
-    width: 100px;
-    border: none;
-    background: none;
-    outline: none;
-    font-size: 14px;
-    color: var(--editor-active-color);
-    font-family: inherit;
-}
-
-.editor-textarea {
-    width: 100%;
-    flex: 1;
-    border: none;
-    background: none;
-    outline: none;
-    font-size: 15px;
-    color: var(--text-main);
-    line-height: 1.6;
-    font-family: inherit;
-    resize: none;
-    margin-top: 8px;
-}
+.editor-title-input { width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: bold; color: var(--text-main); font-family: inherit; margin-bottom: 12px; }
+.editor-time-container { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
+.editor-tags-area { padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
+.editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-input { width: 100px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
+.editor-textarea { width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit; resize: none; margin-top: 8px; }
 
 /* Responsive Sidebar Desktop */
 @media (min-width: 768px) {
     .sidebar { width: 340px; flex-shrink: 0; }
-    .calendar-sidebar .calendar-container {
-        border: none;
-        box-shadow: none;
-        padding: 0 16px;
-        background: transparent;
-    }
+    .calendar-sidebar .calendar-container { border: none; box-shadow: none; padding: 0 16px; background: transparent; }
     .cal-day { padding: 8px 0; }
 }
 
@@ -570,27 +289,4 @@ body {
     background-color: var(--note-bg-default);
 }
 
-/* --- HỆ THỐNG ÁNH XẠ MÀU NỀN TỰ ĐỘNG SÁNG/TỐI --- */
-.note-card[data-theme-color="#FFFFFF"], .note-card[data-theme-color="#1E1E1E"],
-#editorBody[data-theme-color="#FFFFFF"], #editorBody[data-theme-color="#1E1E1E"]
-{ background-color: var(--note-bg-default) !important; }
 
-.note-card[data-theme-color="#FFF9C4"], .note-card[data-theme-color="#3E3B2E"],
-#editorBody[data-theme-color="#FFF9C4"], #editorBody[data-theme-color="#3E3B2E"]
-{ background-color: var(--note-bg-yellow) !important; }
-
-.note-card[data-theme-color="#FFCDD2"], .note-card[data-theme-color="#3E2723"],
-#editorBody[data-theme-color="#FFCDD2"], #editorBody[data-theme-color="#3E2723"]
-{ background-color: var(--note-bg-red) !important; }
-
-.note-card[data-theme-color="#BBDEFB"], .note-card[data-theme-color="#1A2835"],
-#editorBody[data-theme-color="#BBDEFB"], #editorBody[data-theme-color="#1A2835"]
-{ background-color: var(--note-bg-blue) !important; }
-
-.note-card[data-theme-color="#C8E6C9"], .note-card[data-theme-color="#1B3320"],
-#editorBody[data-theme-color="#C8E6C9"], #editorBody[data-theme-color="#1B3320"]
-{ background-color: var(--note-bg-green) !important; }
-
-.note-card[data-theme-color="#E1BEE7"], .note-card[data-theme-color="#2D2033"],
-#editorBody[data-theme-color="#E1BEE7"], #editorBody[data-theme-color="#2D2033"]
-{ background-color: var(--note-bg-purple) !important; }
