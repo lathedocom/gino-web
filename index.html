@@ -37,9 +37,9 @@
                     <span class="nav-text">Tất cả ghi chú</span>
                 </a>
             </div>
-
+ 
             <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
-
+ 
             <div class="sidebar-section calendar-sidebar">
                 <div class="calendar-container sidebar-calendar">
                     <div class="calendar-header">
@@ -54,16 +54,16 @@
                     </div>
                 </div>
             </div>
-
+ 
             <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
-
+ 
             <div class="sidebar-section tags-sidebar" style="padding: 0 16px 24px 16px;">
                 <h4 style="margin-bottom: 12px; color: var(--text-light); font-size: 14px; text-transform: uppercase;">Danh sách Tags</h4>
                 <div class="tags-container" id="allTagsContainer">
                 </div>
             </div>
         </nav>
-
+ 
         <main class="main-content">
             <div id="viewNotes" class="view-section active-view">
                 <div class="notes-grid" id="notesGrid">
@@ -94,12 +94,12 @@
                             <i class="material-icons">palette</i>
                         </button>
                         <div class="color-palette-popup" id="colorPalettePopup">
-                            <div class="color-option default active" data-color="#ffffff" style="background-color: #ffffff;"></div>
-                            <div class="color-option" data-color="#f8caca" style="background-color: #f8caca;"></div>
-                            <div class="color-option" data-color="#c8e6c9" style="background-color: #c8e6c9;"></div>
-                            <div class="color-option" data-color="#b3e5fc" style="background-color: #b3e5fc;"></div>
-                            <div class="color-option" data-color="#fce4ec" style="background-color: #fce4ec;"></div>
-                            <div class="color-option" data-color="#fff9c4" style="background-color: #fff9c4;"></div>
+                            <div class="color-option default active" data-color="#FFFFFF" style="background-color: #FFFFFF;" title="Mặc định"></div>
+                            <div class="color-option" data-color="#FFF9C4" style="background-color: #FFF9C4;" title="Vàng"></div>
+                            <div class="color-option" data-color="#FFCDD2" style="background-color: #FFCDD2;" title="Đỏ"></div>
+                            <div class="color-option" data-color="#BBDEFB" style="background-color: #BBDEFB;" title="Xanh dương"></div>
+                            <div class="color-option" data-color="#C8E6C9" style="background-color: #C8E6C9;" title="Xanh lá"></div>
+                            <div class="color-option" data-color="#E1BEE7" style="background-color: #E1BEE7;" title="Tím"></div>
                         </div>
                     </div>
                     <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
@@ -127,14 +127,14 @@
             <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
         </div>
     </div>
-
+ 
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="script.js"></script>
     
     <input type="file" id="hiddenImageInput" accept="image/jpeg, image/png, image/gif" style="display: none;">
-
+ 
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
