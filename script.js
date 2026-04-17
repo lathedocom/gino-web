@@ -37,6 +37,22 @@ function generateUUID() {
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
 }
+
+// Hàm chuyển đổi mã Hex tĩnh từ Android sang Biến CSS động
+window.getThemeAwareColor = function(hex) {
+    if (!hex) return 'var(--note-default)';
+    const hexUpper = hex.toUpperCase();
+    if (hexUpper === '#FFF9C4' || hexUpper === '#3E3B2E') return 'var(--note-yellow)';
+    if (hexUpper === '#FFCDD2' || hexUpper === '#3E2723') return 'var(--note-red)';
+    if (hexUpper === '#BBDEFB' || hexUpper === '#1A2835') return 'var(--note-blue)';
+    if (hexUpper === '#C8E6C9' || hexUpper === '#1B3320') return 'var(--note-green)';
+    if (hexUpper === '#E1BEE7' || hexUpper === '#2D2033') return 'var(--note-purple)';
+    if (hexUpper === '#FFFFFF' || hexUpper === '#1E1E1E') return 'var(--note-default)';
+    
+    // Nếu là mã màu var(--...) thì trả về nguyên bản
+    if (hexUpper.startsWith('VAR')) return hex;
+    return 'var(--note-default)';
+}
  
 // [TỐI ƯU 2]: Quản lý Blob URL để tránh Memory Leak
 async function getImageUrlSafe(fileName) {
@@ -57,7 +73,7 @@ const styleFix = document.createElement('style');
 styleFix.innerHTML = `
     .editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
     .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
-   .note-editor-overlay { overflow: hidden !important; }
+  .note-editor-overlay { overflow: hidden !important; }
 `;
 document.head.appendChild(styleFix);
  
@@ -79,7 +95,7 @@ window.previewImageInApp = function(imageUrl) {
     });
     document.body.appendChild(overlay);
 };
-
+ 
 // =====================================================================
 // TÍNH NĂNG LỊCH (CALENDAR) VÀ TAGS (TỐI ƯU DÙNG RAM CACHE)
 // =====================================================================
@@ -335,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editTitle.value = '';
         editBody.value = '';
         if (newTagInput) newTagInput.value = '';
-        editorBody.style.backgroundColor = '#FFFFFF'; // Màu mặc định
+        editorBody.style.backgroundColor = 'var(--note-default)'; // Sử dụng biến CSS mặc định
         colorPalettePopup.classList.remove('open');
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-option.default').classList.add('active');
@@ -355,10 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (timeDisplay) timeDisplay.innerText = "Cập nhật: " + dateObj.toLocaleString('vi-VN');
             
             if (noteData.color || noteData.bgColor) {
-                const hexColor = noteData.color || noteData.bgColor;
-                editorBody.style.backgroundColor = hexColor;
+                const themeColor = window.getThemeAwareColor(noteData.color || noteData.bgColor);
+                editorBody.style.backgroundColor = themeColor;
                 document.querySelectorAll('.color-option').forEach(opt => {
-                    if(opt.getAttribute('data-color').toUpperCase() === hexColor.toUpperCase()) {
+                    if(opt.getAttribute('data-color') === themeColor) {
                         opt.classList.add('active');
                     }
                 });
@@ -854,7 +870,7 @@ window.renderSyncedNotesToWeb = async function() {
     for (const note of filteredNotes) {
         const card = document.createElement('div');
         card.className = 'note-card';
-        card.style.backgroundColor = note.color || note.bgColor || '#ffffff';
+        card.style.backgroundColor = window.getThemeAwareColor(note.color || note.bgColor);
         
         let tagsHtml = '';
         const tagsArray = extractTagsFromNote(note);
