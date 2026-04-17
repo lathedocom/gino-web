@@ -10,6 +10,28 @@
     --fab-color: #f5a623;
     --editor-active-color: #f5a623;
 }
+/* Tự động nhận diện giao diện tối của hệ thống */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-body: #121212;
+    --card-bg: #1e1e1e;
+    --text-main: #e0e0e0;
+    --text-light: #9aa0a6;
+    --border-color: #333333;
+    /* Có thể giữ nguyên màu chủ đạo (primary/fab) hoặc làm dịu lại đôi chút cho đỡ chói */
+    --primary-color: #f5a623; 
+    --primary-light: #3d2e15; 
+  }
+
+  /* Đảm bảo Editor cũng đổi màu nền chuẩn khi không chọn màu tuỳ chỉnh */
+  .editor-body {
+    background-color: var(--bg-body) !important;
+  }
+  
+  .app-header, .sidebar, .color-palette-popup {
+    background-color: var(--bg-body);
+  }
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Roboto', Arial, sans-serif;
