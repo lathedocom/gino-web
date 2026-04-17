@@ -270,3 +270,21 @@ body {
 .editor-tag-item { display: inline-flex; align-items: center; gap: 4px; }
 .remove-tag-btn { cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 50%; padding: 2px; }
 .remove-tag-btn:hover { background: rgba(255,0,0,0.2); color: #D32F2F; }
+
+/* Đảm bảo chữ luôn lấy đúng màu của Theme (Sáng/Tối) */
+.note-card, #editorBody {
+    color: var(--text-main) !important;
+}
+
+.note-title, .editor-title-input {
+    color: var(--text-main) !important;
+}
+
+.note-body, .editor-textarea {
+    color: var(--text-light) !important;
+}
+
+/* Đảm bảo nền Editor đồng bộ chính xác biến CSS */
+#editorBody {
+    background-color: var(--note-bg-default);
+}
