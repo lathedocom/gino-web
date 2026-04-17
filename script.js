@@ -37,7 +37,7 @@ function generateUUID() {
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
 }
-
+ 
 // Hàm chuyển đổi mã Hex tĩnh từ Android sang Biến CSS động
 window.getThemeAwareColor = function(hex) {
     if (!hex) return 'var(--note-default)';
@@ -78,7 +78,7 @@ styleFix.innerHTML = `
 document.head.appendChild(styleFix);
  
 // =====================================================================
-// HÀM TIỆN ÍCH PREVIEW ẢNH (SỬA LỖI 4)
+// HÀM TIỆN ÍCH PREVIEW ẢNH
 // =====================================================================
 // Hàm hiển thị ảnh toàn màn hình trong trình duyệt
 window.previewImageInApp = function(imageUrl) {
@@ -170,7 +170,6 @@ function renderCalendarView() {
             selectedFilterDate = new Date(year, month, day);
             selectedFilterTag = null;
             renderCalendarView();
-            // Đã xóa phần thao tác nav-item và view-section theo yêu cầu D
             window.renderSyncedNotesToWeb();
         });
         grid.appendChild(dayDiv);
@@ -215,7 +214,6 @@ function renderTagsSidebar() {
         tagSpan.addEventListener('click', () => {
             selectedFilterTag = tagText;
             selectedFilterDate = null;
-            // Đã xóa phần thao tác nav-item và view-section theo yêu cầu D
             window.renderSyncedNotesToWeb();
         });
         tagsContainer.appendChild(tagSpan);
@@ -346,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // SỬA LỖI 2: Hiển thị đúng thời gian
+    // Hiển thị đúng thời gian
     window.openNoteInEditor = async function(noteData) {
         editTitle.value = '';
         editBody.value = '';
@@ -431,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
             img.src = imgObj.url;
             img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
             
-            // C. Thêm sự kiện tải/xem ảnh khi click trong Editor (SỬA LỖI 4)
+            // Thêm sự kiện tải/xem ảnh khi click trong Editor
             img.style.cursor = 'zoom-in'; // Sửa trỏ chuột
             img.title = "Nhấp để xem phóng to";
             img.addEventListener('click', (e) => {
@@ -493,6 +491,22 @@ document.addEventListener('DOMContentLoaded', () => {
             blob: blob,
             isNew: true
         });
+
+        // --- ĐOẠN CODE MỚI THÊM VÀO ĐÂY ---
+        // Tự động chèn thẻ HTML chứa đường dẫn ảnh vào nội dung chữ để Android Editor đọc được
+        const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
+        const imagePathForAndroid = `${androidPrefix}${uniqueFileName}`;
+        
+        const startPos = editBody.selectionStart;
+        const endPos = editBody.selectionEnd;
+        
+        // Lưu ý: Nếu app Android của bạn dùng Markdown (![img](path)) hoặc đường dẫn trơn, 
+        // bạn hãy thay đổi chuỗi <img src="..."> bên dưới cho phù hợp với app.
+        const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
+        
+        editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
+        // ----------------------------------
+
         renderEditorImages();
         hiddenImageInput.value = '';
     });
@@ -513,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Nút Lưu (Chịu trách nhiệm đồng bộ trực tiếp) - SỬA LỖI 3
+    // Nút Lưu (Chịu trách nhiệm đồng bộ trực tiếp)
     document.getElementById('saveNoteBtn').addEventListener('click', async () => {
         const title = editTitle.value.trim();
         const content = editBody.value.trim();
@@ -530,7 +544,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const tags = window.currentEditingTags; // Lấy tags từ mảng tạm thay vì DOM
-        const finalFileNames = window.currentEditingImages.map(imgObj => imgObj.fileName);
+
+        // [SỬA LỖI ẢNH ANDROID]: Thêm đường dẫn bộ nhớ trong của app GinoNote
+        const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
+        const finalFileNames = window.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
         
         let noteData = window.currentRawNoteData ? { ...window.currentRawNoteData } : {};
         noteData.id = window.currentEditingNoteId || new Date().getTime();
@@ -600,7 +617,7 @@ window.gisLoaded = function() {
     checkAndFetchDriveData();
 };
  
-// SỬA LỖI 1: Cập nhật hàm checkAndFetchDriveData và handleAuthClick
+// Cập nhật hàm checkAndFetchDriveData và handleAuthClick
 function checkAndFetchDriveData() {
     if (!isDOMReady) return;
     const btnAuthGoogle = document.getElementById('btnAuthGoogle');
@@ -913,7 +930,7 @@ window.renderSyncedNotesToWeb = async function() {
             <div class="note-tags">${tagsHtml}</div>
         `;
         
-        // C. Gắn sự kiện click tải ảnh cho các ảnh Preview (SỬA LỖI 4)
+        // C. Gắn sự kiện click tải ảnh cho các ảnh Preview
         if (matchCount > 0) {
             card.querySelectorAll('.preview-img').forEach(img => {
                 img.style.cursor = 'zoom-in';
