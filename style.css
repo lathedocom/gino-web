@@ -1,19 +1,27 @@
 :root {
-    /* Map từ file colors.xml (Light) */
+    /* Map từ file colors.xml (Day) */
     --primary-color: #455A64;
     --primary-variant: #263238;
     --accent-color: #4DB6AC;
     
-    --bg-body: #F5F5F5; /* background */
+    --bg-body: #F5F5F5;
     --surface-bg: #F5F5F5;
-    --card-bg: #FFFFFF; /* surface */
+    --card-bg: #FFFFFF;
     
-    --text-main: #212121; /* text_primary */
-    --text-light: #757575; /* text_secondary */
-    --border-color: #BDBDBD; /* outline */
+    --text-main: #212121;
+    --text-light: #757575;
+    --border-color: #BDBDBD;
     
-    --fab-color: #4DB6AC; /* colorSecondary */
-    --editor-active-color: #2196F3; /* gino_color_primary */
+    --fab-color: #4DB6AC;
+    --editor-active-color: #2196F3;
+
+    /* Bảng màu Ghi chú (Light) */
+    --note-default: #FFFFFF;
+    --note-yellow: #FFF9C4;
+    --note-red: #FFCDD2;
+    --note-blue: #BBDEFB;
+    --note-green: #C8E6C9;
+    --note-purple: #E1BEE7;
 }
 
 /* Tự động nhận diện giao diện tối của hệ thống */
@@ -21,19 +29,28 @@
   :root {
       /* Map từ file colors.xml (Night) */
       --primary-color: #90A4AE;
-      --primary-variant: #263238;
+     --primary-variant: #263238;
       --accent-color: #DDA15E;
       
       --bg-body: #121212;
       --surface-bg: #121212;
       --card-bg: #1E1E1E;
       
-      --text-main: #DEFFFFFF;
-      --text-light: #B3FFFFFF;
+      /* FIX LỖI TEXT: Dịch chuẩn mã Alpha của Android sang CSS */
+      --text-main: rgba(255, 255, 255, 0.87); /* Tương đương #DEFFFFFF */
+      --text-light: rgba(255, 255, 255, 0.70); /* Tương đương #B3FFFFFF */
       --border-color: #424242;
       
       --fab-color: #DDA15E;
       --editor-active-color: #64B5F6;
+
+      /* Bảng màu Ghi chú (Night) - Tự động map khi hệ thống dark mode */
+      --note-default: #1E1E1E;
+      --note-yellow: #3E3B2E;
+      --note-red: #3E2723;
+      --note-blue: #1A2835;
+      --note-green: #1B3320;
+      --note-purple: #2D2033;
   }
 }
 
@@ -101,7 +118,7 @@ body {
         box-shadow: 4px 0 8px rgba(0,0,0,0.1);
         transform: translateX(-100%);
     }
-   .sidebar.mobile-open { transform: translateX(0); }
+  .sidebar.mobile-open { transform: translateX(0); }
     .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .main-content { padding: 16px; }
 }
@@ -168,7 +185,7 @@ body {
 .color-palette-popup {
     position: absolute; top: 100%; right: 0; background-color: var(--card-bg);
     border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none; 
-    grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
+   grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
 }
 .color-palette-popup.open { display: grid; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
