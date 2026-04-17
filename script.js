@@ -37,6 +37,15 @@ function generateUUID() {
     );
 }
 
+// Hàm lấy URL ảnh từ Dexie cho chế độ Offline (Dùng chung)
+async function getImageUrlOffline(fileName) {
+    const imageRecord = await db.images.get(fileName);
+    if (imageRecord && imageRecord.blob) {
+        return URL.createObjectURL(imageRecord.blob);
+    }
+    return null;
+}
+
 // CSS Fix cho khung Editor cuộn mượt mà
 const styleFix = document.createElement('style');
 styleFix.innerHTML = `
@@ -288,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.openNoteInEditor = function(noteData) {
+    window.openNoteInEditor = async function(noteData) {
         editTitle.value = '';
         editBody.value = '';
         newTagInput.value = '';
@@ -325,12 +334,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const noteStr = JSON.stringify(noteData);
             const addedImages = new Set();
-            for (let rawFileName in window.globalImagesMap) {
+            
+            // Quét ảnh từ Dexie thay vì RAM
+            const allOfflineImages = await db.images.toArray();
+            for (let imgRecord of allOfflineImages) {
+                let rawFileName = imgRecord.fileName;
                 if (noteStr.includes(rawFileName) && !addedImages.has(rawFileName)) {
+                    let localUrl = window.imageBlobUrls[rawFileName] || URL.createObjectURL(imgRecord.blob);
+                    window.imageBlobUrls[rawFileName] = localUrl; // Lưu đệm lại để dùng
+                    
                     window.currentEditingImages.push({
                         fileName: rawFileName,
-                        blob: window.globalImagesMap[rawFileName],
-                        url: window.imageBlobUrls[rawFileName]
+                        blob: imgRecord.blob,
+                        url: localUrl
                     });
                     addedImages.add(rawFileName);
                 }
@@ -697,6 +713,13 @@ async function fetchNotesFromHiddenDrive() {
                 const blob = await res.blob();
                 window.globalImagesMap[f.name] = blob;
                 window.imageBlobUrls[f.name] = URL.createObjectURL(blob);
+                
+                // Đồng thời lưu vào Dexie để có thể hiển thị khi offline lần sau
+                await db.images.put({
+                    fileName: f.name,
+                    blob: blob,
+                    syncStatus: 'synced'
+                });
             }
         }
 
@@ -803,6 +826,9 @@ window.renderSyncedNotesToWeb = async function() {
     // Sắp xếp lại theo thời gian cập nhật mới nhất
     notesArray.sort((a, b) => b.updatedAt - a.updatedAt);
 
+    // Lấy danh sách ảnh offline từ Dexie một lần để tăng tốc
+    const allOfflineImages = await db.images.toArray();
+
     // Lọc Notes dựa vào Date, Tag, và trường isDeleted (Soft Delete của App)
     let filteredNotes = notesArray.filter(note => {
         if (note.isDeleted) return false; // Ẩn các ghi chú đã bị xóa từ App
@@ -848,9 +874,15 @@ window.renderSyncedNotesToWeb = async function() {
         let matchCount = 0;
         imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
 
-        for (let rawFileName in window.globalImagesMap) {
+        // Quét qua danh sách ảnh lấy từ Dexie thay vì globalMap
+        for (let imgRecord of allOfflineImages) {
+            let rawFileName = imgRecord.fileName;
             if (matchCount >= 4) break;
-            if (noteStr.includes(rawFileName) && window.imageBlobUrls[rawFileName]) {
+            if (noteStr.includes(rawFileName)) {
+                // Tạo URL từ Blob nếu chưa có trong đệm
+                if (!window.imageBlobUrls[rawFileName]) {
+                     window.imageBlobUrls[rawFileName] = URL.createObjectURL(imgRecord.blob);
+                }
                 imagesPreviewHtml += `<img src="${window.imageBlobUrls[rawFileName]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
                 matchCount++;
             }
@@ -858,7 +890,10 @@ window.renderSyncedNotesToWeb = async function() {
         imagesPreviewHtml += '</div>';
 
         let displayContent = note.content || note.memoContent || note.text || '';
-        for (let rawFileName in window.globalImagesMap) {
+        
+        // Ẩn file name trong text body
+        for (let imgRecord of allOfflineImages) {
+            let rawFileName = imgRecord.fileName;
             if (displayContent.includes(rawFileName)) {
                 const regex = new RegExp(`(?:file:\\/\\/|\\/storage\\/|\\/data\\/|images\\/)?[\\w\\/\\.\\-]*${rawFileName}`, 'g');
                 displayContent = displayContent.replace(regex, '[Hình ảnh đính kèm]');
