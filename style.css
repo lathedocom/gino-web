@@ -5,46 +5,42 @@
     --text-main: #202124;
     --text-light: #5f6368;
     --bg-body: #ffffff;
-    --card-bg: #f5f5f5;
+    --card-bg: #ffffff; /* Tách màu thẻ riêng */
+    --surface-bg: #f5f5f5; /* Dành cho background ngoài cùng */
     --border-color: #dddddd;
     --fab-color: #f5a623;
     --editor-active-color: #f5a623;
 }
+
 /* Tự động nhận diện giao diện tối của hệ thống */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-body: #121212;
-    --card-bg: #1e1e1e;
+    --card-bg: #1e1e1e; /* Màu nền cho card và popup trong dark mode */
+    --surface-bg: #121212; 
     --text-main: #e0e0e0;
     --text-light: #9aa0a6;
     --border-color: #333333;
-    /* Có thể giữ nguyên màu chủ đạo (primary/fab) hoặc làm dịu lại đôi chút cho đỡ chói */
     --primary-color: #f5a623; 
     --primary-light: #3d2e15; 
   }
-
-  /* Đảm bảo Editor cũng đổi màu nền chuẩn khi không chọn màu tuỳ chỉnh */
-  .editor-body {
-    background-color: var(--bg-body) !important;
-  }
-  
-  .app-header, .sidebar, .color-palette-popup {
-    background-color: var(--bg-body);
-  }
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Roboto', Arial, sans-serif;
-    background-color: var(--bg-body);
+    background-color: var(--surface-bg);
     color: var(--text-main);
     display: flex; flex-direction: column;
     height: 100vh; overflow: hidden;
 }
+
 /* Header */
 .app-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 16px; height: 64px; border-bottom: 1px solid var(--border-color);
-    background-color: #ffffff; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    background-color: var(--bg-body); /* Đã đổi sang dùng biến */
+    z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .header-left { display: flex; align-items: center; gap: 16px; }
 .icon-btn {
@@ -52,7 +48,7 @@ body {
     padding: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     transition: background-color 0.2s;
 }
-.icon-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-main); }
+.icon-btn:hover { background-color: rgba(128,128,128,0.1); color: var(--text-main); }
 .sync-btn {
     display: flex; align-items: center; gap: 8px; background-color: var(--border-color); color: var(--text-main);
     border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
@@ -62,8 +58,8 @@ body {
 /* Sidebar & Mobile Menu */
 .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
 .sidebar {
-    width: 280px; background-color: #ffffff; padding-top: 16px;
-    overflow-y: auto; border-right: 1px solid var(--border-color);
+    width: 280px; background-color: var(--bg-body); /* Đã đổi sang dùng biến */
+    padding-top: 16px; overflow-y: auto; border-right: 1px solid var(--border-color);
     transition: transform 0.3s ease;
 }
 .nav-item {
@@ -81,18 +77,17 @@ body {
         box-shadow: 4px 0 8px rgba(0,0,0,0.1);
         transform: translateX(-100%);
     }
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
+    .sidebar.mobile-open { transform: translateX(0); }
     .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .main-content { padding: 16px; }
 }
 
 /* Main Content & Views */
-.main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--bg-body); }
+.main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--surface-bg); }
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
 .note-card {
-    background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;
+    background-color: var(--card-bg); /* Đã đổi sang dùng biến */
+    border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;
     transition: box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; gap: 12px;
 }
 .note-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -100,16 +95,16 @@ body {
 .note-title { font-size: 16px; font-weight: 500; }
 .note-body { font-size: 14px; color: var(--text-main); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag { font-size: 12px; padding: 6px 12px; background-color: rgba(0,0,0,0.05); color: var(--text-light); border-radius: 12px; cursor: pointer;}
+.tag { font-size: 12px; padding: 6px 12px; background-color: rgba(128,128,128,0.1); color: var(--text-light); border-radius: 12px; cursor: pointer;}
 .tag:hover { background-color: var(--primary-light); color: var(--primary-dark);}
 
 /* Lịch (Calendar) */
-.calendar-container { max-width: 600px; margin: 0 auto; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); }
+.calendar-container { max-width: 600px; margin: 0 auto; background-color: var(--card-bg); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
 .cal-day-name { font-weight: bold; color: var(--text-light); font-size: 14px; margin-bottom: 8px;}
 .cal-day { padding: 12px 0; border-radius: 50%; cursor: pointer; font-size: 14px; position: relative; }
-.cal-day:hover { background-color: #f0f0f0; }
+.cal-day:hover { background-color: rgba(128,128,128,0.1); }
 .cal-day.today { background-color: var(--primary-light); color: var(--primary-dark); font-weight: bold;}
 .cal-day.selected { background-color: var(--primary-color); color: white; }
 .note-dot { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background-color: red; border-radius: 50%; }
@@ -132,30 +127,32 @@ body {
 /* Editor */
 .note-editor-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: #ffffff; display: flex; flex-direction: column;
+    background-color: var(--bg-body); /* Đã đổi sang dùng biến */
+    display: flex; flex-direction: column;
     z-index: 1001; transform: translateY(100%); transition: transform 0.3s ease-out;
 }
 .note-editor-overlay.active { transform: translateY(0); }
 .editor-header {
     display: flex; align-items: center; justify-content: space-between;
     height: 64px; border-bottom: 1px solid var(--border-color); padding: 0 16px;
+    background-color: var(--bg-body);
 }
 .editor-header-actions { display: flex; gap: 8px; }
 .action-btn:hover { color: var(--editor-active-color); }
 .save-btn { color: var(--editor-active-color); }
 .color-picker-container { position: relative; }
 .color-palette-popup {
-    position: absolute; top: 100%; right: 0; background: #ffffff; border: 1px solid var(--border-color);
-    border-radius: 8px; padding: 12px; display: none; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
+    position: absolute; top: 100%; right: 0; background-color: var(--card-bg); /* Đã đổi sang dùng biến */
+    border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none; 
+    grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
 }
 .color-palette-popup.open { display: grid; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
 .color-option.active { border: 2px solid var(--editor-active-color); }
-.editor-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; transition: background-color 0.3s; }
+.editor-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; transition: background-color 0.3s; background-color: var(--bg-body); }
 .editor-title-input { width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: 500; color: var(--text-main); font-family: inherit; }
 .editor-time-container { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); }
-.editor-tags-area { padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.editor-tags-area { padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); }
 .editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag-input { width: 100px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
 .editor-textarea { width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit; resize: none; }
