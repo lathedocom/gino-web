@@ -3,8 +3,9 @@
 // =====================================================================
 window.currentEditingNoteId = null;
 window.globalImagesMap = {}; // Lưu trữ Blob thực tế: { "uuid.jpg": Blob }
-window.imageBlobUrls = {};   // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
+window.imageBlobUrls = {};  // Lưu Blob URL để hiển thị: { "uuid.jpg": "blob:http..." }
 window.currentEditingImages = []; 
+window.currentEditingTags = []; // Mảng tạm lưu tags khi đang chỉnh sửa
 window.lastSyncTime = parseInt(localStorage.getItem('gino_last_sync_time') || '0');
 window.pendingUploadImages = [];
 
@@ -135,11 +136,7 @@ function renderCalendarView() {
             selectedFilterDate = new Date(year, month, day);
             selectedFilterTag = null;
             renderCalendarView();
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelector('[data-target="viewNotes"]').classList.add('active');
-            document.querySelectorAll('.view-section').forEach(view => {
-                view.style.display = view.id === 'viewNotes' ? 'block' : 'none';
-            });
+            // Đã xóa phần thao tác nav-item và view-section theo yêu cầu D
             window.renderSyncedNotesToWeb();
         });
         grid.appendChild(dayDiv);
@@ -184,11 +181,7 @@ function renderTagsSidebar() {
         tagSpan.addEventListener('click', () => {
             selectedFilterTag = tagText;
             selectedFilterDate = null;
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelector('[data-target="viewNotes"]').classList.add('active');
-            document.querySelectorAll('.view-section').forEach(view => {
-                view.style.display = view.id === 'viewNotes' ? 'block' : 'none';
-            });
+            // Đã xóa phần thao tác nav-item và view-section theo yêu cầu D
             window.renderSyncedNotesToWeb();
         });
         tagsContainer.appendChild(tagSpan);
@@ -265,26 +258,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const editNoteModeBtn = document.getElementById('editNoteModeBtn');
     const editModeToolbar = document.getElementById('editModeToolbar');
     
+    // B. Logic Render Tags trong Editor
+    window.renderEditorTagsUI = function() {
+        const list = document.getElementById('editorTagList');
+        if (!list) return;
+        list.innerHTML = '';
+        window.currentEditingTags.forEach((tag, index) => {
+            if (!tag.trim()) return;
+            const span = document.createElement('span');
+            span.className = 'tag editor-tag-item';
+            span.innerHTML = `${tag} <i class="material-icons remove-tag-btn" style="font-size: 14px; display: ${editModeToolbar.style.display === 'flex' ? 'flex' : 'none'};">close</i>`;
+            
+            // Sự kiện xóa tag
+            span.querySelector('.remove-tag-btn').addEventListener('click', () => {
+                window.currentEditingTags.splice(index, 1);
+                window.renderEditorTagsUI();
+            });
+            list.appendChild(span);
+        });
+    }
+
+    // Bắt sự kiện Enter để thêm Tag mới từ ô input
+    if (newTagInput) {
+        newTagInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (val && !window.currentEditingTags.includes(val)) {
+                    window.currentEditingTags.push(val);
+                    this.value = '';
+                    window.renderEditorTagsUI();
+                }
+            }
+        });
+    }
+    
+    // A. Cập nhật hàm setEditorMode (Quản lý trạng thái Cuộn & Tags)
     function setEditorMode(isEditing) {
         if (isEditing) {
             editNoteModeBtn.style.display = 'none';
             editModeToolbar.style.display = 'flex';
             editorBody.classList.remove('readonly-mode');
-            newTagInput.style.display = 'block';
-            document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = 'flex');
+            newTagInput.style.display = 'inline-block';
+            editBody.removeAttribute('readonly'); // Cho phép gõ
+            document.querySelectorAll('.image-remove-btn, .remove-tag-btn').forEach(b => b.style.display = 'flex');
         } else {
             editNoteModeBtn.style.display = 'flex';
             editModeToolbar.style.display = 'none';
             editorBody.classList.add('readonly-mode');
             newTagInput.style.display = 'none';
-            document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = 'none');
+            editBody.setAttribute('readonly', 'true'); // Ngăn gõ nhưng vẫn cho cuộn
+            document.querySelectorAll('.image-remove-btn, .remove-tag-btn').forEach(b => b.style.display = 'none');
         }
     }
     
     window.openNoteInEditor = async function(noteData) {
         editTitle.value = '';
         editBody.value = '';
-        newTagInput.value = '';
+        if (newTagInput) newTagInput.value = '';
         editorBody.style.backgroundColor = '#ffffff';
         colorPalettePopup.classList.remove('open');
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
@@ -306,8 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
-            const tagsArray = extractTagsFromNote(noteData);
-            newTagInput.value = tagsArray.join(', ');
+            // Render Tags bằng Logic UI mới
+            window.currentEditingTags = extractTagsFromNote(noteData);
+            window.renderEditorTagsUI();
             
             // [TỐI ƯU 1]: Quét ảnh dựa trên JSON Array, không dùng chuỗi includes()
             const imageNames = extractImageNamesFromNote(noteData);
@@ -325,6 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setEditorMode(false);
         } else {
             window.currentEditingNoteId = null;
+            window.currentEditingTags = [];
+            window.renderEditorTagsUI();
             renderEditorImages();
             setEditorMode(true);
         }
@@ -352,6 +386,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = document.createElement('img');
             img.src = imgObj.url;
             img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+            
+            // C. Thêm sự kiện tải/xem ảnh khi click trong Editor
+            img.style.cursor = 'pointer';
+            img.title = "Nhấp để xem/tải ảnh";
+            img.addEventListener('click', (e) => {
+                e.stopPropagation(); // Ngăn sự kiện lan truyền
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = imgObj.fileName || "GinoNote_Image.jpg"; // Tên file tải về
+                a.target = "_blank"; // Mở tab mới nếu trình duyệt chặn download trực tiếp
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
             
             const removeBtn = document.createElement('button');
             removeBtn.className = 'image-remove-btn';
@@ -432,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = editTitle.value.trim();
         const content = editBody.value.trim();
         const color = editorBody.style.backgroundColor;
-        const tags = newTagInput.value ? newTagInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
+        const tags = window.currentEditingTags; // B. Lấy tags từ mảng tạm thay vì DOM
         const finalFileNames = window.currentEditingImages.map(imgObj => imgObj.fileName);
         
         let noteData = window.currentRawNoteData ? { ...window.currentRawNoteData } : {};
@@ -782,7 +830,8 @@ window.renderSyncedNotesToWeb = async function() {
                 if (matchCount >= 4) break;
                 let localUrl = await getImageUrlSafe(rawFileName);
                 if (localUrl) {
-                    imagesPreviewHtml += `<img src="${localUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
+                    // C. Thêm data-filename để xử lý download
+                    imagesPreviewHtml += `<img src="${localUrl}" data-filename="${rawFileName}" class="preview-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
                     matchCount++;
                 }
             }
@@ -803,6 +852,25 @@ window.renderSyncedNotesToWeb = async function() {
             <div class="note-body">${displayContent}</div>
             <div class="note-tags">${tagsHtml}</div>
         `;
+        
+        // C. Gắn sự kiện click tải ảnh cho các ảnh Preview
+        if (matchCount > 0) {
+            card.querySelectorAll('.preview-img').forEach(img => {
+                img.style.cursor = 'pointer';
+                img.title = "Nhấp để xem/tải ảnh";
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Ngăn mở Editor Note
+                    const a = document.createElement('a');
+                    a.href = img.src;
+                    a.download = img.getAttribute('data-filename') || "GinoNote_Image.jpg";
+                    a.target = "_blank";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            });
+        }
+
         card.addEventListener('click', () => { window.openNoteInEditor(note); });
         notesGrid.appendChild(card);
     }
