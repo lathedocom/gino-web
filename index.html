@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GinoNote - Đồng bộ Web</title>
+    <title>GinoNote - Đồng bộ Web</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f5a623">
@@ -31,58 +31,43 @@
     
     <div class="app-body">
         <nav class="sidebar" id="sidebar">
-            <ul class="nav-list">
-                <li>
-                    <a href="#" class="nav-item active" data-target="viewNotes">
-                        <i class="material-icons">lightbulb</i>
-                        <span class="nav-text">Tất cả ghi chú</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-item" data-target="viewCalendar">
-                        <i class="material-icons">calendar_today</i>
-                        <span class="nav-text">Lịch</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-item" data-target="viewTags">
-                        <i class="material-icons">label</i>
-                        <span class="nav-text">Tags</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <main class="main-content">
-            <div id="viewNotes" class="view-section active-view">
-                <div class="notes-grid" id="notesGrid">
-                    </div>
+            <div class="sidebar-section">
+                <a href="#" class="nav-item active" data-target="viewNotes">
+                    <i class="material-icons">lightbulb</i>
+                    <span class="nav-text">Tất cả ghi chú</span>
+                </a>
             </div>
-            
-            <div id="viewCalendar" class="view-section" style="display: none;">
-                <div class="calendar-container">
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+
+            <div class="sidebar-section calendar-sidebar">
+                <div class="calendar-container sidebar-calendar">
                     <div class="calendar-header">
                         <button class="icon-btn" id="prevMonthBtn"><i class="material-icons">chevron_left</i></button>
-                        <h3 id="calendarMonthYear">Tháng 4, 2026</h3>
+                        <h4 id="calendarMonthYear" style="font-size: 15px; margin: 0;">Tháng 4, 2026</h4>
                         <button class="icon-btn" id="nextMonthBtn"><i class="material-icons">chevron_right</i></button>
                         <button class="icon-btn" id="todayBtn" title="Hôm nay"><i class="material-icons">today</i></button>
                     </div>
                     <div class="calendar-grid">
-                        <div class="cal-day-name">T2</div>
-                        <div class="cal-day-name">T3</div>
-                        <div class="cal-day-name">T4</div>
-                        <div class="cal-day-name">T5</div>
-                        <div class="cal-day-name">T6</div>
-                        <div class="cal-day-name">T7</div>
-                        <div class="cal-day-name">CN</div>
-                        </div>
+                        <div class="cal-day-name">T2</div><div class="cal-day-name">T3</div><div class="cal-day-name">T4</div>
+                        <div class="cal-day-name">T5</div><div class="cal-day-name">T6</div><div class="cal-day-name">T7</div><div class="cal-day-name">CN</div>
+                    </div>
                 </div>
             </div>
-            
-            <div id="viewTags" class="view-section" style="display: none;">
-                <h3 style="margin-bottom: 16px;">Danh sách Tags</h3>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+
+            <div class="sidebar-section tags-sidebar" style="padding: 0 16px 24px 16px;">
+                <h4 style="margin-bottom: 12px; color: var(--text-light); font-size: 14px; text-transform: uppercase;">Danh sách Tags</h4>
                 <div class="tags-container" id="allTagsContainer">
-                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div id="viewNotes" class="view-section active-view">
+                <div class="notes-grid" id="notesGrid">
+                </div>
             </div>
         </main>
     </div>
@@ -109,12 +94,12 @@
                             <i class="material-icons">palette</i>
                         </button>
                         <div class="color-palette-popup" id="colorPalettePopup">
-                            <div class="color-option default active" data-color="#ffffff"></div>
-                            <div class="color-option" data-color="#f8caca"></div>
-                            <div class="color-option" data-color="#c8e6c9"></div>
-                            <div class="color-option" data-color="#b3e5fc"></div>
-                            <div class="color-option" data-color="#fce4ec"></div>
-                            <div class="color-option" data-color="#fff9c4"></div>
+                            <div class="color-option default active" data-color="#ffffff" style="background-color: #ffffff;"></div>
+                            <div class="color-option" data-color="#f8caca" style="background-color: #f8caca;"></div>
+                            <div class="color-option" data-color="#c8e6c9" style="background-color: #c8e6c9;"></div>
+                            <div class="color-option" data-color="#b3e5fc" style="background-color: #b3e5fc;"></div>
+                            <div class="color-option" data-color="#fce4ec" style="background-color: #fce4ec;"></div>
+                            <div class="color-option" data-color="#fff9c4" style="background-color: #fff9c4;"></div>
                         </div>
                     </div>
                     <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
@@ -139,7 +124,7 @@
                 <div id="editorTagList" class="editor-tag-list"></div>
                 <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
             </div>
-            <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
+            <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
         </div>
     </div>
 
