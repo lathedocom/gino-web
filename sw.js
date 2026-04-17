@@ -2,7 +2,7 @@
 importScripts('https://unpkg.com/dexie/dist/dexie.js');
 
 // =====================================================================
-// PHẦN 1: CACHING & OFFLINE (Từ code cũ của bạn)
+// PHẦN 1: CACHING & OFFLINE (Từ code cũ
 // =====================================================================
 const CACHE_NAME = 'ginonote-cache-v2'; // Đổi thành v2 để ép cập nhật cache
 
@@ -12,7 +12,7 @@ const urlsToCache = [
   './style.css',
   './script.js',
   './manifest.json',
-  // './icon-192.png', // Hãy đảm bảo bạn có các file này
+  // './icon-192.png', // 
   // './icon-512.png'
 ];
 
@@ -99,7 +99,7 @@ async function doBackgroundSync() {
 
     console.log(`[SW] Đang đẩy ${pendingNotes.length} ghi chú lên Drive...`);
 
-    // 3. Đóng gói thành file Delta JSON (Giống cách làm trong file gốc của bạn)
+    // 3. Đóng gói thành file Delta JSON (Giống cách làm trong file gốc)
     const syncStartTime = Date.now();
     const deltaFileName = `ginonote_delta_${syncStartTime}.json`;
     const deltaBlob = new Blob([JSON.stringify(pendingNotes)], { type: 'application/json' });
