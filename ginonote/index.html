@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GinoNote - Ứng dụng ghi chú thông minh kết hợp phương pháp Active Recall và Spaced Repetition.">
+    <title>GinoNote - Khắc ghi chú vào trí nhớ</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="toolbar">
+        <div class="toolbar-logo">
+            <img src="logo.png" alt="GinoNote Logo">
+            GinoNote
+        </div>
+        <div class="toolbar-actions">
+            <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode" title="Giao diện Sáng/Tối">
+                <i class="material-icons" id="themeIcon">dark_mode</i>
+            </button>
+            <button class="lang-btn" id="langToggle" onclick="toggleLanguage()">VI / EN</button>
+        </div>
+    </div>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <img src="logo.png" alt="GinoNote" class="hero-logo">
+            <h1 class="hero-slogan" data-i18n="slogan">Khắc ghi chú vào trí nhớ</h1>
+            <p class="hero-subtitle" data-i18n="hero_desc">Ứng dụng ghi chú thông minh kết hợp phương pháp Active Recall và Spaced Repetition, giúp bạn chuyển hóa thông tin thành tri thức dài hạn.</p>
+            <a href="https://play.google.com/store/apps/details?id=com.lathedo.ginonote" class="playstore-btn" target="_blank">
+                <i class="material-icons">shop</i>
+                <span data-i18n="download">Tải ứng dụng từ Play Store</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="feature-section bg-white">
+        <div class="container-inner layout-zigzag">
+            <div class="feature-visual">
+                <div class="mockup-shape">
+                    <div class="device-frame">
+                        <img src="ghichu.png" alt="Màn hình ghi chú" title="Giao diện ghi chú GinoNote">
+                    </div>
+                </div>
+            </div>
+            <div class="feature-text">
+                <h2 class="feature-title" data-i18n="box1_title">Không gian Ghi chú Tối giản, Tập trung và Hỗ trợ Học tập</h2>
+                <p class="feature-desc" data-i18n="box1_desc">
+                    Màn hình soạn thảo của GinoNote mang đến trải nghiệm viết hoàn toàn không gây phân tâm nhờ thiết kế tối giản và chế độ nền tối (dark mode) dịu mắt.
+                    Điểm ưu việt của màn hình này là sự kết hợp giữa hệ thống "Thẻ phân loại" (Tags) giúp tổ chức dữ liệu khoa học, và tính năng đánh dấu từ khóa thông minh bằng ngoặc nhọn {...}, rất lý tưởng để tạo các bài ôn tập dạng điền từ.
+                </p>
+                <p class="list-intro"><strong data-i18n="box1_list_intro">Khám phá các tính năng đặc biệt:</strong></p>
+                <ul class="feature-list">
+                    <li>
+                        <i class="material-icons accent-icon">lightbulb</i>
+                        <span data-i18n="icon_lightbulb">Bôi đen từ khóa bạn cho là quan trọng/ cần ghi nhớ. Khi bôi đen từ khóa và nhấn vào biểu tượng bóng đèn, hệ thống sẽ bọc từ khóa trong ngoặc nhọn (ví dụ: {quan điểm}) để tạo thành các ô trống ẩn từ.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">play_circle_filled</i>
+                        <span data-i18n="icon_play">Khởi động chế độ ôn tập tập trung. Hệ thống sẽ chuyển sang giao diện thực hành, ẩn đi các từ khóa trong ngoặc nhọn để bạn chính thức kiểm tra trí nhớ.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section bg-alt">
+        <div class="container-inner layout-zigzag reverse">
+            <div class="feature-visual double-mockup">
+                <div class="mockup-shape">
+                    <div class="device-frame frame-left"><img src="test1.png" alt="Màn hình điền từ"></div>
+                    <div class="device-frame frame-right"><img src="test.png" alt="Màn hình kết quả"></div>
+                </div>
+            </div>
+            <div class="feature-text">
+                <h2 class="feature-title" data-i18n="recall_title">Hệ thống Ôn tập Chủ động</h2>
+                <p class="feature-desc" data-i18n="recall_desc">
+                    GinoNote thay đổi hoàn toàn thói quen đọc lại thụ động bằng cách kết hợp sức mạnh của phương pháp Active Recall (Chủ động gọi nhớ) và Spaced Repetition (Lặp lại ngắt quãng).
+                </p>
+                <p class="list-intro"><strong data-i18n="recall_list_intro">Chi tiết Chức năng & Cách thức Hoạt động:</strong></p>
+                <ul class="feature-list">
+                    <li>
+                        <i class="material-icons accent-icon">help_outline</i>
+                        <span data-i18n="recall_help">Icon Trợ giúp (?): Khi bạn "bí" từ, nhấn vào biểu tượng này để nhận một gợi ý nhỏ mà không làm mất đi nỗ lực tự hồi tưởng.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">fact_check</i>
+                        <span data-i18n="recall_check">Nút Kiểm tra đáp án: Khóa đáp án của bạn và tiến hành đối chiếu với bản gốc để đưa ra kết quả ngay lập tức.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">spellcheck</i>
+                        <span data-i18n="recall_detail">Sửa lỗi trực quan: Hệ thống chấm điểm %, tô xanh từ đúng và bôi đỏ từ sai kèm đáp án chính xác. Tính năng châm chước giúp sửa lỗi đánh máy nhanh.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">thumbs_up_down</i>
+                        <span data-i18n="recall_diff">Đánh giá độ khó (Again - Easy): Thuật toán căn cứ vào lựa chọn của bạn để lên lịch ôn tập hoàn hảo cho lần tiếp theo.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section bg-white">
+        <div class="container-inner layout-zigzag">
+            <div class="feature-visual">
+                <div class="mockup-shape">
+                    <div class="device-frame">
+                        <img src="lich.png" alt="Màn hình lịch" title="Nhật ký học tập GinoNote">
+                    </div>
+                </div>
+            </div>
+            <div class="feature-text">
+                <h2 class="feature-title" data-i18n="cal_title">Nhật ký Học tập Trực quan</h2>
+                <p class="feature-desc" data-i18n="cal_desc">
+                    Màn hình Lịch đóng vai trò như một cuốn nhật ký cá nhân, nơi mọi ghi chép và tiến độ ôn tập của bạn được lưu vết cẩn thận theo thời gian thực.
+                </p>
+                <ul class="feature-list mt-4">
+                    <li>
+                        <i class="material-icons text-danger">lens</i>
+                        <span data-i18n="cal_dot">Dấu chấm đỏ dưới các ngày: Đánh dấu các mốc "Dấu chân tri thức" khi bạn tạo ghi chú hoặc ôn tập mới trong ngày.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">restore</i>
+                        <span data-i18n="cal_today">Trở về hiện tại: Một chạm để quay lại lịch trình của ngày hôm nay dù bạn đang ở bất kỳ tháng nào.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">list_alt</i>
+                        <span data-i18n="cal_notes">Dòng thời gian bài học: Hiển thị chi tiết toàn bộ danh sách ghi chú đã tạo hoặc lịch sử ôn tập khi chọn một ngày cụ thể.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section bg-alt">
+        <div class="container-inner layout-zigzag reverse">
+            <div class="feature-visual">
+                <div class="mockup-shape">
+                    <div class="device-frame">
+                        <img src="thongke.jpg" alt="Màn hình thống kê" title="Thống kê GinoNote">
+                    </div>
+                </div>
+            </div>
+            <div class="feature-text">
+                <h2 class="feature-title" data-i18n="stats_title">Trực Quan Hóa Mọi Hành Trình Ghi Nhớ</h2>
+                <p class="feature-desc" data-i18n="stats_desc">
+                    Trung tâm phân tích học tập giúp bạn nắm bắt thói quen, hiệu suất ôn tập và tiến độ ghi nhớ dài hạn thông qua dữ liệu thực tế.
+                </p>
+                <ul class="feature-list mt-4">
+                    <li>
+                        <i class="material-icons accent-icon">bar_chart</i>
+                        <span data-i18n="stats_metrics">Thống kê theo Tuần/Tháng/Năm: Đếm tổng lượng ghi chú và lượt tương tác để theo dõi sự tăng trưởng tri thức.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">psychology</i>
+                        <span data-i18n="stats_visual">Phân tích Ghi nhớ: Trực quan hóa số lượng ghi chú "Đang ôn" và "Đã thuộc" để đánh giá chất lượng học tập.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section bg-white">
+        <div class="container-inner layout-zigzag">
+            <div class="feature-visual">
+                <div class="mockup-shape">
+                    <div class="device-frame">
+                        <img src="dongbo.png" alt="Màn hình đồng bộ" title="Đồng bộ GinoNote">
+                    </div>
+                </div>
+            </div>
+            <div class="feature-text">
+                <h2 class="feature-title" data-i18n="sync_title">Kết Nối Tri Thức Không Giới Hạn</h2>
+                <p class="feature-desc" data-i18n="sync_desc">
+                    Xóa tan nỗi lo mất mát thông tin nhờ giải pháp đồng bộ hóa tức thì và hệ thống xuất tệp tin độc quyền để chia sẻ kiến thức.
+                </p>
+                <ul class="feature-list mt-4">
+                    <li>
+                        <i class="material-icons accent-icon">cloud_sync</i>
+                        <span data-i18n="sync_drive">Đồng bộ Google Drive: Tự động sao lưu mọi chỉnh sửa lên đám mây, đảm bảo dữ liệu luôn nhất quán trên mọi thiết bị.</span>
+                    </li>
+                    <li>
+                        <i class="material-icons accent-icon">share</i>
+                        <span data-i18n="sync_share">Chia sẻ file .gino: Đóng gói toàn bộ nội dung và hình ảnh thành một tệp tin duy nhất để trao đổi tài liệu cực kỳ nhanh chóng.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section bg-alt text-center">
+        <div class="container-inner">
+            <h2 class="feature-title" data-i18n="box5_title">Khám phá sức mạnh của GinoNote</h2>
+            <p class="feature-desc" data-i18n="box5_desc">Xem video ngắn để nắm bắt cách ứng dụng có thể thay đổi cách bạn tổ chức cuộc sống và nâng tầm tư duy.</p>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section class="advantages-section">
+        <div class="advantages-grid">
+            <div class="extra__card">
+                <div class="extra__icon">
+                    <i class="material-icons">psychology</i>
+                </div>
+                <h3 class="extra__title" data-i18n="adv4_title">Tối ưu ghi nhớ khoa học</h3>
+                <p class="extra__desc" data-i18n="adv4_desc">Khắc sâu kiến thức vào trí nhớ dài hạn nhờ sự kết hợp giữa Active Recall và Spaced Repetition, giúp tiết kiệm thời gian học mà vẫn đạt hiệu quả cao nhất.</p>
+            </div>
+            <div class="extra__card">
+                <div class="extra__icon">
+                    <i class="material-icons">insert_chart</i>
+                </div>
+                <h3 class="extra__title" data-i18n="adv5_title">Thống kê thông minh</h3>
+                <p class="extra__desc" data-i18n="adv5_desc">Theo dõi tiến độ bản thân qua hệ thống trực quan, tự động dự báo khối lượng bài cần ôn để bạn luôn làm chủ kế hoạch học tập mỗi ngày.</p>
+            </div>
+            <div class="extra__card">
+                <div class="extra__icon">
+                    <i class="material-icons">folder_shared</i>
+                </div>
+                <h3 class="extra__title" data-i18n="adv6_title">Dễ dàng chia sẻ</h3>
+                <p class="extra__desc" data-i18n="adv6_desc">Đóng gói và chia sẻ kho tàng kiến thức qua file .gino độc quyền, giúp trao đổi các bộ thẻ ghi chú tiện lợi và sử dụng ngoại tuyến dễ dàng.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="super__free">
+            <h3 class="super__free-h3" data-i18n="free_title">Sẵn sàng khắc ghi chú vào trí nhớ?</h3>
+            <p class="super__free-description" data-i18n="free_desc">
+                Đừng chỉ ghi chép rồi để đó. Hãy để GinoNote giúp bạn chuyển hóa thông tin thành tri thức.
+                Ứng dụng hệ thống khoa học Active Recall và Spaced Repetition là khoản đầu tư bền vững nhất cho tư duy của bạn.
+            </p>
+        </div>
+    </section>
+
+    <div class="footer">
+        <p>&copy; 2026 GinoNote. All rights reserved.</p>
+        <a href="policy_vi.html" id="link-policy" data-i18n="policy">Chính sách bảo mật</a> |
+        <a href="terms_vi.html" id="link-terms" data-i18n="terms">Điều khoản sử dụng</a>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
