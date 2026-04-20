@@ -1,146 +1,191 @@
 :root {
-    /* Map từ file colors.xml (Day) */
-    --primary-color: #455A64;
-    --primary-variant: #263238;
-    --accent-color: #4DB6AC;
-    
-    --bg-body: #F5F5F5;
-    --surface-bg: #F5F5F5;
-    --card-bg: #FFFFFF;
-    
-    --text-main: #212121;
-    --text-light: #757575;
-    --border-color: #BDBDBD;
-    
-    --fab-color: #4DB6AC;
-    --editor-active-color: #2196F3;
+  /* Đồng bộ với màu Landing Page */
+  --primary-color: #0E4B75;      /* Xanh Navy chủ đạo */
+  --primary-variant: #0A3552;    /* Xanh Navy đậm */
+  --accent-color: #FFB300;       /* Vàng Hổ phách làm điểm nhấn */
 
-    /* Màu nền ghi chú - Chế độ Sáng (Khớp colors.xml) */
-    --note-bg-default: #FFFFFF;
-    --note-bg-yellow: #FFF9C4;
-    --note-bg-red: #FFCDD2;
-    --note-bg-blue: #BBDEFB;
-    --note-bg-green: #C8E6C9;
-    --note-bg-purple: #E1BEE7;
-    
-    /* Biến tương thích ngược cho file HTML/JS cũ nếu chưa đổi tên */
-    --note-default: var(--note-bg-default);
-    --note-yellow: var(--note-bg-yellow);
-    --note-red: var(--note-bg-red);
-    --note-blue: var(--note-bg-blue);
-    --note-green: var(--note-bg-green);
-    --note-purple: var(--note-bg-purple);
+  --bg-body: #F0F4F8;            /* Dùng xám xanh cực nhạt như section-bg-alt của landing page */
+  --surface-bg: #F0F4F8;
+  --card-bg: #FFFFFF;
+
+  --text-main: #202124;
+  --text-light: #5F6368;
+  --border-color: #E8EAED;
+
+  --fab-color: #FFB300;          /* Nút FAB nổi bật với màu Vàng */
+  --editor-active-color: #1A73E8; /* Giữ màu xanh Google Blue cho các action trong Editor */
+
+  /* Màu nền ghi chú - Chế độ Sáng (Khớp colors.xml) */
+  --note-bg-default: #FFFFFF;
+  --note-bg-yellow: #FFF9C4;
+  --note-bg-red: #FFCDD2;
+  --note-bg-blue: #BBDEFB;
+  --note-bg-green: #C8E6C9;
+  --note-bg-purple: #E1BEE7;
+
+  /* Biến tương thích ngược cho file HTML/JS cũ nếu chưa đổi tên */
+  --note-default: var(--note-bg-default);
+  --note-yellow: var(--note-bg-yellow);
+  --note-red: var(--note-bg-red);
+  --note-blue: var(--note-bg-blue);
+  --note-green: var(--note-bg-green);
+  --note-purple: var(--note-bg-purple);
 }
 
 /* Tự động nhận diện giao diện tối của hệ thống */
 @media (prefers-color-scheme: dark) {
   :root {
-      /* Map từ file colors.xml (Night) */
-      --primary-color: #90A4AE;
-      --primary-variant: #263238;
-      --accent-color: #DDA15E;
-      
-      --bg-body: #121212;
-      --surface-bg: #121212;
-      --card-bg: #1E1E1E;
-      
-      /* FIX LỖI TEXT: Dịch chuẩn mã Alpha của Android sang CSS */
-      --text-main: rgba(255, 255, 255, 0.87); /* Tương đương #DEFFFFFF */
-      --text-light: rgba(255, 255, 255, 0.70); /* Tương đương #B3FFFFFF */
-      --border-color: #424242;
-      
-      --fab-color: #DDA15E;
-      --editor-active-color: #64B5F6;
+    /* Đồng bộ với Dark mode của Landing Page */
+    --primary-color: #64B5F6; 
+    --primary-variant: #90CAF9;
+    --accent-color: #FFCA28;
 
-      /* Màu nền ghi chú - Chế độ Tối (Khớp colors-night.xml) */
-      --note-bg-default: #1E1E1E;
-      --note-bg-yellow: #3E3B2E;
-      --note-bg-red: #3E2723;
-      --note-bg-blue: #1A2835;
-      --note-bg-green: #1B3320;
-      --note-bg-purple: #2D2033;
+    --bg-body: #202124;
+    --surface-bg: #202124;
+    --card-bg: #2D2E31;
+
+    --text-main: #E8EAED;
+    --text-light: #9AA0A6;
+    --border-color: #3C4043;
+
+    --fab-color: #FFCA28;
+    --editor-active-color: #64B5F6;
+
+    /* Màu nền ghi chú - Chế độ Tối (Khớp colors-night.xml) */
+    --note-bg-default: #1E1E1E;
+    --note-bg-yellow: #3E3B2E;
+    --note-bg-red: #3E2723;
+    --note-bg-blue: #1A2835;
+    --note-bg-green: #1B3320;
+    --note-bg-purple: #2D2033;
   }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    font-family: 'Roboto', Arial, sans-serif;
-    background-color: var(--surface-bg);
-    color: var(--text-main);
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: var(--surface-bg);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Header */
 .app-header {
-    display: flex;
-    align-items: center; justify-content: space-between;
-    padding: 8px 16px;
-    height: 64px; border-bottom: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-    z-index: 1000;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  height: 64px; border-bottom: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  z-index: 1000;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
+
 .header-left { display: flex; align-items: center; gap: 16px; }
+
 .icon-btn {
-    background: none;
-    border: none; color: var(--text-light); cursor: pointer;
-    padding: 12px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    transition: background-color 0.2s;
+  background: none;
+  border: none; color: var(--text-light); cursor: pointer;
+  padding: 12px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  transition: background-color 0.2s;
 }
+
 .icon-btn:hover { background-color: rgba(128,128,128,0.1); color: var(--text-main); }
+
 .sync-btn {
-    display: flex;
-    align-items: center; gap: 8px; background-color: var(--border-color); color: var(--text-main);
-    border: none;
-    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; 
+  background-color: var(--card-bg); 
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px; 
+  border-radius: 24px; /* Bo tròn hoàn toàn kiểu viên thuốc */
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s ease;
 }
-.sync-btn.active-auth { background-color: #388E3C; color: white; } /* status_good */
+
+.sync-btn:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.sync-btn.active-auth { 
+  background-color: var(--primary-color); /* Dùng Xanh Navy thay vì Xanh lá */
+  color: white; 
+  border: none;
+  box-shadow: 0 2px 8px rgba(14, 75, 117, 0.3);
+}
 
 /* Sidebar */
 .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+
 .sidebar {
-    width: 280px;
-    background-color: var(--card-bg);
-    padding-top: 16px;
-    overflow-y: auto; border-right: 1px solid var(--border-color);
-    transition: transform 0.3s ease;
+  width: 280px;
+  background-color: var(--card-bg);
+  padding-top: 16px;
+  overflow-y: auto; border-right: 1px solid var(--border-color);
+  transition: transform 0.3s ease;
 }
+
 .nav-item {
-    display: flex;
-    align-items: center; padding: 0 24px; height: 48px; margin-right: 12px; border-radius: 0 24px 24px 0;
-    cursor: pointer;
-    color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
-    font-weight: 500; font-size: 14px;
+  display: flex;
+  align-items: center; padding: 0 24px; height: 48px; margin-right: 16px; border-radius: 0 24px 24px 0;
+  cursor: pointer;
+  color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
+  font-weight: 500; font-size: 14px;
 }
+
 .nav-item i { color: var(--text-light); font-size: 24px; }
-.nav-item.active { background-color: rgba(77, 182, 172, 0.15); color: var(--accent-color); }
-.nav-item.active i { color: var(--accent-color); }
+
+.nav-item.active { 
+  /* Nền vàng nhạt, chữ Xanh Navy */
+  background-color: rgba(255, 179, 0, 0.15); 
+  color: var(--primary-color); 
+  font-weight: 700;
+}
+
+.nav-item.active i { 
+  color: var(--accent-color); /* Icon màu vàng */
+}
 
 @media (max-width: 600px) {
-    .sidebar {
-        position: absolute; left: 0; top: 0; bottom: 0; z-index: 900;
-        box-shadow: 4px 0 8px rgba(0,0,0,0.1);
-        transform: translateX(-100%);
-    }
-    .sidebar.mobile-open { transform: translateX(0); }
-    .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .main-content { padding: 16px; }
+  .sidebar {
+    position: absolute; left: 0; top: 0; bottom: 0; z-index: 900;
+    box-shadow: 4px 0 8px rgba(0,0,0,0.1);
+    transform: translateX(-100%);
+  }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .main-content { padding: 16px; }
 }
 
 /* Main Content & Views */
 .main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--surface-bg); }
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+
 .note-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color); border-radius: 12px; /* Đồng bộ cornerRadius Android */
-    padding: 16px;
-    transition: box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; gap: 12px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color); 
+  border-radius: 16px; /* Bo góc to hơn giống Landing Page */
+  padding: 20px; /* Tăng padding cho thoáng */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Chuyển động mượt hơn */
+  cursor: pointer; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  border-top: 4px solid transparent; /* Chuẩn bị cho hiệu ứng hover */
 }
-.note-card:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+.note-card:hover { 
+  transform: translateY(-4px); /* Nhô lên khi hover */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08); /* Bóng đổ đậm hơn */
+  border-top: 4px solid var(--accent-color); /* Hiện viền vàng */
+}
+
 .note-title { font-size: 18px; font-weight: bold; color: var(--text-main); }
 .note-body { font-size: 14px; color: var(--text-light); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -164,49 +209,48 @@ body {
 
 /* FAB */
 .fab-btn {
-    position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
-    background-color: var(--fab-color); color: #ffffff;
-    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 90;
-    transition: transform 0.2s, background-color 0.2s;
+  position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
+  background-color: var(--accent-color); color: #000;
+  border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(255, 179, 0, 0.4); z-index: 90;
+  transition: transform 0.2s, background-color 0.2s;
 }
 .fab-btn:hover { filter: brightness(0.9); }
 .fab-btn:active { transform: scale(1.1); }
 
 /* Editor Overlay (Làm mờ nền) */
 .note-editor-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 1001;
-    background-color: rgba(0, 0, 0, 0.4); /* Làm tối nền xung quanh */
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column; 
-    padding: 20px;
-    transform: none; /* Bỏ slide-up cũ */
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1001;
+  background-color: rgba(0, 0, 0, 0.4); /* Làm tối nền xung quanh */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  transform: none; /* Bỏ slide-up cũ */
 }
-
 .note-editor-overlay.active {
-    display: flex;
+  display: flex;
 }
 
 /* Header cố định trong chế độ Editor */
 .editor-header {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; max-width: 600px;
-    height: 64px; padding: 0 16px;
-    flex-shrink: 0;
-    border-bottom: none;
-    background-color: transparent;
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; max-width: 600px;
+  height: 64px; padding: 0 16px;
+  flex-shrink: 0;
+  border-bottom: none;
+  background-color: transparent;
 }
 .editor-header-actions { display: flex; gap: 8px; }
 .action-btn:hover { color: var(--editor-active-color); }
 .save-btn { color: var(--editor-active-color); }
 .color-picker-container { position: relative; }
 .color-palette-popup {
-    position: absolute; top: 100%; right: 0; background-color: var(--card-bg);
-    border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none; 
-    grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
+  position: absolute; top: 100%; right: 0; background-color: var(--card-bg);
+  border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none;
+  grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
 }
 .color-palette-popup.open { display: grid; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
@@ -214,54 +258,53 @@ body {
 
 /* Khung ghi chú kiểu Keep */
 #editorBody {
-    width: 100%;
-    max-width: 600px; /* Kích thước tối đa như Keep Web */
-    max-height: 90vh;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Để xử lý cuộn nội bộ */
-    position: relative;
-    background-color: var(--note-bg-default);
-    transition: background-color 0.3s;
+  width: 100%;
+  max-width: 600px; /* Kích thước tối đa như Keep Web */
+  max-height: 90vh;
+  border-radius: 16px; /* Bo góc to hơn đồng bộ với Note card */
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2); /* Bóng to và tỏa rộng hơn để tách biệt hẳn với nền */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Để xử lý cuộn nội bộ */
+  position: relative;
+  background-color: var(--note-bg-default);
+  transition: background-color 0.3s;
 }
 
 /* Nội dung cuộn độc lập */
 .editor-body-content {
-    flex: 1;
-    overflow-y: auto; /* Chỉ cuộn phần này */
-    padding: 10px 20px 20px 20px;
-    display: flex;
-    flex-direction: column;
+  flex: 1;
+  overflow-y: auto; /* Chỉ cuộn phần này */
+  padding: 10px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
 }
-
 /* Tùy chỉnh thanh cuộn cho đẹp */
 .editor-body-content::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 .editor-body-content::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.1);
-    border-radius: 10px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
 }
-
 /* Fallback padding nếu cấu trúc HTML chưa bọc .editor-body-content */
 .editor-body {
-    padding: 20px;
+  padding: 20px;
 }
-
-.editor-title-input { width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: bold; color: var(--text-main); font-family: inherit; margin-bottom: 12px; }
+.editor-title-input { width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: bold; color: var(--text-main); font-family: inherit; margin-bottom: 12px;
+}
 .editor-time-container { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
 .editor-tags-area { padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
 .editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag-input { width: 100px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
-.editor-textarea { width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit; resize: none; margin-top: 8px; }
+.editor-textarea { width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
+resize: none; margin-top: 8px; }
 
 /* Responsive Sidebar Desktop */
 @media (min-width: 768px) {
-    .sidebar { width: 340px; flex-shrink: 0; }
-    .calendar-sidebar .calendar-container { border: none; box-shadow: none; padding: 0 16px; background: transparent; }
-    .cal-day { padding: 8px 0; }
+  .sidebar { width: 340px; flex-shrink: 0; }
+  .calendar-sidebar .calendar-container { border: none; box-shadow: none; padding: 0 16px; background: transparent; }
+  .cal-day { padding: 8px 0; }
 }
 
 /* Fix Cuộn Readonly */
@@ -273,20 +316,15 @@ body {
 
 /* Đảm bảo chữ luôn lấy đúng màu của Theme (Sáng/Tối) */
 .note-card, #editorBody {
-    color: var(--text-main) !important;
+  color: var(--text-main) !important;
 }
-
 .note-title, .editor-title-input {
-    color: var(--text-main) !important;
+  color: var(--text-main) !important;
 }
-
 .note-body, .editor-textarea {
-    color: var(--text-light) !important;
+  color: var(--text-light) !important;
 }
-
 /* Đảm bảo nền Editor đồng bộ chính xác biến CSS */
 #editorBody {
-    background-color: var(--note-bg-default);
+  background-color: var(--note-bg-default);
 }
-
-
