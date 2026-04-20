@@ -379,7 +379,11 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentEditingNoteId = noteData.id;
             window.currentRawNoteData = noteData; // Bảo lưu syncHistories & lastReviewAt
             editTitle.value = noteData.title || noteData.memoTitle || '';
-            editBody.value = noteData.content || noteData.memoContent || noteData.text || '';
+            
+            // [CẬP NHẬT 1]: Tự động dọn dẹp các thẻ link ảnh rác (<img src="...">) từ bản lưu cũ
+            let rawContent = noteData.content || noteData.memoContent || noteData.text || '';
+            rawContent = rawContent.replace(/<img[^>]*src="[^"]*"[^>]*>/gi, ''); 
+            editBody.value = rawContent.trim();
             
             // Hiển thị thời gian
             const dateObj = new Date(noteData.updatedAt || noteData.createdAt || Date.now());
@@ -535,17 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         isNew: true
                     });
                     
-                    // Tự động chèn thẻ HTML chứa đường dẫn ảnh vào nội dung chữ để Android Editor đọc được
-                    const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
-                    const imagePathForAndroid = `${androidPrefix}${uniqueFileName}`;
-                    
-                    const startPos = editBody.selectionStart;
-                    const endPos = editBody.selectionEnd;
-                    
-                    // Lưu ý: Nếu app Android của bạn dùng Markdown (![img](path)) hoặc đường dẫn trơn,
-                    // bạn hãy thay đổi chuỗi <img src="..."> bên dưới cho phù hợp với app.
-                    const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
-                    editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
+                    // [CẬP NHẬT 2]: Đã vô hiệu hóa việc chèn text tag HTML vào nội dung ghi chú
                     
                     renderEditorImages();
                 }, 'image/jpeg', 0.8);
