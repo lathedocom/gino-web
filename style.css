@@ -25,7 +25,12 @@
   --note-blue: var(--note-bg-blue);
   --note-green: var(--note-bg-green);
   --note-purple: var(--note-bg-purple);
+  
+  /* THÊM MỚI: Màu thanh cuộn chế độ Sáng */
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2); /* Xám nhạt */
+  --scrollbar-hover: rgba(0, 0, 0, 0.4); /* Xám đậm hơn khi trỏ chuột */
 }
+
 /* Tự động nhận diện giao diện tối của hệ thống */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -48,8 +53,13 @@
     --note-bg-blue: #1A2835;
     --note-bg-green: #1B3320;
     --note-bg-purple: #2D2033;
+
+    /* THÊM MỚI: Màu thanh cuộn chế độ Tối */
+    --scrollbar-thumb: rgba(255, 255, 255, 0.2); /* Trắng mờ */
+    --scrollbar-hover: rgba(255, 255, 255, 0.4); /* Trắng sáng hơn khi trỏ chuột */
   }
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Roboto', Arial, sans-serif;
@@ -60,6 +70,7 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
 /* Header */
 .app-header {
   display: flex;
@@ -99,6 +110,7 @@ body {
   border: none;
   box-shadow: 0 2px 8px rgba(14, 75, 117, 0.3);
 }
+
 /* Sidebar */
 .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
 .sidebar {
@@ -135,6 +147,7 @@ body {
   .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .main-content { padding: 16px; }
 }
+
 /* Main Content & Views */
 .main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--surface-bg); }
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
@@ -161,6 +174,7 @@ body {
 .note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { font-size: 12px; padding: 6px 12px; background-color: rgba(128,128,128,0.1); color: var(--text-main); border-radius: 12px; cursor: pointer; border: 1px solid var(--border-color);}
 .tag:hover { background-color: rgba(77, 182, 172, 0.1); border-color: var(--accent-color); color: var(--accent-color);}
+
 /* Calendar */
 .calendar-container { max-width: 600px; margin: 0 auto; background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -171,9 +185,11 @@ body {
 .cal-day.today { background-color: rgba(77, 182, 172, 0.2); color: var(--accent-color); font-weight: bold;}
 .cal-day.selected { background-color: var(--accent-color); color: white; }
 .note-dot { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background-color: var(--editor-active-color); border-radius: 50%; }
+
 /* Tags View */
 .tags-container { display: flex; flex-wrap: wrap; gap: 12px; }
 .tags-container .tag { font-size: 16px; padding: 8px 16px; }
+
 /* FAB */
 .fab-btn {
   position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
@@ -184,6 +200,7 @@ body {
 }
 .fab-btn:hover { filter: brightness(0.9); }
 .fab-btn:active { transform: scale(1.1); }
+
 /* Editor Overlay (Làm mờ nền) */
 .note-editor-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -199,6 +216,7 @@ body {
 .note-editor-overlay.active {
   display: flex;
 }
+
 /* Header cố định trong chế độ Editor */
 .editor-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -210,8 +228,8 @@ body {
 }
 .editor-header-actions { display: flex; gap: 8px; }
 .action-btn:hover { color: var(--editor-active-color); }
-#deleteNoteBtn:hover { 
-    color: #D32F2F; /* Đỏ cảnh báo */
+#deleteNoteBtn:hover {
+  color: #D32F2F; /* Đỏ cảnh báo */
 }
 .save-btn { color: var(--editor-active-color); }
 .color-picker-container { position: relative; }
@@ -223,6 +241,7 @@ body {
 .color-palette-popup.open { display: grid; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
 .color-option.active { border: 2px solid var(--editor-active-color); }
+
 /* Khung ghi chú kiểu Keep */
 #editorBody {
   width: 100%;
@@ -237,6 +256,7 @@ body {
   background-color: var(--note-bg-default);
   transition: background-color 0.3s;
 }
+
 /* Nội dung cuộn độc lập */
 .editor-body-content {
   flex: 1;
@@ -245,14 +265,30 @@ body {
   display: flex;
   flex-direction: column;
 }
-/* Tùy chỉnh thanh cuộn cho đẹp */
-.editor-body-content::-webkit-scrollbar {
-  width: 6px;
+
+/* Tùy chỉnh thanh cuộn toàn cục cho mượt và hợp Theme Sáng/Tối */
+::-webkit-scrollbar {
+  width: 8px; /* Tăng lên 8px một chút để dễ cầm nắm hơn trên Desktop */
+  height: 8px; /* Cho thanh cuộn ngang nếu có */
 }
-.editor-body-content::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.1);
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Nền track trong suốt để lộ màu nền (surface-bg hoặc card-bg) */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
   border-radius: 10px;
+  border: 2px solid transparent; /* Tạo viền giả để thanh cuộn trông mỏng và bo tròn đẹp hơn */
+  background-clip: padding-box;
 }
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
 /* Fallback padding nếu cấu trúc HTML chưa bọc .editor-body-content */
 .editor-body {
   padding: 20px;
@@ -265,18 +301,21 @@ body {
 .tag-input { width: 100px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
 .editor-textarea { width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
   resize: none; margin-top: 8px; }
+
 /* Responsive Sidebar Desktop */
 @media (min-width: 768px) {
   .sidebar { width: 340px; flex-shrink: 0; }
   .calendar-sidebar .calendar-container { border: none; box-shadow: none; padding: 0 16px; background: transparent; }
   .cal-day { padding: 8px 0; }
 }
+
 /* Fix Cuộn Readonly */
 .readonly-mode .editor-title-input { pointer-events: none; }
 .readonly-mode .editor-textarea { cursor: default; }
 .editor-tag-item { display: inline-flex; align-items: center; gap: 4px; }
 .remove-tag-btn { cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 50%; padding: 2px; }
 .remove-tag-btn:hover { background: rgba(255,0,0,0.2); color: #D32F2F; }
+
 /* Đảm bảo chữ luôn lấy đúng màu của Theme (Sáng/Tối) */
 .note-card, #editorBody {
   color: var(--text-main) !important;
@@ -287,6 +326,7 @@ body {
 .note-body, .editor-textarea {
   color: var(--text-light) !important;
 }
+
 /* Đảm bảo nền Editor đồng bộ chính xác biến CSS */
 #editorBody {
   background-color: var(--note-bg-default);
