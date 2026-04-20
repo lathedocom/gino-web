@@ -266,7 +266,17 @@ body {
   flex-direction: column;
 }
 
-/* Tùy chỉnh thanh cuộn toàn cục cho mượt và hợp Theme Sáng/Tối */
+/* --------------------------------------------------- */
+/* TÙY CHỈNH THANH CUỘN TOÀN CỤC CHO MƯỢT VÀ HỢP THEME */
+/* --------------------------------------------------- */
+
+/* Hỗ trợ chuẩn CSS cho Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+/* Chuẩn Webkit cho Chrome, Edge, Safari, Cốc Cốc */
 ::-webkit-scrollbar {
   width: 8px; /* Tăng lên 8px một chút để dễ cầm nắm hơn trên Desktop */
   height: 8px; /* Cho thanh cuộn ngang nếu có */
@@ -288,6 +298,8 @@ body {
   border: 2px solid transparent;
   background-clip: padding-box;
 }
+
+/* --------------------------------------------------- */
 
 /* Fallback padding nếu cấu trúc HTML chưa bọc .editor-body-content */
 .editor-body {
