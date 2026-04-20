@@ -9,14 +9,12 @@ window.currentEditingTags = []; // Mảng tạm lưu tags khi đang chỉnh sử
 window.lastSyncTime = parseInt(localStorage.getItem('gino_last_sync_time') || '0');
 window.pendingUploadImages = [];
 window.currentNoteColorHex = '#FFFFFF'; // Thêm biến lưu mã Hex gốc
-
 let isDOMReady = false;
 let gapiInited = false;
 let gisInited = false;
 let currentCalendarDate = new Date();
 let selectedFilterDate = null;
 let selectedFilterTag = null;
-
 // [TỐI ƯU 4]: Lưu cache toàn bộ dữ liệu vào RAM sau lần quét DB đầu tiên
 // Các hàm Calendar/Tags sẽ chỉ filter trên RAM, không gọi xuống Dexie nữa.
 window.globalNotesArray = [];
@@ -67,10 +65,8 @@ window.hexToIndex = function(hexStr) {
 // Hàm chuyển đổi mã Hex tĩnh từ Android sang Biến CSS động
 window.getThemeAwareColor = function(colorValue) {
     if (!colorValue) return 'var(--note-bg-default)';
-
     // Chuẩn hóa về Hex viết hoa để so sánh
     const hex = colorValue.toString().toUpperCase();
-
     const colorMap = {
         '#FFFFFF': 'var(--note-bg-default)',
         '#1E1E1E': 'var(--note-bg-default)',
@@ -85,7 +81,6 @@ window.getThemeAwareColor = function(colorValue) {
         '#E1BEE7': 'var(--note-bg-purple)',
         '#2D2033': 'var(--note-bg-purple)'
     };
-
     return colorMap[hex] || colorValue; // Nếu là var(--) thì giữ nguyên
 };
 
@@ -106,9 +101,9 @@ async function getImageUrlSafe(fileName) {
 // CSS Fix
 const styleFix = document.createElement('style');
 styleFix.innerHTML = `
-    .editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
-    .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
-    .note-editor-overlay { overflow: hidden !important; }
+.editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
+.editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
+.note-editor-overlay { overflow: hidden !important; }
 `;
 document.head.appendChild(styleFix);
 
@@ -119,11 +114,9 @@ document.head.appendChild(styleFix);
 window.previewImageInApp = function(imageUrl) {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; align-items: center; justify-content: center; cursor: zoom-out;';
-
     const img = document.createElement('img');
     img.src = imageUrl;
     img.style.cssText = 'max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);';
-
     overlay.appendChild(img);
     overlay.addEventListener('click', () => {
         document.body.removeChild(overlay);
@@ -155,19 +148,16 @@ function renderCalendarView() {
     const grid = document.querySelector('.calendar-grid');
     const monthYearText = document.getElementById('calendarMonthYear');
     if (!grid) return;
-
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
     monthYearText.innerText = `Tháng ${month + 1}, ${year}`;
-
     const dayNames = Array.from(grid.querySelectorAll('.cal-day-name'));
     grid.innerHTML = '';
     dayNames.forEach(name => grid.appendChild(name));
-
     const firstDayIndex = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     let startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-
+    
     // Sử dụng globalNotesArray thay vì query Dexie
     const daysWithNotes = new Set();
     window.globalNotesArray.forEach(note => {
@@ -177,17 +167,15 @@ function renderCalendarView() {
             daysWithNotes.add(noteDate.getDate());
         }
     });
-
+    
     const today = new Date();
     for (let i = 0; i < startOffset; i++) {
         grid.appendChild(document.createElement('div'));
     }
-
     for (let day = 1; day <= daysInMonth; day++) {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'cal-day';
         dayDiv.innerText = day;
-
         if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
             dayDiv.classList.add('today');
         }
@@ -200,7 +188,6 @@ function renderCalendarView() {
             dot.className = 'note-dot';
             dayDiv.appendChild(dot);
         }
-
         dayDiv.addEventListener('click', () => {
             selectedFilterDate = new Date(year, month, day);
             selectedFilterTag = null;
@@ -220,17 +207,14 @@ function renderTagsSidebar() {
             if (tag) tagCountMap[tag] = (tagCountMap[tag] || 0) + 1;
         });
     });
-
     const tagsContainer = document.getElementById('allTagsContainer');
     if(!tagsContainer) return;
     tagsContainer.innerHTML = '';
-
     let savedOrder = [];
     try {
         const orderStr = localStorage.getItem('gino_tag_order');
         if (orderStr) savedOrder = JSON.parse(orderStr);
     } catch(e) {}
-
     const sortedTags = Object.keys(tagCountMap).sort((a, b) => {
         const indexA = savedOrder.indexOf(a);
         const indexB = savedOrder.indexOf(b);
@@ -239,9 +223,7 @@ function renderTagsSidebar() {
         else if (indexB === -1) return -1;
         return indexA - indexB;
     });
-
     localStorage.setItem('gino_tag_order', JSON.stringify(sortedTags));
-
     sortedTags.forEach(tagText => {
         const tagSpan = document.createElement('span');
         tagSpan.className = 'tag';
@@ -285,7 +267,6 @@ function extractImageNamesFromNote(note) {
     return imageNames;
 }
 
-
 // =====================================================================
 // PHẦN 1: KHỞI TẠO GIAO DIỆN (UI) VÀ EDITOR
 // =====================================================================
@@ -299,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const views = document.querySelectorAll('.view-section');
 
     menuBtn.addEventListener('click', () => sidebar.classList.toggle('mobile-open'));
+    
     navItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -335,7 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const span = document.createElement('span');
             span.className = 'tag editor-tag-item';
             span.innerHTML = `${tag} <i class="material-icons remove-tag-btn" style="font-size: 14px; display: ${editModeToolbar.style.display === 'flex' ? 'flex' : 'none'};">close</i>`;
-
             // Sự kiện xóa tag
             span.querySelector('.remove-tag-btn').addEventListener('click', () => {
                 window.currentEditingTags.splice(index, 1);
@@ -389,9 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
         colorPalettePopup.classList.remove('open');
         document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-option.default').classList.add('active');
+        
         window.currentEditingImages = [];
         window.currentRawNoteData = null; // Lưu bản gốc để không mất FSRS data
-
         const timeDisplay = document.getElementById('editNoteTime');
 
         if (noteData) {
@@ -399,18 +380,21 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentRawNoteData = noteData; // Bảo lưu syncHistories & lastReviewAt
             editTitle.value = noteData.title || noteData.memoTitle || '';
             editBody.value = noteData.content || noteData.memoContent || noteData.text || '';
-
+            
             // Hiển thị thời gian
             const dateObj = new Date(noteData.updatedAt || noteData.createdAt || Date.now());
             if (timeDisplay) timeDisplay.innerText = "Cập nhật: " + dateObj.toLocaleString('vi-VN');
 
-            // [SỬA LẠI]: Đọc colorIndex thay vì color/bgColor
-            let savedIndex = (noteData.colorIndex !== undefined) ? noteData.colorIndex : 0;
+            // [TỐI ƯU]: Đọc colorIndex, nếu ghi chú cũ không có thì dịch ngược từ color cũ
+            let savedIndex = noteData.colorIndex !== undefined 
+                ? noteData.colorIndex 
+                : window.hexToIndex(noteData.color || noteData.bgColor || '#FFFFFF');
+            
             window.currentNoteColorHex = window.indexToHex(savedIndex);
-
+            
             const themeColor = window.getThemeAwareColor(window.currentNoteColorHex);
             editorBody.style.backgroundColor = themeColor;
-
+            
             // Cập nhật trạng thái active cho bảng chọn màu
             document.querySelectorAll('.color-option').forEach(opt => {
                 opt.classList.remove('active');
@@ -434,7 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             }
-
             renderEditorImages();
             setEditorMode(false);
         } else {
@@ -463,13 +446,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         imageArea.style.display = 'flex';
+        
         window.currentEditingImages.forEach((imgObj, index) => {
             const wrapper = document.createElement('div');
             wrapper.style.cssText = 'position: relative; width: 80px; height: 80px; border-radius: 4px; overflow: hidden; border: 1px solid #ddd;';
+            
             const img = document.createElement('img');
             img.src = imgObj.url;
             img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-
+            
             // Thêm sự kiện tải/xem ảnh khi click trong Editor
             img.style.cursor = 'zoom-in'; // Sửa trỏ chuột
             img.title = "Nhấp để xem phóng to";
@@ -477,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation(); // Ngăn sự kiện lan truyền
                 window.previewImageInApp(img.src);
             });
-
+            
             const removeBtn = document.createElement('button');
             removeBtn.className = 'image-remove-btn';
             removeBtn.innerHTML = '<i class="material-icons" style="font-size: 16px;">close</i>';
@@ -487,16 +472,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.currentEditingImages.splice(index, 1);
                 renderEditorImages();
             });
+            
             wrapper.appendChild(img);
             wrapper.appendChild(removeBtn);
             imageArea.appendChild(wrapper);
         });
+
         const isEditing = editModeToolbar.style.display === 'flex';
         document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = isEditing ? 'flex' : 'none');
     }
 
     document.getElementById('fabBtn').addEventListener('click', () => { window.openNoteInEditor(null); editTitle.focus(); });
     editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
+    
     document.getElementById('closeEditorBtn').addEventListener('click', () => {
         noteEditor.classList.remove('active');
         colorPalettePopup.classList.remove('open');
@@ -505,11 +493,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CHỌN ẢNH VÀ TẠO UUID CHO WEB ---
     const insertImageBtn = document.getElementById('insertImageBtn');
     const hiddenImageInput = document.getElementById('hiddenImageInput');
+    
     insertImageBtn.addEventListener('click', () => hiddenImageInput.click());
     hiddenImageInput.addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (!file || !file.type.startsWith('image/')) return;
-
+        
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
@@ -518,49 +507,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 const MAX_WIDTH = 1200;
                 let width = img.width;
                 let height = img.height;
-
                 if (width > MAX_WIDTH) {
                     height *= MAX_WIDTH / width;
                     width = MAX_WIDTH;
                 }
-
                 const canvas = document.createElement('canvas');
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-
+                
                 // Nén ảnh sang định dạng JPEG, chất lượng 0.8
                 canvas.toBlob(async (blob) => {
                     const uniqueFileName = `${generateUUID()}.jpg`;
                     const blobUrl = URL.createObjectURL(blob);
-
+                    
                     await db.images.put({
                         fileName: uniqueFileName,
                         blob: blob,
                         syncStatus: 'pending'
                     });
-
+                    
                     window.currentEditingImages.push({
                         fileName: uniqueFileName,
                         url: blobUrl,
                         blob: blob,
                         isNew: true
                     });
-
+                    
                     // Tự động chèn thẻ HTML chứa đường dẫn ảnh vào nội dung chữ để Android Editor đọc được
                     const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
                     const imagePathForAndroid = `${androidPrefix}${uniqueFileName}`;
-
+                    
                     const startPos = editBody.selectionStart;
                     const endPos = editBody.selectionEnd;
-
+                    
                     // Lưu ý: Nếu app Android của bạn dùng Markdown (![img](path)) hoặc đường dẫn trơn,
                     // bạn hãy thay đổi chuỗi <img src="..."> bên dưới cho phù hợp với app.
                     const imageTag = `\n<img src="${imagePathForAndroid}" alt="image">\n`;
-
                     editBody.value = editBody.value.substring(0, startPos) + imageTag + editBody.value.substring(endPos);
-
+                    
                     renderEditorImages();
                 }, 'image/jpeg', 0.8);
             };
@@ -584,10 +570,9 @@ document.addEventListener('DOMContentLoaded', () => {
         option.addEventListener('click', function() {
             // Lưu mã Hex gốc để dành cho lúc Save
             window.currentNoteColorHex = this.getAttribute('data-color');
-
             // Cập nhật giao diện Web bằng biến CSS thông qua hàm Mapper
             editorBody.style.backgroundColor = window.getThemeAwareColor(window.currentNoteColorHex);
-
+            
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
         });
@@ -597,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveNoteBtn').addEventListener('click', async () => {
         const title = editTitle.value.trim();
         const content = editBody.value.trim();
-
+        
         // TỰ ĐỘNG THÊM TAG NẾU NGƯỜI DÙNG QUÊN BẤM ENTER
         if (newTagInput && newTagInput.value.trim() !== '') {
             const val = newTagInput.value.trim();
@@ -607,9 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
             newTagInput.value = '';
             window.renderEditorTagsUI();
         }
-
+        
         const tags = window.currentEditingTags; // Lấy tags từ mảng tạm thay vì DOM
-
+        
         // [SỬA LỖI ẢNH ANDROID]: Thêm đường dẫn bộ nhớ trong của app GinoNote
         const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
         const finalFileNames = window.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
@@ -621,19 +606,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // [SỬA LẠI]: Chuyển Hex về Index số nguyên cho Android
         noteData.colorIndex = window.hexToIndex(window.currentNoteColorHex);
-
+        
         noteData.tags = JSON.stringify(tags);
         noteData.imagePaths = JSON.stringify(finalFileNames);
         noteData.updatedAt = new Date().getTime();
         noteData.isDeleted = false;
         noteData.syncStatus = 'pending';
-
+        
         if (!window.currentEditingNoteId) {
             noteData.createdAt = noteData.updatedAt;
         }
 
         await db.notes.put(noteData);
-
+        
         window.currentEditingImages.forEach(imgObj => {
             if (imgObj.isNew) {
                 if (!window.pendingUploadImages) window.pendingUploadImages = [];
@@ -645,13 +630,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Cập nhật lại UI lập tức
         setEditorMode(false);
         await window.loadNotesFromDBAndRender();
-
+        
         // Đẩy lên mây
         const saveBtn = document.getElementById('saveNoteBtn');
         saveBtn.innerHTML = '<i class="material-icons">sync</i>';
         const isSuccess = await window.saveNotesToDrive();
         saveBtn.innerHTML = '<i class="material-icons">save</i>';
-
         if (isSuccess) {
             noteData.syncStatus = 'synced';
             await db.notes.put(noteData);
@@ -688,13 +672,14 @@ window.gisLoaded = function() {
 // Cập nhật hàm checkAndFetchDriveData và handleAuthClick
 function checkAndFetchDriveData() {
     if (!isDOMReady) return;
+    
     const btnAuthGoogle = document.getElementById('btnAuthGoogle');
     const syncText = document.getElementById('syncText');
-
+    
     // Gỡ sự kiện cũ và gắn mới để tránh lặp
     btnAuthGoogle.removeEventListener('click', handleAuthClick);
     btnAuthGoogle.addEventListener('click', handleAuthClick);
-
+    
     // Nếu Google JS chưa tải xong, tạm dừng auto-check
     if (!gapiInited || !gisInited) return;
 
@@ -730,6 +715,7 @@ function handleAuthClick(e) {
         localStorage.setItem('gino_gdrive_expires', expiresAt.toString());
         document.getElementById('syncText').innerText = "Đang đồng bộ...";
         document.getElementById('btnAuthGoogle').classList.add('active-auth');
+        
         await fetchNotesFromHiddenDrive();
         await window.saveNotesToDrive();
     };
@@ -773,7 +759,6 @@ async function fetchNotesFromHiddenDrive() {
     try {
         let allFiles = [];
         let pageToken = null;
-
         do {
             let response = await gapi.client.drive.files.list({
                 spaces: 'appDataFolder',
@@ -826,6 +811,7 @@ async function fetchNotesFromHiddenDrive() {
         for (let i = 0; i < imagesToDownload.length; i++) {
             const f = imagesToDownload[i];
             const existingImage = await db.images.get(f.name);
+            
             if (!existingImage) {
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`, {
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -859,22 +845,22 @@ window.saveNotesToDrive = async function() {
     const syncText = document.getElementById('syncText');
     const tokenObj = gapi.client.getToken();
     if (!tokenObj) return false;
-
     const token = tokenObj.access_token;
+    
     try {
         const syncStartTime = Date.now();
         const pendingNotes = await db.notes.where('syncStatus').equals('pending').toArray();
-
+        
         if (pendingNotes.length > 0) {
             syncText.innerText = "Đang đẩy JSON...";
             const deltaFileName = `ginonote_delta_${syncStartTime}.json`;
             const deltaBlob = new Blob([JSON.stringify(pendingNotes)], { type: 'application/json' });
+            
             const metadata = { name: deltaFileName, parents: ['appDataFolder'] };
-
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             form.append('file', deltaBlob, deltaFileName);
-
+            
             const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
             const response = await fetch(url, {
                 method: 'POST',
@@ -882,7 +868,7 @@ window.saveNotesToDrive = async function() {
                 body: form
             });
             if (!response.ok) throw new Error("Lỗi tải lên Delta");
-
+            
             const ids = pendingNotes.map(n => n.id);
             await db.notes.where('id').anyOf(ids).modify({ syncStatus: 'synced' });
         }
@@ -891,11 +877,12 @@ window.saveNotesToDrive = async function() {
             syncText.innerText = "Đang tải ảnh lên...";
             for (let i = 0; i < window.pendingUploadImages.length; i++) {
                 let imgObj = window.pendingUploadImages[i];
+                
                 const imgMetadata = { name: imgObj.fileName, mimeType: 'image/jpeg', parents: ['appDataFolder'] };
                 const imgForm = new FormData();
                 imgForm.append('metadata', new Blob([JSON.stringify(imgMetadata)], { type: 'application/json' }));
                 imgForm.append('file', imgObj.blob, imgObj.fileName);
-
+                
                 await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
@@ -904,7 +891,7 @@ window.saveNotesToDrive = async function() {
             }
             window.pendingUploadImages = [];
         }
-
+        
         window.lastSyncTime = syncStartTime;
         localStorage.setItem('gino_last_sync_time', syncStartTime.toString());
         syncText.innerText = "Đã đồng bộ";
@@ -918,13 +905,11 @@ window.saveNotesToDrive = async function() {
 // =====================================================================
 // PHẦN 3: VẼ GIAO DIỆN TRANG CHỦ (ĐÃ TỐI ƯU MEMORY & QUERY)
 // =====================================================================
-
 window.loadNotesFromDBAndRender = async function() {
     try {
         const allNotes = await db.notes.filter(note => !note.isDeleted && note.is_deleted !== 1).toArray();
         allNotes.sort((a, b) => b.updatedAt - a.updatedAt);
         window.globalNotesArray = allNotes;
-
         window.renderSyncedNotesToWeb();
     } catch (err) {
         console.error("Lỗi Dexie:", err);
@@ -935,7 +920,6 @@ window.renderSyncedNotesToWeb = async function() {
     const notesGrid = document.getElementById('notesGrid');
     if (!notesGrid) return;
     notesGrid.innerHTML = '';
-
     let filteredNotes = window.globalNotesArray.filter(note => {
         if (selectedFilterTag) {
             const tagsArray = extractTagsFromNote(note);
@@ -955,9 +939,12 @@ window.renderSyncedNotesToWeb = async function() {
     for (const note of filteredNotes) {
         const card = document.createElement('div');
         card.className = 'note-card';
-        
-        // [SỬA LẠI]: Lấy màu từ colorIndex
-        let cardHex = window.indexToHex(note.colorIndex !== undefined ? note.colorIndex : 0);
+
+        // [TỐI ƯU]: Fallback tương tự cho hiển thị Card ngoài màn hình chính
+        let displayIdx = note.colorIndex !== undefined 
+            ? note.colorIndex 
+            : window.hexToIndex(note.color || note.bgColor || '#FFFFFF');
+        let cardHex = window.indexToHex(displayIdx);
         card.style.backgroundColor = window.getThemeAwareColor(cardHex);
 
         let tagsHtml = '';
@@ -970,7 +957,7 @@ window.renderSyncedNotesToWeb = async function() {
         let imagesPreviewHtml = '';
         const imageNames = extractImageNamesFromNote(note);
         let matchCount = 0;
-
+        
         // [TỐI ƯU 1]: Quét trực tiếp dựa trên JSON Array
         if (imageNames.length > 0) {
             imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
@@ -995,10 +982,10 @@ window.renderSyncedNotesToWeb = async function() {
         });
 
         card.innerHTML = `
-        ${matchCount > 0 ? imagesPreviewHtml : ''}
-        <div class="note-title">${note.title || note.memoTitle || 'Không có tiêu đề'}</div>
-        <div class="note-body">${displayContent}</div>
-        <div class="note-tags">${tagsHtml}</div>
+            ${matchCount > 0 ? imagesPreviewHtml : ''}
+            <div class="note-title">${note.title || note.memoTitle || 'Không có tiêu đề'}</div>
+            <div class="note-body">${displayContent}</div>
+            <div class="note-tags">${tagsHtml}</div>
         `;
 
         // C. Gắn sự kiện click tải ảnh cho các ảnh Preview
@@ -1016,7 +1003,6 @@ window.renderSyncedNotesToWeb = async function() {
         card.addEventListener('click', () => { window.openNoteInEditor(note); });
         notesGrid.appendChild(card);
     }
-
     renderCalendarView();
     renderTagsSidebar();
 }
