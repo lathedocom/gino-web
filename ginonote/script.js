@@ -9,14 +9,14 @@ const translations = {
         "box1_title": "Không gian Ghi chú Tối giản",
         "box1_desc": "Trải nghiệm viết hoàn toàn không phân tâm với giao diện tối giản.",
         "box1_list_intro": "Thao tác nhanh:",
-        "icon_lightbulb": "Tạo ô trống điền từ: Chọn từ khóa quan trọng.",
+        "icon_lightbulb": "Tạo ô trống điền từ: Chọn từ khóa quan trọng và nhấn biểu tượng Bóng đèn.",
         "icon_play": "Bắt đầu ôn tập: Nhấn biểu tượng Play để vào chế độ Active Recall.",
 
         // Khối 2: Hệ thống ôn tập chủ động
         "recall_title": "Hệ thống ôn tập chủ động",
         "recall_desc": "Đột phá thói quen đọc lại thụ động nhờ sự kết hợp giữa Active Recall và Spaced Repetition.",
         "recall_help": "Gợi ý (Hint): Nhận manh mối nhỏ khi \"bí\" từ, duy trì hiệu quả tự hồi tưởng.",
-        "recall_check": "Kiểm tra đáp án: Đối chiếu câu trả lời với bản gốc và nhận kết quả ngay sau khi hoàn thành.",
+        "recall_check": "Kiểm tra đáp án: Đối chiếu câu trả lời với bản gốc và nhận kết quả ngay sau hoàn thành.",
         "recall_detail": "Chấm điểm trực quan: Hiển thị điểm số %, phân biệt đúng/sai bằng màu sắc trực quan và tính năng tự động bỏ qua lỗi đánh máy.",
         "recall_diff": "Thuật toán thông minh: Tự động lên lịch ôn tập cho lần tới dựa trên mức độ đánh giá (Again - Hard - Good - Easy) của chính bạn.",
 
@@ -61,7 +61,7 @@ const translations = {
         "box1_title": "Minimalist Note Space",
         "box1_desc": "Experience completely distraction-free writing with a minimalist interface.",
         "box1_list_intro": "Quick actions:",
-        "icon_lightbulb": "Create fill-in-the-blanks: Select important keywords.",
+        "icon_lightbulb": "Create fill-in-the-blanks: Select important keywords and tap the Lightbulb icon.",
         "icon_play": "Start reviewing: Tap the Play icon to enter Active Recall mode.",
 
         // Block 2: Active Review System
