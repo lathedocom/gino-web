@@ -146,7 +146,6 @@ dayNames.forEach(name => grid.appendChild(name));
 const firstDayIndex = new Date(year, month, 1).getDay();
 const daysInMonth = new Date(year, month + 1, 0).getDate();
 let startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-
 // Sử dụng globalNotesArray thay vì query Dexie
 const daysWithNotes = new Set();
 window.globalNotesArray.forEach(note => {
@@ -156,7 +155,6 @@ if (noteDate.getFullYear() === year && noteDate.getMonth() === month) {
 daysWithNotes.add(noteDate.getDate());
 }
 });
-
 const today = new Date();
 for (let i = 0; i < startOffset; i++) {
 grid.appendChild(document.createElement('div'));
@@ -263,7 +261,6 @@ const menuBtn = document.getElementById('menuBtn');
 const navItems = document.querySelectorAll('.nav-item');
 const views = document.querySelectorAll('.view-section');
 menuBtn.addEventListener('click', () => sidebar.classList.toggle('mobile-open'));
-
 navItems.forEach(item => {
 item.addEventListener('click', function(e) {
 e.preventDefault();
@@ -341,7 +338,6 @@ document.querySelectorAll('.image-remove-btn, .remove-tag-btn').forEach(b => b.s
 // Hiển thị đúng thời gian
 window.openNoteInEditor = async function(noteData) {
 const deleteBtn = document.getElementById('deleteNoteBtn'); // Thêm nút delete
-
 editTitle.value = '';
 editBody.value = '';
 if (newTagInput) newTagInput.value = '';
@@ -350,22 +346,18 @@ window.currentNoteColorHex = '#FFFFFF'; // Reset màu Hex khi mở editor mới
 colorPalettePopup.classList.remove('open');
 document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
 document.querySelector('.color-option.default').classList.add('active');
-
 window.currentEditingImages = [];
 window.currentRawNoteData = null; // Lưu bản gốc để không mất FSRS data
 const timeDisplay = document.getElementById('editNoteTime');
 if (noteData) {
 if (deleteBtn) deleteBtn.style.display = 'flex'; // Hiện nút xóa khi mở Note cũ
-
 window.currentEditingNoteId = noteData.id;
 window.currentRawNoteData = noteData; // Bảo lưu syncHistories & lastReviewAt
 editTitle.value = noteData.title || noteData.memoTitle || '';
-
 // [CẬP NHẬT 1]: Tự động dọn dẹp các thẻ link ảnh rác (<img src="...">) từ bản lưu cũ
 let rawContent = noteData.content || noteData.memoContent || noteData.text || '';
 rawContent = rawContent.replace(/<img[^>]*src="[^"]*"[^>]*>/gi, '');
 editBody.value = rawContent.trim();
-
 // Hiển thị thời gian
 const dateObj = new Date(noteData.updatedAt || noteData.createdAt || Date.now());
 if (timeDisplay) timeDisplay.innerText = "Cập nhật: " + dateObj.toLocaleString('vi-VN');
@@ -373,12 +365,9 @@ if (timeDisplay) timeDisplay.innerText = "Cập nhật: " + dateObj.toLocaleStri
 let savedIndex = noteData.colorIndex !== undefined
 ? noteData.colorIndex
 : window.hexToIndex(noteData.color || noteData.bgColor || '#FFFFFF');
-
 window.currentNoteColorHex = window.indexToHex(savedIndex);
-
 const themeColor = window.getThemeAwareColor(window.currentNoteColorHex);
 editorBody.style.backgroundColor = themeColor;
-
 // Cập nhật trạng thái active cho bảng chọn màu
 document.querySelectorAll('.color-option').forEach(opt => {
 opt.classList.remove('active');
@@ -404,7 +393,6 @@ renderEditorImages();
 setEditorMode(false);
 } else {
 if (deleteBtn) deleteBtn.style.display = 'none'; // Ẩn nút xóa khi tạo Note mới
-
 window.currentEditingNoteId = null;
 window.currentEditingTags = [];
 if (timeDisplay) timeDisplay.innerText = "Đang tạo mới..."; // Cập nhật thời gian khi tạo mới
@@ -429,15 +417,12 @@ imageArea.style.display = 'none';
 return;
 }
 imageArea.style.display = 'flex';
-
 window.currentEditingImages.forEach((imgObj, index) => {
 const wrapper = document.createElement('div');
 wrapper.style.cssText = 'position: relative; width: 80px; height: 80px; border-radius: 4px; overflow: hidden; border: 1px solid #ddd;';
-
 const img = document.createElement('img');
 img.src = imgObj.url;
 img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-
 // Thêm sự kiện tải/xem ảnh khi click trong Editor
 img.style.cursor = 'zoom-in'; // Sửa trỏ chuột
 img.title = "Nhấp để xem phóng to";
@@ -445,7 +430,6 @@ img.addEventListener('click', (e) => {
 e.stopPropagation(); // Ngăn sự kiện lan truyền
 window.previewImageInApp(img.src);
 });
-
 const removeBtn = document.createElement('button');
 removeBtn.className = 'image-remove-btn';
 removeBtn.innerHTML = '<i class="material-icons" style="font-size: 16px;">close</i>';
@@ -455,7 +439,6 @@ e.stopPropagation();
 window.currentEditingImages.splice(index, 1);
 renderEditorImages();
 });
-
 wrapper.appendChild(img);
 wrapper.appendChild(removeBtn);
 imageArea.appendChild(wrapper);
@@ -465,49 +448,39 @@ document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = is
 }
 document.getElementById('fabBtn').addEventListener('click', () => { window.openNoteInEditor(null); editTitle.focus(); });
 editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
-
 document.getElementById('closeEditorBtn').addEventListener('click', () => {
 noteEditor.classList.remove('active');
 colorPalettePopup.classList.remove('open');
 });
-
 // Tính năng Xóa ghi chú
 document.getElementById('deleteNoteBtn').addEventListener('click', async () => {
 if (!window.currentEditingNoteId) return;
-
 const confirmDelete = confirm("Bạn có chắc chắn muốn xóa ghi chú này không?");
 if (!confirmDelete) return;
-
 // Lấy dữ liệu ghi chú hiện tại từ Dexie
 let noteData = await db.notes.get(window.currentEditingNoteId);
 if (noteData) {
 // Áp dụng Soft-delete theo cấu trúc có sẵn
-noteData.isDeleted = true; 
+noteData.isDeleted = true;
 noteData.syncStatus = 'pending';
 noteData.updatedAt = new Date().getTime();
-
 await db.notes.put(noteData);
-
 // Đóng Editor và cập nhật giao diện
 document.getElementById('noteEditor').classList.remove('active');
 await window.loadNotesFromDBAndRender();
-
 // Tự động đồng bộ lên Google Drive
 const syncText = document.getElementById('syncText');
 if (syncText) syncText.innerText = "Đang đồng bộ xóa...";
 await window.saveNotesToDrive();
 }
 });
-
 // --- CHỌN ẢNH VÀ TẠO UUID CHO WEB ---
 const insertImageBtn = document.getElementById('insertImageBtn');
 const hiddenImageInput = document.getElementById('hiddenImageInput');
-
 insertImageBtn.addEventListener('click', () => hiddenImageInput.click());
 hiddenImageInput.addEventListener('change', async function(e) {
 const file = e.target.files[0];
 if (!file || !file.type.startsWith('image/')) return;
-
 const reader = new FileReader();
 reader.onload = function(event) {
 const img = new Image();
@@ -525,27 +498,22 @@ canvas.width = width;
 canvas.height = height;
 const ctx = canvas.getContext('2d');
 ctx.drawImage(img, 0, 0, width, height);
-
 // Nén ảnh sang định dạng JPEG, chất lượng 0.8
 canvas.toBlob(async (blob) => {
 const uniqueFileName = `${generateUUID()}.jpg`;
 const blobUrl = URL.createObjectURL(blob);
-
 await db.images.put({
 fileName: uniqueFileName,
 blob: blob,
 syncStatus: 'pending'
 });
-
 window.currentEditingImages.push({
 fileName: uniqueFileName,
 url: blobUrl,
 blob: blob,
 isNew: true
 });
-
 // [CẬP NHẬT 2]: Đã vô hiệu hóa việc chèn text tag HTML vào nội dung ghi chú
-
 renderEditorImages();
 }, 'image/jpeg', 0.8);
 };
@@ -568,7 +536,6 @@ option.addEventListener('click', function() {
 window.currentNoteColorHex = this.getAttribute('data-color');
 // Cập nhật giao diện Web bằng biến CSS thông qua hàm Mapper
 editorBody.style.backgroundColor = window.getThemeAwareColor(window.currentNoteColorHex);
-
 document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
 this.classList.add('active');
 });
@@ -577,7 +544,6 @@ this.classList.add('active');
 document.getElementById('saveNoteBtn').addEventListener('click', async () => {
 const title = editTitle.value.trim();
 const content = editBody.value.trim();
-
 // TỰ ĐỘNG THÊM TAG NẾU NGƯỜI DÙNG QUÊN BẤM ENTER
 if (newTagInput && newTagInput.value.trim() !== '') {
 const val = newTagInput.value.trim();
@@ -587,9 +553,7 @@ window.currentEditingTags.push(val);
 newTagInput.value = '';
 window.renderEditorTagsUI();
 }
-
 const tags = window.currentEditingTags; // Lấy tags từ mảng tạm thay vì DOM
-
 // [SỬA LỖI ẢNH ANDROID]: Thêm đường dẫn bộ nhớ trong của app GinoNote
 const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
 const finalFileNames = window.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
@@ -597,21 +561,17 @@ let noteData = window.currentRawNoteData ? { ...window.currentRawNoteData } : {}
 noteData.id = window.currentEditingNoteId || new Date().getTime();
 noteData.title = title;
 noteData.content = content;
-
 // [SỬA LẠI]: Chuyển Hex về Index số nguyên cho Android
 noteData.colorIndex = window.hexToIndex(window.currentNoteColorHex);
-
 noteData.tags = JSON.stringify(tags);
 noteData.imagePaths = JSON.stringify(finalFileNames);
 noteData.updatedAt = new Date().getTime();
 noteData.isDeleted = false;
 noteData.syncStatus = 'pending';
-
 if (!window.currentEditingNoteId) {
 noteData.createdAt = noteData.updatedAt;
 }
 await db.notes.put(noteData);
-
 window.currentEditingImages.forEach(imgObj => {
 if (imgObj.isNew) {
 if (!window.pendingUploadImages) window.pendingUploadImages = [];
@@ -622,7 +582,6 @@ imgObj.isNew = false;
 // Cập nhật lại UI lập tức
 setEditorMode(false);
 await window.loadNotesFromDBAndRender();
-
 // Đẩy lên mây
 const saveBtn = document.getElementById('saveNoteBtn');
 saveBtn.innerHTML = '<i class="material-icons">sync</i>';
@@ -659,14 +618,11 @@ checkAndFetchDriveData();
 // Cập nhật hàm checkAndFetchDriveData và handleAuthClick
 function checkAndFetchDriveData() {
 if (!isDOMReady) return;
-
 const btnAuthGoogle = document.getElementById('btnAuthGoogle');
 const syncText = document.getElementById('syncText');
-
 // Gỡ sự kiện cũ và gắn mới để tránh lặp
 btnAuthGoogle.removeEventListener('click', handleAuthClick);
 btnAuthGoogle.addEventListener('click', handleAuthClick);
-
 // Nếu Google JS chưa tải xong, tạm dừng auto-check
 if (!gapiInited || !gisInited) return;
 const savedToken = localStorage.getItem('gino_gdrive_token');
@@ -699,7 +655,6 @@ localStorage.setItem('gino_gdrive_token', resp.access_token);
 localStorage.setItem('gino_gdrive_expires', expiresAt.toString());
 document.getElementById('syncText').innerText = "Đang đồng bộ...";
 document.getElementById('btnAuthGoogle').classList.add('active-auth');
-
 await fetchNotesFromHiddenDrive();
 await window.saveNotesToDrive();
 };
@@ -736,102 +691,119 @@ await db.notes.put(cloudNote);
 }
 }
 }
-async function fetchNotesFromHiddenDrive() {
-try {
-let allFiles = [];
-let pageToken = null;
-do {
-let response = await gapi.client.drive.files.list({
-spaces: 'appDataFolder',
-fields: 'nextPageToken, files(id, name, mimeType)',
-pageToken: pageToken,
-pageSize: 1000
-});
-if (response.result.files) {
-allFiles = allFiles.concat(response.result.files);
-}
-pageToken = response.result.nextPageToken;
-} while (pageToken);
-if (allFiles.length === 0) {
-document.getElementById('syncText').innerText = "Sẵn sàng lưu";
-return;
-}
-let deltaFilesToDownload = [];
-let imagesToDownload = [];
-allFiles.forEach(f => {
-if (!f.name) return;
-if (f.name.startsWith('ginonote_delta_') && f.name.endsWith('.json')) {
-let tsStr = f.name.replace('ginonote_delta_', '').replace('.json', '');
-let fileTs = parseInt(tsStr);
-if (!isNaN(fileTs) && fileTs > window.lastSyncTime) {
-deltaFilesToDownload.push({ file: f, ts: fileTs });
-}
-} else if (f.name.endsWith('.jpg') || f.name.endsWith('.png') || f.name.endsWith('.webp') || f.mimeType === 'image/jpeg') {
-imagesToDownload.push(f);
-}
-});
-deltaFilesToDownload.sort((a, b) => a.ts - b.ts);
-const token = gapi.client.getToken().access_token;
-for (let i = 0; i < deltaFilesToDownload.length; i++) {
-const fileId = deltaFilesToDownload[i].file.id;
-const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-headers: { 'Authorization': 'Bearer ' + token }
-});
-if (res.ok) {
-const deltaNotes = await res.json();
-await mergeCloudToLocal(deltaNotes);
-}
-}
-// Tải ảnh (Chỉ tải những ảnh chưa có trong Dexie để tiết kiệm)
-for (let i = 0; i < imagesToDownload.length; i++) {
-const f = imagesToDownload[i];
-const existingImage = await db.images.get(f.name);
 
-if (!existingImage) {
-const res = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`, {
-headers: { 'Authorization': 'Bearer ' + token }
-});
-if (res.ok) {
-const blob = await res.blob();
-await db.images.put({
-fileName: f.name,
-blob: blob,
-syncStatus: 'synced'
-});
+async function fetchNotesFromHiddenDrive() {
+  try {
+    let allFiles = [];
+    let pageToken = null;
+    do {
+      let response = await gapi.client.drive.files.list({
+        spaces: 'appDataFolder',
+        fields: 'nextPageToken, files(id, name, mimeType)',
+        pageToken: pageToken,
+        pageSize: 1000
+      });
+      if (response.result.files) {
+        allFiles = allFiles.concat(response.result.files);
+      }
+      pageToken = response.result.nextPageToken;
+    } while (pageToken);
+
+    if (allFiles.length === 0) {
+      document.getElementById('syncText').innerText = "Sẵn sàng lưu";
+      return;
+    }
+
+    let deltaFilesToDownload = [];
+    let imagesToDownload = [];
+
+    allFiles.forEach(f => {
+      if (!f.name) return;
+      if (f.name.startsWith('ginonote_delta_') && f.name.endsWith('.json')) {
+        let tsStr = f.name.replace('ginonote_delta_', '').replace('.json', '');
+        let fileTs = parseInt(tsStr);
+        if (!isNaN(fileTs) && fileTs > window.lastSyncTime) {
+          deltaFilesToDownload.push({ file: f, ts: fileTs });
+        }
+      } else if (f.name.endsWith('.jpg') || f.name.endsWith('.png') || f.name.endsWith('.webp') || f.mimeType === 'image/jpeg') {
+        imagesToDownload.push(f);
+      }
+    });
+    deltaFilesToDownload.sort((a, b) => a.ts - b.ts);
+    const token = gapi.client.getToken().access_token;
+
+    // --- TỐI ƯU 1: Tải JSON Deltas Song Song ---
+    if (deltaFilesToDownload.length > 0) {
+      document.getElementById('syncText').innerText = "Đang tải dữ liệu text...";
+      await Promise.all(deltaFilesToDownload.map(async (deltaObj) => {
+        const fileId = deltaObj.file.id;
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          const deltaNotes = await res.json();
+          await mergeCloudToLocal(deltaNotes);
+        }
+      }));
+      window.lastSyncTime = deltaFilesToDownload[deltaFilesToDownload.length - 1].ts;
+      localStorage.setItem('gino_last_sync_time', window.lastSyncTime.toString());
+    }
+
+    // --- TỐI ƯU 2: Quét DB Ảnh siêu tốc độ & Tải Ảnh Song Song ---
+    document.getElementById('syncText').innerText = "Đang kiểm tra ảnh mới...";
+    // Lấy Set tên file ảnh hiện có (nhanh hơn get() từng cái ngàn lần)
+    const existingImageKeys = await db.images.toCollection().primaryKeys();
+    const existingImagesSet = new Set(existingImageKeys);
+    
+    // Lọc ra danh sách ảnh thực sự cần tải
+    const missingImages = imagesToDownload.filter(f => !existingImagesSet.has(f.name));
+
+    if (missingImages.length > 0) {
+      document.getElementById('syncText').innerText = `Đang tải ${missingImages.length} ảnh...`;
+      const BATCH_SIZE = 5; // Tải 5 ảnh một lúc để không nghẽn mạng
+      
+      for (let i = 0; i < missingImages.length; i += BATCH_SIZE) {
+        const batch = missingImages.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map(async (f) => {
+          const res = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (res.ok) {
+            const blob = await res.blob();
+            await db.images.put({
+              fileName: f.name,
+              blob: blob,
+              syncStatus: 'synced'
+            });
+          }
+        }));
+      }
+    }
+
+    document.getElementById('syncText').innerText = "Đã đồng bộ";
+    await window.loadNotesFromDBAndRender();
+  } catch (err) {
+    console.error(err);
+    if (err.status === 401) clearDriveSession();
+  }
 }
-}
-}
-if (deltaFilesToDownload.length > 0) {
-window.lastSyncTime = deltaFilesToDownload[deltaFilesToDownload.length - 1].ts;
-localStorage.setItem('gino_last_sync_time', window.lastSyncTime.toString());
-}
-document.getElementById('syncText').innerText = "Đã đồng bộ";
-await window.loadNotesFromDBAndRender();
-} catch (err) {
-console.error(err);
-if (err.status === 401) clearDriveSession();
-}
-}
+
 window.saveNotesToDrive = async function() {
 const syncText = document.getElementById('syncText');
 const tokenObj = gapi.client.getToken();
 if (!tokenObj) return false;
 const token = tokenObj.access_token;
-
 try {
 const syncStartTime = Date.now();
 const pendingNotes = await db.notes.where('syncStatus').equals('pending').toArray();
-
 if (pendingNotes.length > 0) {
 syncText.innerText = "Đang đẩy JSON...";
 const deltaFileName = `ginonote_delta_${syncStartTime}.json`;
 const deltaBlob = new Blob([JSON.stringify(pendingNotes)], { type: 'application/json' });
-
 const metadata = { name: deltaFileName, parents: ['appDataFolder'] };
 const form = new FormData();
 form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
 form.append('file', deltaBlob, deltaFileName);
-
 const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
 const response = await fetch(url, {
 method: 'POST',
@@ -839,7 +811,6 @@ headers: { 'Authorization': 'Bearer ' + token },
 body: form
 });
 if (!response.ok) throw new Error("Lỗi tải lên Delta");
-
 const ids = pendingNotes.map(n => n.id);
 await db.notes.where('id').anyOf(ids).modify({ syncStatus: 'synced' });
 }
@@ -847,12 +818,10 @@ if (window.pendingUploadImages && window.pendingUploadImages.length > 0) {
 syncText.innerText = "Đang tải ảnh lên...";
 for (let i = 0; i < window.pendingUploadImages.length; i++) {
 let imgObj = window.pendingUploadImages[i];
-
 const imgMetadata = { name: imgObj.fileName, mimeType: 'image/jpeg', parents: ['appDataFolder'] };
 const imgForm = new FormData();
 imgForm.append('metadata', new Blob([JSON.stringify(imgMetadata)], { type: 'application/json' }));
 imgForm.append('file', imgObj.blob, imgObj.fileName);
-
 await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
 method: 'POST',
 headers: { 'Authorization': 'Bearer ' + token },
@@ -861,7 +830,6 @@ body: imgForm
 }
 window.pendingUploadImages = [];
 }
-
 window.lastSyncTime = syncStartTime;
 localStorage.setItem('gino_last_sync_time', syncStartTime.toString());
 syncText.innerText = "Đã đồng bộ";
@@ -884,6 +852,7 @@ window.renderSyncedNotesToWeb();
 console.error("Lỗi Dexie:", err);
 }
 };
+
 window.renderSyncedNotesToWeb = async function() {
 const notesGrid = document.getElementById('notesGrid');
 if (!notesGrid) return;
@@ -918,24 +887,32 @@ if (tagsArray.length > 0) {
 card.setAttribute('data-tags', tagsArray.join(','));
 tagsArray.forEach(tag => { if(tag) tagsHtml += `<span class="tag">${tag}</span>`; });
 }
+
 let imagesPreviewHtml = '';
 const imageNames = extractImageNamesFromNote(note);
 let matchCount = 0;
 
-// [TỐI ƯU 1]: Quét trực tiếp dựa trên JSON Array
+// [TỐI ƯU 1]: Quét trực tiếp dựa trên JSON Array (Đã sửa lỗi N+1 Query)
 if (imageNames.length > 0) {
-imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
-for (let rawFileName of imageNames) {
-if (matchCount >= 4) break;
-let localUrl = await getImageUrlSafe(rawFileName);
-if (localUrl) {
-// C. Thêm data-filename để xử lý download
-imagesPreviewHtml += `<img src="${localUrl}" data-filename="${rawFileName}" class="preview-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
-matchCount++;
+  imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
+  
+  // Chỉ lấy tối đa 4 ảnh đầu tiên để preview
+  const previewNames = imageNames.slice(0, 4);
+  
+  // Lấy URL từ IndexedDB song song thay vì chờ từng cái
+  const urlPromises = previewNames.map(name => getImageUrlSafe(name));
+  const localUrls = await Promise.all(urlPromises);
+  
+  localUrls.forEach((localUrl, idx) => {
+    if (localUrl) {
+      const rawFileName = previewNames[idx];
+      imagesPreviewHtml += `<img src="${localUrl}" data-filename="${rawFileName}" class="preview-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;">`;
+      matchCount++;
+    }
+  });
+  imagesPreviewHtml += '</div>';
 }
-}
-imagesPreviewHtml += '</div>';
-}
+
 let displayContent = note.content || note.memoContent || note.text || '';
 imageNames.forEach(rawFileName => {
 if (displayContent.includes(rawFileName)) {
