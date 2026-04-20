@@ -6,7 +6,7 @@ const translations = {
         "download": "Tải ứng dụng từ Play Store",
 
         // Khối 1: Không gian Ghi chú Tối giản
-        "box1_title": "Không gian Ghi chú Tối giản",
+        "box1_title": "Không gian ghi chú tối giản",
         "box1_desc": "Trải nghiệm viết hoàn toàn không phân tâm với giao diện tối giản.",
         "box1_list_intro": "Thao tác nhanh:",
         "icon_lightbulb": "Tạo ô trống điền từ: Chọn từ khóa quan trọng và nhấn biểu tượng Bóng đèn.",
@@ -28,13 +28,13 @@ const translations = {
         "cal_notes": "Dòng thời gian: Xem chi tiết toàn bộ danh sách bài học và lịch sử ôn tập của từng ngày cụ thể một cách khoa học.",
 
         // Khối 4: Trực Quan Hóa Hành Trình Ghi Nhớ
-        "stats_title": "Trực Quan Hóa Hành Trình Ghi Nhớ",
+        "stats_title": "Trực quan hóa hành trình ghi nhớ",
         "stats_desc": "Nắm bắt thói quen và hiệu suất ôn tập thông qua trung tâm phân tích dữ liệu trực quan.",
         "stats_metrics": "Biểu đồ Thống kê: Đếm tổng lượng ghi chú và lượt tương tác theo Tuần/Tháng/Năm để theo dõi đà tăng trưởng tri thức.",
         "stats_visual": "Phân tích khả năng ghi nhớ: Hiển thị rõ ràng tỷ lệ chất lượng ghi nhớ ghi chú, giúp bạn tự đánh giá chất lượng và mức độ làm chủ kiến thức.",
 
         // Khối 5: Kết Nối & Lưu Trữ An Toàn
-        "sync_title": "Kết Nối & Lưu Trữ An Toàn",
+        "sync_title": "Kết nối & Lưu trữ an toàn",
         "sync_desc": "Bảo vệ tri thức của bạn với giải pháp đồng bộ hóa đám mây và hệ thống xuất tệp tin thông minh.",
         "sync_drive": "Đồng bộ Google Drive: Tự động sao lưu và giữ cho dữ liệu luôn đồng nhất, xuyên suốt giữa ứng dụng di động và nền tảng web.",
         "sync_share": "Chia sẻ file .gino: Đóng gói thông minh toàn bộ nội dung và hình ảnh vào một tệp tin duy nhất, giúp việc gửi và chia sẻ tài liệu nhanh chóng hơn bao giờ hết.",
