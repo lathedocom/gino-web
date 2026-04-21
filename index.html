@@ -123,10 +123,14 @@
 </div>
 </div>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="script.js"></script>
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+<script type="module" src="./js/main.js"></script>
+
+<script async defer src="https://apis.google.com/js/api.js" onload="setTimeout(() => { if(window.gapiLoaded) window.gapiLoaded() }, 500)"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="setTimeout(() => { if(window.gisLoaded) window.gisLoaded() }, 500)"></script>
+
 <input type="file" id="hiddenImageInput" accept="image/jpeg, image/png, image/gif" style="display: none;">
 <script>
 if ('serviceWorker' in navigator) {
