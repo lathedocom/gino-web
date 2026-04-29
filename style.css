@@ -180,11 +180,54 @@ body {
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
 .cal-day-name { font-weight: bold; color: var(--text-light); font-size: 14px; margin-bottom: 8px;}
-.cal-day { padding: 12px 0; border-radius: 50%; cursor: pointer; font-size: 14px; position: relative; }
-.cal-day:hover { background-color: rgba(128,128,128,0.1); }
-.cal-day.today { background-color: rgba(77, 182, 172, 0.2); color: var(--accent-color); font-weight: bold;}
-.cal-day.selected { background-color: var(--accent-color); color: white; }
-.note-dot { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background-color: var(--editor-active-color); border-radius: 50%; }
+
+/* BẮT ĐẦU PHẦN CẬP NHẬT MATERIAL DESIGN CHO LỊCH */
+.cal-day { 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 0; 
+  cursor: pointer; 
+  position: relative;
+  min-height: 48px;
+}
+.cal-day:hover .day-number { background-color: rgba(128,128,128,0.1); }
+
+/* Vòng tròn bọc con số */
+.day-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+  color: var(--text-main);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Ngày hôm nay: In đậm và dùng màu Primary (Xanh Navy) */
+.cal-day.today .day-number { 
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+/* Ngày đang chọn: Đổ nền vòng tròn màu Primary, chữ trắng */
+.cal-day.selected .day-number { 
+  background-color: var(--primary-color); 
+  color: #ffffff !important; 
+  font-weight: bold;
+}
+
+/* Dấu chấm báo hiệu có ghi chú: Đẩy xuống dưới, dùng màu Accent (Vàng hổ phách) */
+.note-dot { 
+  width: 6px; 
+  height: 6px; 
+  background-color: var(--accent-color); 
+  border-radius: 50%; 
+  margin-top: 4px;
+}
 
 /* Tags View */
 .tags-container { display: flex; flex-wrap: wrap; gap: 12px; }
