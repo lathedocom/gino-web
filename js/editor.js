@@ -10,7 +10,7 @@ function setEditorMode(isEditing) {
     const editorBody = document.getElementById('editorBody');
     const newTagInput = document.getElementById('newTagInput');
     const editBody = document.getElementById('editNoteBody');
-    
+
     if (isEditing) {
         editNoteModeBtn.style.display = 'none';
         editModeToolbar.style.display = 'flex';
@@ -49,26 +49,27 @@ function renderEditorTagsUI() {
 function renderEditorImages() {
     let imageArea = document.getElementById('editorImageArea');
     const editModeToolbar = document.getElementById('editModeToolbar');
-    
+
     if (!imageArea) {
         imageArea = document.createElement('div');
         imageArea.id = 'editorImageArea';
-        imageArea.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; flex-shrink: 0;';
+        // Đã tăng gap từ 8px lên 16px để tạo khoảng hở rộng hơn giữa các ảnh
+        imageArea.style.cssText = 'display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; flex-shrink: 0;';
         const tagsArea = document.getElementById('editorTagsArea');
         tagsArea.parentNode.insertBefore(imageArea, tagsArea.nextSibling);
     }
     imageArea.innerHTML = '';
-    
+
     if (appState.currentEditingImages.length === 0) {
         imageArea.style.display = 'none';
         return;
     }
     imageArea.style.display = 'flex';
-    
+
     appState.currentEditingImages.forEach((imgObj, index) => {
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'position: relative; width: 80px; height: 80px; border-radius: 4px; overflow: hidden; border: 1px solid #ddd;';
-        
+
         const img = document.createElement('img');
         img.src = imgObj.url;
         img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
@@ -78,7 +79,7 @@ function renderEditorImages() {
             e.stopPropagation();
             previewImageInApp(img.src);
         });
-        
+
         const removeBtn = document.createElement('button');
         removeBtn.className = 'image-remove-btn';
         removeBtn.innerHTML = '<i class="material-icons" style="font-size: 16px;">close</i>';
@@ -88,12 +89,12 @@ function renderEditorImages() {
             appState.currentEditingImages.splice(index, 1);
             renderEditorImages();
         });
-        
+
         wrapper.appendChild(img);
         wrapper.appendChild(removeBtn);
         imageArea.appendChild(wrapper);
     });
-    
+
     const isEditing = editModeToolbar && editModeToolbar.style.display === 'flex';
     document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = isEditing ? 'flex' : 'none');
 }
@@ -107,20 +108,20 @@ export async function openNoteInEditor(noteData) {
     const colorPalettePopup = document.getElementById('colorPalettePopup');
     const timeDisplay = document.getElementById('editNoteTime');
     const noteEditor = document.getElementById('noteEditor');
-    
+
     editTitle.value = '';
     editBody.value = '';
     if (newTagInput) newTagInput.value = '';
     editorBody.style.backgroundColor = 'var(--note-default)';
     appState.currentNoteColorHex = '#FFFFFF';
     colorPalettePopup.classList.remove('open');
-    
+
     document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
     document.querySelector('.color-option.default').classList.add('active');
-    
+
     appState.currentEditingImages = [];
     appState.currentRawNoteData = null;
-    
+
     if (noteData) {
         if (deleteBtn) deleteBtn.style.display = 'flex';
         appState.currentEditingNoteId = noteData.id;
@@ -175,14 +176,14 @@ export function initEditor() {
     const newTagInput = document.getElementById('newTagInput');
     const colorPalettePopup = document.getElementById('colorPalettePopup');
     const editorBody = document.getElementById('editorBody');
-    
+
     editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
 
     document.getElementById('closeEditorBtn').addEventListener('click', () => {
         document.getElementById('noteEditor').classList.remove('active');
         colorPalettePopup.classList.remove('open');
     });
-    
+
     if (newTagInput) {
         newTagInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -196,7 +197,7 @@ export function initEditor() {
             }
         });
     }
-    
+
     // Sự kiện Delete
     document.getElementById('deleteNoteBtn').addEventListener('click', async () => {
         if (!appState.currentEditingNoteId) return;
@@ -216,7 +217,7 @@ export function initEditor() {
             await saveNotesToDrive();
         }
     });
-    
+
     // Chèn ảnh
     const insertImageBtn = document.getElementById('insertImageBtn');
     const hiddenImageInput = document.getElementById('hiddenImageInput');
@@ -255,14 +256,14 @@ export function initEditor() {
         reader.readAsDataURL(file);
         hiddenImageInput.value = '';
     });
-    
+
     document.getElementById('wrapTextBtn').addEventListener('click', () => {
         const startPos = editBody.selectionStart;
         const endPos = editBody.selectionEnd;
         const selectedText = editBody.value.substring(startPos, endPos);
         if (selectedText) editBody.value = editBody.value.substring(0, startPos) + `{${selectedText}}` + editBody.value.substring(endPos);
     });
-    
+
     document.getElementById('colorPaletteBtn').addEventListener('click', () => colorPalettePopup.classList.toggle('open'));
     document.querySelectorAll('.color-option').forEach(option => {
         option.addEventListener('click', function() {
@@ -278,7 +279,7 @@ export function initEditor() {
     saveNoteBtn.addEventListener('click', async function() {
         // Kiểm tra xem nút có đang bị khóa không
         if (this.classList.contains('is-processing')) return;
-        
+
         // Khóa nút, đổi icon sang trạng thái đang tải
         this.classList.add('is-processing');
         this.style.opacity = '0.5';
@@ -289,7 +290,7 @@ export function initEditor() {
             const editTitle = document.getElementById('editNoteTitle');
             const title = editTitle.value.trim();
             const content = editBody.value.trim();
-            
+
             // Xử lý Tag
             if (newTagInput && newTagInput.value.trim() !== '') {
                 const val = newTagInput.value.trim();
@@ -297,11 +298,11 @@ export function initEditor() {
                 newTagInput.value = '';
                 renderEditorTagsUI();
             }
-            
+
             const tags = appState.currentEditingTags;
             const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
             const finalFileNames = appState.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
-            
+
             let noteData = appState.currentRawNoteData ? { ...appState.currentRawNoteData } : {};
             noteData.id = appState.currentEditingNoteId || new Date().getTime();
             noteData.title = title;
@@ -312,11 +313,11 @@ export function initEditor() {
             noteData.updatedAt = new Date().getTime();
             noteData.isDeleted = false;
             noteData.syncStatus = 'pending';
-            
+
             if (!appState.currentEditingNoteId) noteData.createdAt = noteData.updatedAt;
-            
+
             await db.notes.put(noteData);
-            
+
             appState.currentEditingImages.forEach(imgObj => {
                 if (imgObj.isNew) {
                     if (!appState.pendingUploadImages) appState.pendingUploadImages = [];
@@ -324,13 +325,13 @@ export function initEditor() {
                     imgObj.isNew = false;
                 }
             });
-            
+
             setEditorMode(false);
             await loadNotesFromDBAndRender();
-            
+
             // Đồng bộ ngầm với Google Drive
             const isSuccess = await saveNotesToDrive();
-            
+
             if (isSuccess) {
                 noteData.syncStatus = 'synced';
                 await db.notes.put(noteData);
