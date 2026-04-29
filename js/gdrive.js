@@ -118,15 +118,17 @@ async function fetchNotesFromHiddenDrive() {
 
             if ((isDelta || isSnapshot) && f.name.endsWith('.json')) {
                 // Tách lấy timestamp bằng cách xóa prefix tương ứng
-                let tsStr = f.name.replace('ginonote_delta_', '')
-                                  .replace('ginonote_snapshot_', '')
-                                  .replace('.json', '');
+                // Dùng tên biến mới để tránh lỗi "Identifier has already been declared"
+                let rawTimeStr = f.name.replace('ginonote_delta_', '')
+                                       .replace('ginonote_snapshot_', '')
+                                       .replace('.json', '');
                 
                 // Cắt phần UUID (sau dấu _) nếu có
-                let fileTs = parseInt(tsStr.split('_')[0]);
+                let extractedTs = parseInt(rawTimeStr.split('_')[0]);
                 
-                if (!isNaN(fileTs) && fileTs > appState.lastSyncTime) {
-                    deltaFilesToDownload.push({ file: f, ts: fileTs });
+                // So sánh với lastSyncTime (mặc định là 0 nếu chưa có)
+                if (!isNaN(extractedTs) && extractedTs > (appState.lastSyncTime || 0)) {
+                    deltaFilesToDownload.push({ file: f, ts: extractedTs });
                 }
             } else if (f.name.endsWith('.jpg') || f.name.endsWith('.png') || f.name.endsWith('.webp') || f.mimeType === 'image/jpeg') {
                 imagesToDownload.push(f);
