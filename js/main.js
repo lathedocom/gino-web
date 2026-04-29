@@ -80,12 +80,10 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         }
         
         let displayContent = note.content || note.memoContent || note.text || '';
-        imageNames.forEach(rawFileName => {
-            if (displayContent.includes(rawFileName)) {
-                const regex = new RegExp(`(?:file:\\/\\/|\\/storage\\/|\\/data\\/|images\\/)?[\\w\\/\\.\\-]*${rawFileName}`, 'g');
-                displayContent = displayContent.replace(regex, '[Hình ảnh đính kèm]');
-            }
-        });
+        
+        // [FIX]: Loại bỏ HOÀN TOÀN các thẻ <img> ra khỏi văn bản hiển thị. 
+        // Thay thế bằng dòng chữ nhỏ để trình duyệt không gửi request ảo gây lỗi 404.
+        displayContent = displayContent.replace(/<img[^>]*>/gi, ' <span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span> ');
         
         card.innerHTML = `
             ${matchCount > 0 ? imagesPreviewHtml : ''}
