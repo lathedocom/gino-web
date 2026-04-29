@@ -16,10 +16,10 @@ window.gapiLoaded = function() {
 };
 
 window.gisLoaded = function() {
-    appState.tokenClient = google.accounts.oauth2.initTokenClient({ 
-        client_id: CLIENT_ID, 
+    appState.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
         scope: SCOPES,
-        callback: '' 
+        callback: ''
     });
     appState.gisInited = true;
     checkAndFetchDriveData();
@@ -29,7 +29,7 @@ window.gisLoaded = function() {
 export function checkAndFetchDriveData() {
     const btnAuthGoogle = document.getElementById('btnAuthGoogle');
     const syncText = document.getElementById('syncText');
-    
+
     if(!btnAuthGoogle) return;
 
     btnAuthGoogle.removeEventListener('click', handleAuthClick);
@@ -143,7 +143,7 @@ async function fetchNotesFromHiddenDrive() {
         const existingImageKeys = await db.images.toCollection().primaryKeys();
         const existingImagesSet = new Set(existingImageKeys);
         const missingImages = imagesToDownload.filter(f => !existingImagesSet.has(f.name));
-        
+
         if (missingImages.length > 0) {
             document.getElementById('syncText').innerText = `Đang tải ${missingImages.length} ảnh...`;
             const BATCH_SIZE = 5;
@@ -197,15 +197,16 @@ export async function saveNotesToDrive() {
     try {
         const syncStartTime = Date.now();
         const pendingNotes = await db.notes.where('syncStatus').equals('pending').toArray();
-        
+
         if (pendingNotes.length > 0) {
             if(syncText) syncText.innerText = "Đang đẩy JSON...";
-            const deltaFileName = `ginonote_delta_${syncStartTime}.json`;
+            const randomSuffix = Math.random().toString(36).substring(2, 10);
+            const deltaFileName = `ginonote_delta_${syncStartTime}_${randomSuffix}.json`;
             const deltaBlob = new Blob([JSON.stringify(pendingNotes)], { type: 'application/json' });
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify({ name: deltaFileName, parents: ['appDataFolder'] })], { type: 'application/json' }));
             form.append('file', deltaBlob, deltaFileName);
-            
+
             const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: form
             });
