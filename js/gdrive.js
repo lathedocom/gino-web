@@ -118,7 +118,7 @@ async function fetchNotesFromHiddenDrive() {
                 let tsStr = f.name.replace('ginonote_delta_', '')
                                   .replace('ginonote_snapshot_', '')
                                   .replace('.json', '');
-                
+
                 // Nếu có UUID (phần sau dấu _) thì chỉ lấy phần timestamp đầu tiên
                 let fileTs = parseInt(tsStr.split('_')[0]);
                 let fileTs = parseInt(tsStr);
