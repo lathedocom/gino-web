@@ -109,8 +109,18 @@ async function fetchNotesFromHiddenDrive() {
         let imagesToDownload = [];
         allFiles.forEach(f => {
             if (!f.name) return;
-            if (f.name.startsWith('ginonote_delta_') && f.name.endsWith('.json')) {
-                let tsStr = f.name.replace('ginonote_delta_', '').replace('.json', '');
+            // Chấp nhận cả delta và snapshot
+            const isDelta = f.name.startsWith('ginonote_delta_');
+            const isSnapshot = f.name.startsWith('ginonote_snapshot_');
+
+            if ((isDelta || isSnapshot) && f.name.endsWith('.json')) {
+                // Tách lấy timestamp bằng cách xóa prefix tương ứng
+                let tsStr = f.name.replace('ginonote_delta_', '')
+                                  .replace('ginonote_snapshot_', '')
+                                  .replace('.json', '');
+                
+                // Nếu có UUID (phần sau dấu _) thì chỉ lấy phần timestamp đầu tiên
+                let fileTs = parseInt(tsStr.split('_')[0]);
                 let fileTs = parseInt(tsStr);
                 if (!isNaN(fileTs) && fileTs > appState.lastSyncTime) {
                     deltaFilesToDownload.push({ file: f, ts: fileTs });
