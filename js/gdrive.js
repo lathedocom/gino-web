@@ -31,7 +31,6 @@ export function checkAndFetchDriveData() {
     const syncText = document.getElementById('syncText');
 
     if(!btnAuthGoogle) return;
-
     btnAuthGoogle.removeEventListener('click', handleAuthClick);
     btnAuthGoogle.addEventListener('click', handleAuthClick);
 
@@ -66,8 +65,10 @@ function handleAuthClick(e) {
         const expiresAt = Date.now() + (resp.expires_in * 1000);
         localStorage.setItem('gino_gdrive_token', resp.access_token);
         localStorage.setItem('gino_gdrive_expires', expiresAt.toString());
+
         document.getElementById('syncText').innerText = "Đang đồng bộ...";
         document.getElementById('btnAuthGoogle').classList.add('active-auth');
+        
         await fetchNotesFromHiddenDrive();
         await saveNotesToDrive();
     };
@@ -107,9 +108,11 @@ async function fetchNotesFromHiddenDrive() {
 
         let deltaFilesToDownload = [];
         let imagesToDownload = [];
+
         allFiles.forEach(f => {
             if (!f.name) return;
-            // Chấp nhận cả delta và snapshot
+            
+            // Chấp nhận cả delta và snapshot từ Android
             const isDelta = f.name.startsWith('ginonote_delta_');
             const isSnapshot = f.name.startsWith('ginonote_snapshot_');
 
@@ -118,10 +121,10 @@ async function fetchNotesFromHiddenDrive() {
                 let tsStr = f.name.replace('ginonote_delta_', '')
                                   .replace('ginonote_snapshot_', '')
                                   .replace('.json', '');
-
-                // Nếu có UUID (phần sau dấu _) thì chỉ lấy phần timestamp đầu tiên
+                
+                // Cắt phần UUID (sau dấu _) nếu có
                 let fileTs = parseInt(tsStr.split('_')[0]);
-                let fileTs = parseInt(tsStr);
+                
                 if (!isNaN(fileTs) && fileTs > appState.lastSyncTime) {
                     deltaFilesToDownload.push({ file: f, ts: fileTs });
                 }
@@ -169,6 +172,7 @@ async function fetchNotesFromHiddenDrive() {
                 }));
             }
         }
+
         document.getElementById('syncText').innerText = "Đã đồng bộ";
         await loadNotesFromDBAndRender();
     } catch (err) {
@@ -202,6 +206,7 @@ export async function saveNotesToDrive() {
     const syncText = document.getElementById('syncText');
     const tokenObj = gapi.client.getToken();
     if (!tokenObj) return false;
+
     const token = tokenObj.access_token;
 
     try {
@@ -210,9 +215,12 @@ export async function saveNotesToDrive() {
 
         if (pendingNotes.length > 0) {
             if(syncText) syncText.innerText = "Đang đẩy JSON...";
+            
+            // Tạo suffix ngẫu nhiên chống trùng lặp tên file tương tự Android
             const randomSuffix = Math.random().toString(36).substring(2, 10);
             const deltaFileName = `ginonote_delta_${syncStartTime}_${randomSuffix}.json`;
             const deltaBlob = new Blob([JSON.stringify(pendingNotes)], { type: 'application/json' });
+            
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify({ name: deltaFileName, parents: ['appDataFolder'] })], { type: 'application/json' }));
             form.append('file', deltaBlob, deltaFileName);
@@ -220,7 +228,9 @@ export async function saveNotesToDrive() {
             const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: form
             });
+            
             if (!response.ok) throw new Error("Lỗi tải lên Delta");
+            
             const ids = pendingNotes.map(n => n.id);
             await db.notes.where('id').anyOf(ids).modify({ syncStatus: 'synced' });
         }
@@ -231,6 +241,7 @@ export async function saveNotesToDrive() {
                 const imgForm = new FormData();
                 imgForm.append('metadata', new Blob([JSON.stringify({ name: imgObj.fileName, mimeType: 'image/jpeg', parents: ['appDataFolder'] })], { type: 'application/json' }));
                 imgForm.append('file', imgObj.blob, imgObj.fileName);
+
                 await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: imgForm
                 });
