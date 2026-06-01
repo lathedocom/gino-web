@@ -59,7 +59,7 @@ const translations = {
         "terms": "Điều khoản sử dụng"
     },
     "en": {
-        "slogan": "Take notes to remember longer",
+        "slogan": "Etch notes into your mamory",
         "hero_desc": "Take notes, review, and retain knowledge using Active Recall and Spaced Repetition in a single app.",
         "download": "Get it on Google Play",
         "download_cta": "Get it on Google Play",
