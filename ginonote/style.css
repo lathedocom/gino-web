@@ -302,78 +302,90 @@ color: var(--text-light); background-color: var(--bg-white);
 .footer a { color: var(--primary-color); text-decoration: none; margin: 0 10px; font-weight: 500; transition: color 0.2s; }
 .footer a:hover { color: var(--accent-color); }
 
-/* --- Khu vực Tải File .gino Mẫu --- */
+/* --- THIẾT KẾ KHU VỰC CHIP FILE MẪU CHUYÊN NGHIỆP --- */
 .gino-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 16px;
   width: 100%;
 }
 
-.gino-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
+.gino-chip {
+  display: flex;
+  align-items: center;
+  background-color: #F8FAFC; /* Màu nền xám nhẹ thanh lịch */
+  border: 1px solid #E2E8F0;
   border-radius: 16px;
-  padding: 30px 24px;
-  text-align: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  padding: 12px 16px;
+  gap: 14px;
+  transition: all 0.25s ease;
 }
 
-.gino-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px var(--shadow-color);
+.gino-chip:hover {
+  background-color: var(--bg-white);
   border-color: var(--primary-color);
+  box-shadow: 0 6px 16px rgba(14, 75, 117, 0.08);
+  transform: translateY(-2px);
 }
 
-.gino-icon {
-  width: 64px;
-  height: 64px;
-  background-color: rgba(26, 115, 232, 0.1);
+.gino-chip-icon {
+  width: 44px;
+  height: 44px;
+  background-color: rgba(26, 115, 232, 0.08);
   color: var(--cta-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
+  flex-shrink: 0;
 }
 
-.gino-icon i {
-  font-size: 32px;
+.gino-chip-icon i {
+  font-size: 22px;
 }
 
-.gino-card h3 {
-  font-size: 18px;
+.gino-chip-content {
+  flex: 1;
+  text-align: left;
+  min-width: 0; /* Ngăn lỗi tràn text */
+}
+
+.gino-chip-content h3 {
+  font-size: 15px;
+  font-weight: 700;
   color: var(--primary-dark);
-  margin: 0 0 10px 0;
+  margin: 0 0 3px 0;
 }
 
-.gino-card p {
-  font-size: 14px;
+.gino-chip-content p {
+  font-size: 12px;
   color: var(--text-light);
-  margin: 0 0 24px 0;
-  min-height: 42px; 
+  margin: 0;
+  line-height: 1.4;
 }
 
-.gino-btn {
-  display: inline-flex;
+.gino-chip-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px;
-  background-color: transparent;
-  color: var(--cta-color);
-  border: 2px solid var(--cta-color);
-  border-radius: 12px;
+  color: var(--text-light);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 15px;
-  box-sizing: border-box;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.gino-btn:hover {
-  background-color: var(--cta-color);
-  color: white;
+.gino-chip:hover .gino-chip-btn {
+  border-color: var(--cta-color);
+  color: var(--cta-color);
+}
+
+.gino-chip-btn:hover {
+  background-color: var(--cta-color) !important;
+  color: white !important;
+  border-color: var(--cta-color) !important;
 }
