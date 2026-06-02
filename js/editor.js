@@ -332,7 +332,7 @@ export function initEditor() {
             this.classList.remove('is-processing');
             this.style.opacity = '1';
             this.style.pointerEvents = 'auto';
-            this.innerHTML = '<i class="material-icons">check</i>';
+            this.innerHTML = '<i class="material-icons">save</i>';
         }
     });
 }
