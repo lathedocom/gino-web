@@ -50,11 +50,11 @@ function renderEditorImages() {
     let imageArea = document.getElementById('editorImageArea');
     const editModeToolbar = document.getElementById('editModeToolbar');
     
-    if (!imageArea) return; // Bảo vệ nếu DOM bị thiếu
+    if (!imageArea) return; 
     
-    // [FIX] Áp dụng CSS trực tiếp để ĐẢM BẢO luôn tạo thanh cuộn ngang độc lập cho vùng ảnh
-    // Thanh cuộn sẽ nằm ngay sát dưới chân các ảnh này.
-    imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; width: 100%; box-sizing: border-box; padding-bottom: 8px; margin-bottom: 12px; -webkit-overflow-scrolling: touch;';
+    // Đã thêm overflow-y: hidden để ẩn thanh cuộn dọc
+    // Tăng padding-bottom để thanh cuộn ngang không lẹm vào ảnh
+    imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; width: 100%; box-sizing: border-box; padding-bottom: 12px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; align-items: flex-start;';
     
     imageArea.innerHTML = '';
     
@@ -66,7 +66,6 @@ function renderEditorImages() {
     imageArea.style.display = 'flex';
     appState.currentEditingImages.forEach((imgObj, index) => {
         const wrapper = document.createElement('div');
-        // [FIX] flex: 0 0 auto bắt buộc khung ảnh giữ cứng kích thước, kích hoạt thanh cuộn của container cha
         wrapper.style.cssText = 'flex: 0 0 auto; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; margin-right: 12px; position: relative; display: block;';
         
         const img = document.createElement('img');
