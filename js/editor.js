@@ -52,8 +52,8 @@ function renderEditorImages() {
     if (!imageArea) {
         imageArea = document.createElement('div');
         imageArea.id = 'editorImageArea';
-        // [FIX] Cập nhật CSS cho container: dùng overflow-x, tắt wrap
-        imageArea.style.cssText = 'display: flex; gap: 16px; padding: 10px 0 14px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; overflow-x: auto; flex-shrink: 0;';
+        // Ép cuộn ngang và chống vỡ khung
+        imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; width: 100%; padding: 10px 0 14px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; flex-shrink: 0;';
         const tagsArea = document.getElementById('editorTagsArea');
         tagsArea.parentNode.insertBefore(imageArea, tagsArea.nextSibling);
     }
@@ -67,15 +67,14 @@ function renderEditorImages() {
     imageArea.style.display = 'flex';
     appState.currentEditingImages.forEach((imgObj, index) => {
         const wrapper = document.createElement('div');
-        // [FIX] Thêm flex-shrink: 0 để ảnh không bị ép kích cỡ
-        wrapper.style.cssText = 'flex-shrink: 0; position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd;';
+        // Thêm min-width và margin-right trực tiếp, bỏ gap
+        wrapper.style.cssText = 'flex-shrink: 0; min-width: 80px; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; margin-right: 12px; position: relative; display: block;';
         
         const img = document.createElement('img');
         img.src = imgObj.url;
         img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; cursor: pointer;';
         img.title = "Nhấp để xem";
         
-        // [FIX] Lấy danh sách toàn bộ ảnh trong Editor truyền vào Slider
         img.addEventListener('click', (e) => {
             e.stopPropagation();
             const imageUrls = appState.currentEditingImages.map(obj => obj.url);
