@@ -76,12 +76,11 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         let matchCount = imageNames.length;
 
         if (matchCount > 0) {
-            // [FIX] Thêm max-width: 100% và -webkit-overflow-scrolling: touch để tối ưu cuộn trên mobile/webview
-            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 8px; margin-bottom: 12px; -webkit-overflow-scrolling: touch;">';
+            // Fix cuộn ngang trên thẻ ghi chú
+            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; flex-wrap: nowrap; overflow-x: auto; width: 100%; box-sizing: border-box; padding-bottom: 8px; margin-bottom: 12px; -webkit-overflow-scrolling: touch;">';
             
             imageNames.forEach(rawFileName => {
                 const transparentGif = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-                // [FIX] Sử dụng flex: 0 0 auto để chống méo/thu nhỏ hình ảnh, buộc tạo overflow
                 imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="flex: 0 0 auto; width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; background: #e0e0e0; margin-right: 8px; cursor: pointer; display: block;">`;
             });
             imagesPreviewHtml += '</div>';
@@ -161,10 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const styleFix = document.createElement('style');
     styleFix.innerHTML = `
         .editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
-        .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
+        
+        /* KHÓA CHIỀU NGANG CHO VĂN BẢN (CHỐNG TRÀN) */
+        .editor-body-content { overflow-x: hidden !important; width: 100% !important; box-sizing: border-box !important; }
+        .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; overflow-x: hidden !important; resize: none; padding-bottom: 50px; width: 100%; box-sizing: border-box; }
         .note-editor-overlay { overflow: hidden !important; }
         
-        /* [FIX] Hiện rõ Track và Thumb của thanh cuộn ngang */
+        /* Tùy chỉnh thanh cuộn ngang */
         .note-images-preview::-webkit-scrollbar, #editorImageArea::-webkit-scrollbar { height: 8px; display: block; }
         .note-images-preview::-webkit-scrollbar-track, #editorImageArea::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
         .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
