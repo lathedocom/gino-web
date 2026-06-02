@@ -2,7 +2,7 @@
 const translations = {
 "vi": {
 "slogan": "Khắc ghi chú vào trí nhớ",
-"hero_desc": "Ghi chú, ôn tập và ghi nhớ kiến thức bằng Active Recall và Spaced Repetition trong một ứng dụng duy nhất.",
+"hero_desc": "Ghi chú, ôn tập kiến thức bằng Active Recall và Spaced Repetition trong một ứng dụng duy nhất.",
 "download": "Tải trên Google Play",
 "download_cta": "Tải trên Google Play",
 // Khối 1: Không gian ghi chú tối giản
@@ -16,7 +16,7 @@ const translations = {
 "recall_help": "Gợi ý từng phần khi bạn chưa nhớ ra đáp án.",
 "recall_check": "So sánh câu trả lời với nội dung gốc ngay sau khi hoàn thành.",
 "recall_detail": "Chấm điểm tự động và bỏ qua lỗi gõ nhỏ.",
-"recall_diff": "Tự động lên lịch ôn tập dựa trên mức độ ghi nhớ của bạn.",
+"recall_diff": "Gợi ý mức độ ghi nhớ dựa trên kết quả của bạn.",
 // Khối 3: Lịch sử học tập
 "cal_title": "Lịch sử ghi chú",
 "cal_desc": "Xem lại những ngày bạn đã ghi chú.",
@@ -65,7 +65,7 @@ const translations = {
 },
 "en": {
 "slogan": "Etch notes into your memory",
-"hero_desc": "Take notes, review, and retain knowledge using Active Recall and Spaced Repetition in a single app.",
+"hero_desc": "Take notes, review knowledge using Active Recall and Spaced Repetition in a single app.",
 "download": "Get it on Google Play",
 "download_cta": "Get it on Google Play",
 // Block 1: Minimalist Note Space
@@ -79,7 +79,7 @@ const translations = {
 "recall_help": "Get partial hints when you can't recall the answer.",
 "recall_check": "Compare your answers with the original content immediately.",
 "recall_detail": "Automatic scoring with typo tolerance.",
-"recall_diff": "Automatically schedule reviews based on your retention level.",
+"recall_diff": "Receive personalized retention suggestions based on your results.",
 // Block 3: Study History
 "cal_title": "Note History",
 "cal_desc": "View the days you've taken notes.",
