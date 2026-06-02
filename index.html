@@ -8,139 +8,159 @@
 <meta name="theme-color" content="#f5a623">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="light-theme mobile-app-mode">
 <header class="app-header">
-<div class="header-left">
-<button class="icon-btn" id="menuBtn">
-<i class="material-icons">menu</i>
-</button>
-</div>
-<div class="header-right">
-<button class="sync-btn active-auth" id="btnAuthGoogle">
-<i class="material-icons">cloud_sync</i>
-<span id="syncText">Đã đồng bộ</span>
-</button>
-</div>
+    <div class="header-left">
+        <button class="icon-btn" id="menuBtn" title="Menu chính">
+            <i class="material-icons">menu</i>
+        </button>
+        <span class="app-brand">GinoNote</span>
+    </div>
+    
+    <div class="header-center">
+        <div class="search-bar">
+            <button class="icon-btn search-icon-btn"><i class="material-icons">search</i></button>
+            <input type="text" id="searchInput" placeholder="Tìm kiếm ghi chú...">
+        </div>
+    </div>
+
+    <div class="header-right">
+        <button class="icon-btn sync-btn-icon" id="btnAuthGoogle" title="Chưa đăng nhập">
+            <i class="material-icons" id="syncIcon">account_circle</i>
+        </button>
+    </div>
 </header>
+
 <div class="app-body">
-<nav class="sidebar" id="sidebar">
-<div class="sidebar-section">
-<a href="#" class="nav-item active" data-target="viewNotes">
-<i class="material-icons">lightbulb</i>
-<span class="nav-text">Tất cả ghi chú</span>
-</a>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <a href="#" class="nav-item active" data-target="viewNotes" title="Tất cả ghi chú">
+                <i class="material-icons">notes</i>
+                <span class="nav-text">Tất cả ghi chú</span>
+            </a>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+        <div class="sidebar-section calendar-sidebar">
+            <div class="calendar-container sidebar-calendar">
+                <div class="calendar-header">
+                    <button class="icon-btn" id="prevMonthBtn"><i class="material-icons">chevron_left</i></button>
+                    <h4 id="calendarMonthYear" style="font-size: 15px; margin: 0;">Tháng 4, 2026</h4>
+                    <button class="icon-btn" id="nextMonthBtn"><i class="material-icons">chevron_right</i></button>
+                    <button class="icon-btn" id="todayBtn" title="Hôm nay"><i class="material-icons">today</i></button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="cal-day-name">T2</div><div class="cal-day-name">T3</div><div class="cal-day-name">T4</div>
+                    <div class="cal-day-name">T5</div><div class="cal-day-name">T6</div><div class="cal-day-name">T7</div><div class="cal-day-name">CN</div>
+                </div>
+            </div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+        <div class="sidebar-section tags-sidebar" style="padding: 0 16px 24px 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--text-light);">
+                <i class="material-icons" style="font-size: 18px;">label</i>
+                <h4 style="font-size: 14px; text-transform: uppercase; margin: 0;">Nhãn</h4>
+            </div>
+            <div class="tags-container" id="allTagsContainer">
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div id="viewNotes" class="view-section active-view">
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="material-icons">note_add</i>
+                <h3>Chưa có ghi chú nào</h3>
+                <p>Những ghi chú bạn tạo sẽ xuất hiện ở đây.</p>
+                <button id="emptyStateAddBtn" class="primary-btn">
+                    <i class="material-icons">add_note</i> Tạo ghi chú đầu tiên
+                </button>
+            </div>
+            <!-- Notes Grid -->
+            <div class="notes-grid" id="notesGrid"></div>
+        </div>
+    </main>
 </div>
-<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
-<div class="sidebar-section calendar-sidebar">
-<div class="calendar-container sidebar-calendar">
-<div class="calendar-header">
-<button class="icon-btn" id="prevMonthBtn"><i class="material-icons">chevron_left</i></button>
-<h4 id="calendarMonthYear" style="font-size: 15px; margin: 0;">Tháng 4, 2026</h4>
-<button class="icon-btn" id="nextMonthBtn"><i class="material-icons">chevron_right</i></button>
-<button class="icon-btn" id="todayBtn" title="Hôm nay"><i class="material-icons">today</i></button>
-</div>
-<div class="calendar-grid">
-<div class="cal-day-name">T2</div><div class="cal-day-name">T3</div><div class="cal-day-name">T4</div>
-<div class="cal-day-name">T5</div><div class="cal-day-name">T6</div><div class="cal-day-name">T7</div><div class="cal-day-name">CN</div>
-</div>
-</div>
-</div>
-<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
-<div class="sidebar-section tags-sidebar" style="padding: 0 16px 24px 16px;">
-<h4 style="margin-bottom: 12px; color: var(--text-light); font-size: 14px; text-transform: uppercase;">Danh sách Tags</h4>
-<div class="tags-container" id="allTagsContainer">
-</div>
-</div>
-</nav>
-<main class="main-content">
-<div id="viewNotes" class="view-section active-view">
-<div class="notes-grid" id="notesGrid">
-</div>
-</div>
-</main>
-</div>
-<button class="fab-btn" id="fabBtn">
-<i class="material-icons">add</i>
+
+<button class="fab-btn" id="fabBtn" title="Tạo ghi chú mới">
+    <i class="material-icons">add_note</i>
 </button>
+
 <div class="note-editor-overlay" id="noteEditor">
-<div id="editorBody">
-<header class="editor-header">
-<button class="icon-btn close-btn" id="closeEditorBtn">
-<i class="material-icons">arrow_back</i>
-</button>
-<div class="editor-header-actions">
-<button class="icon-btn action-btn" id="deleteNoteBtn" title="Xóa ghi chú" style="display: none;">
-<i class="material-icons">delete</i>
-</button>
-<button class="icon-btn action-btn" id="editNoteModeBtn" title="Chỉnh sửa">
-<i class="material-icons">edit</i>
-</button>
-<div id="editModeToolbar" style="display: none; align-items: center; gap: 8px;">
-<button class="icon-btn action-btn" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
-<i class="material-icons">lightbulb</i>
-</button>
-<div class="color-picker-container">
-<button class="icon-btn action-btn" id="colorPaletteBtn" title="Chọn màu nền">
-<i class="material-icons">palette</i>
-</button>
-<div class="color-palette-popup" id="colorPalettePopup">
-<div class="color-option default active" data-color="#FFFFFF" style="background-color: var(--note-bg-default);" title="Mặc định"></div>
-<div class="color-option" data-color="#FFF9C4" style="background-color: var(--note-bg-yellow);" title="Vàng"></div>
-<div class="color-option" data-color="#FFCDD2" style="background-color: var(--note-bg-red);" title="Đỏ"></div>
-<div class="color-option" data-color="#BBDEFB" style="background-color: var(--note-bg-blue);" title="Xanh dương"></div>
-<div class="color-option" data-color="#C8E6C9" style="background-color: var(--note-bg-green);" title="Xanh lá"></div>
-<div class="color-option" data-color="#E1BEE7" style="background-color: var(--note-bg-purple);" title="Tím"></div>
-</div>
-</div>
-<button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
-<i class="material-icons">image</i>
-</button>
-<button class="icon-btn action-btn save-btn" id="saveNoteBtn" title="Lưu ghi chú">
-<i class="material-icons">save</i>
-</button>
-</div>
-</div>
-</header>
-<div class="editor-body-content">
-<div class="editor-title-container">
-<input type="text" id="editNoteTitle" placeholder="Tiêu đề" class="editor-title-input">
-</div>
-<div class="editor-time-container">
-<i class="material-icons">access_time</i>
-<span id="editNoteTime">Tự động tạo thời gian...</span>
-</div>
-<div id="editorImageArea"></div>
-<div class="editor-tags-area" id="editorTagsArea">
-<i class="material-icons" style="color: var(--text-light);">label</i>
-<div id="editorTagList" class="editor-tag-list"></div>
-<input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
-</div>
-<textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
-</div>
-</div>
+    <div id="editorBody">
+        <header class="editor-header">
+            <button class="icon-btn close-btn" id="closeEditorBtn" title="Đóng">
+                <i class="material-icons">close</i>
+            </button>
+            <div class="editor-header-actions">
+                <button class="icon-btn action-btn" id="deleteNoteBtn" title="Xóa ghi chú" style="display: none;">
+                    <i class="material-icons">delete</i>
+                </button>
+                <button class="icon-btn action-btn" id="editNoteModeBtn" title="Chỉnh sửa">
+                    <i class="material-icons">edit</i>
+                </button>
+                <div id="editModeToolbar" style="display: none; align-items: center; gap: 8px;">
+                    <button class="icon-btn action-btn" id="wrapTextBtn" title="Bôi đen trong ngoặc {}">
+                        <i class="material-icons">auto_fix_high</i>
+                    </button>
+                    <div class="color-picker-container">
+                        <button class="icon-btn action-btn" id="colorPaletteBtn" title="Chọn màu nền">
+                            <i class="material-icons">palette</i>
+                        </button>
+                        <div class="color-palette-popup" id="colorPalettePopup">
+                            <div class="color-option default active" data-color="#FFFFFF" style="background-color: var(--note-bg-default);" title="Mặc định"></div>
+                            <div class="color-option" data-color="#FFF9C4" style="background-color: var(--note-bg-yellow);" title="Vàng"></div>
+                            <div class="color-option" data-color="#FFCDD2" style="background-color: var(--note-bg-red);" title="Đỏ"></div>
+                            <div class="color-option" data-color="#BBDEFB" style="background-color: var(--note-bg-blue);" title="Xanh dương"></div>
+                            <div class="color-option" data-color="#C8E6C9" style="background-color: var(--note-bg-green);" title="Xanh lá"></div>
+                            <div class="color-option" data-color="#E1BEE7" style="background-color: var(--note-bg-purple);" title="Tím"></div>
+                        </div>
+                    </div>
+                    <button class="icon-btn action-btn" id="insertImageBtn" title="Chèn ảnh">
+                        <i class="material-icons">image</i>
+                    </button>
+                    <button class="icon-btn action-btn save-btn" id="saveNoteBtn" title="Lưu ghi chú">
+                        <i class="material-icons">check</i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <div class="editor-body-content">
+            <div class="editor-title-container">
+                <input type="text" id="editNoteTitle" placeholder="Tiêu đề" class="editor-title-input">
+            </div>
+            <div class="editor-time-container">
+                <i class="material-icons">access_time</i>
+                <span id="editNoteTime">Tự động tạo thời gian...</span>
+            </div>
+            <div id="editorImageArea"></div>
+            <div class="editor-tags-area" id="editorTagsArea">
+                <i class="material-icons" style="color: var(--text-light);">label</i>
+                <div id="editorTagList" class="editor-tag-list"></div>
+                <input type="text" id="newTagInput" placeholder="Thêm tag..." class="tag-input">
+            </div>
+            <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
 <script type="module" src="./js/main.js"></script>
-
 <script async defer src="https://apis.google.com/js/api.js" onload="setTimeout(() => { if(window.gapiLoaded) window.gapiLoaded() }, 500)"></script>
 <script async defer src="https://accounts.google.com/gsi/client" onload="setTimeout(() => { if(window.gisLoaded) window.gisLoaded() }, 500)"></script>
-
 <input type="file" id="hiddenImageInput" accept="image/jpeg, image/png, image/gif" style="display: none;">
 <script>
 if ('serviceWorker' in navigator) {
-window.addEventListener('load', function() {
-navigator.serviceWorker.register('./sw.js').then(function(registration) {
-console.log('ServiceWorker đăng ký thành công với scope: ', registration.scope);
-}, function(err) {
-console.log('ServiceWorker đăng ký thất bại: ', err);
-});
-});
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').then(function(registration) {
+            console.log('ServiceWorker đăng ký thành công với scope: ', registration.scope);
+        }, function(err) {
+            console.log('ServiceWorker đăng ký thất bại: ', err);
+        });
+    });
 }
 </script>
 </body>
