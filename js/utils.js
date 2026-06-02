@@ -92,15 +92,93 @@ export async function getImageUrlSafe(fileName) {
     return null;
 }
 
-export function previewImageInApp(imageUrl) {
+// [FIX] Cập nhật hàm xem ảnh: Hỗ trợ mảng ảnh, slider, và phím mũi tên
+export function previewImageInApp(imageUrls, startIndex = 0) {
+    // Tương thích ngược nếu chỉ truyền 1 URL dạng chuỗi
+    if (typeof imageUrls === 'string') {
+        imageUrls = [imageUrls];
+        startIndex = 0;
+    }
+    
+    let currentIndex = startIndex;
+    
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; align-items: center; justify-content: center; cursor: zoom-out;';
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none;';
+    
     const img = document.createElement('img');
-    img.src = imageUrl;
-    img.style.cssText = 'max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);';
+    img.src = imageUrls[currentIndex];
+    img.style.cssText = 'max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: opacity 0.15s ease-in-out; cursor: pointer;';
+    
+    // Bộ đếm (VD: 1 / 4)
+    const counter = document.createElement('div');
+    counter.style.cssText = 'position: absolute; top: 20px; color: white; font-size: 16px; font-weight: bold; font-family: sans-serif; background: rgba(0,0,0,0.5); padding: 6px 16px; border-radius: 20px;';
+    
+    const updateUI = () => {
+        if (imageUrls.length > 1) {
+            counter.innerText = `${currentIndex + 1} / ${imageUrls.length}`;
+            counter.style.display = 'block';
+        } else {
+            counter.style.display = 'none';
+        }
+    };
+    updateUI();
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '<i class="material-icons">close</i>';
+    closeBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center;';
+    closeBtn.addEventListener('click', closeOverlay);
+
+    overlay.appendChild(counter);
     overlay.appendChild(img);
-    overlay.addEventListener('click', () => {
-        document.body.removeChild(overlay);
+    overlay.appendChild(closeBtn);
+    
+    // Hàm chuyển ảnh mượt mà
+    const showImage = (index) => {
+        if (index < 0 || index >= imageUrls.length) return;
+        currentIndex = index;
+        img.style.opacity = '0.3';
+        setTimeout(() => {
+            img.src = imageUrls[currentIndex];
+            img.style.opacity = '1';
+            updateUI();
+        }, 150);
+    };
+
+    // Xử lý phím mũi tên
+    const handleKeyDown = (e) => {
+        if (e.key === 'ArrowLeft') {
+            showImage(currentIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+            showImage(currentIndex + 1);
+        } else if (e.key === 'Escape') {
+            closeOverlay();
+        }
+    };
+
+    // Bấm hai bên rìa màn hình để chuyển ảnh, bấm ngoài để thoát
+    overlay.addEventListener('click', (e) => {
+        if (e.target === closeBtn || closeBtn.contains(e.target)) return;
+        
+        const clickX = e.clientX;
+        const screenW = window.innerWidth;
+        
+        if (clickX < screenW / 3 && currentIndex > 0) {
+            showImage(currentIndex - 1);
+        } else if (clickX > screenW * 2 / 3 && currentIndex < imageUrls.length - 1) {
+            showImage(currentIndex + 1);
+        } else if (e.target === overlay) {
+            closeOverlay();
+        }
     });
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    function closeOverlay() {
+        document.removeEventListener('keydown', handleKeyDown);
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+        }
+    }
+
     document.body.appendChild(overlay);
 }
