@@ -79,7 +79,7 @@ const translations = {
 "recall_help": "Get partial hints when you can't recall the answer.",
 "recall_check": "Compare your answers with the original content immediately.",
 "recall_detail": "Automatic scoring with typo tolerance.",
-"recall_diff": "Receive personalized retention suggestions based on your results.",
+"recall_diff": "Receive recall rating suggestions based on your results.",
 // Block 3: Study History
 "cal_title": "Note History",
 "cal_desc": "View the days you've taken notes.",
