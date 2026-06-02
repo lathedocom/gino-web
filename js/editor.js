@@ -52,41 +52,51 @@ function renderEditorImages() {
     if (!imageArea) {
         imageArea = document.createElement('div');
         imageArea.id = 'editorImageArea';
-        imageArea.style.cssText = 'display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; flex-shrink: 0;';
+        // [FIX] Cập nhật CSS cho container: dùng overflow-x, tắt wrap
+        imageArea.style.cssText = 'display: flex; gap: 16px; padding: 10px 0 14px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; overflow-x: auto; flex-shrink: 0;';
         const tagsArea = document.getElementById('editorTagsArea');
         tagsArea.parentNode.insertBefore(imageArea, tagsArea.nextSibling);
     }
     imageArea.innerHTML = '';
+    
     if (appState.currentEditingImages.length === 0) {
         imageArea.style.display = 'none';
         return;
     }
+    
     imageArea.style.display = 'flex';
     appState.currentEditingImages.forEach((imgObj, index) => {
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'position: relative; width: 80px; height: 80px; border-radius: 4px; overflow: hidden; border: 1px solid #ddd;';
+        // [FIX] Thêm flex-shrink: 0 để ảnh không bị ép kích cỡ
+        wrapper.style.cssText = 'flex-shrink: 0; position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd;';
+        
         const img = document.createElement('img');
         img.src = imgObj.url;
-        img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-        img.style.cursor = 'zoom-in';
-        img.title = "Nhấp để xem phóng to";
+        img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; cursor: pointer;';
+        img.title = "Nhấp để xem";
+        
+        // [FIX] Lấy danh sách toàn bộ ảnh trong Editor truyền vào Slider
         img.addEventListener('click', (e) => {
             e.stopPropagation();
-            previewImageInApp(img.src);
+            const imageUrls = appState.currentEditingImages.map(obj => obj.url);
+            previewImageInApp(imageUrls, index);
         });
+        
         const removeBtn = document.createElement('button');
         removeBtn.className = 'image-remove-btn';
         removeBtn.innerHTML = '<i class="material-icons" style="font-size: 16px;">close</i>';
-        removeBtn.style.cssText = 'position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0;';
+        removeBtn.style.cssText = 'position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0;';
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             appState.currentEditingImages.splice(index, 1);
             renderEditorImages();
         });
+        
         wrapper.appendChild(img);
         wrapper.appendChild(removeBtn);
         imageArea.appendChild(wrapper);
     });
+    
     const isEditing = editModeToolbar && editModeToolbar.style.display === 'flex';
     document.querySelectorAll('.image-remove-btn').forEach(b => b.style.display = isEditing ? 'flex' : 'none');
 }
@@ -181,7 +191,6 @@ export function initEditor() {
         });
     }
     
-    // Sự kiện Delete
     document.getElementById('deleteNoteBtn').addEventListener('click', async () => {
         if (!appState.currentEditingNoteId) return;
         const confirmDelete = confirm("Bạn có chắc chắn muốn xóa ghi chú này không?");
@@ -206,7 +215,6 @@ export function initEditor() {
         }
     });
     
-    // Chèn ảnh
     const insertImageBtn = document.getElementById('insertImageBtn');
     const hiddenImageInput = document.getElementById('hiddenImageInput');
     insertImageBtn.addEventListener('click', () => hiddenImageInput.click());
@@ -263,16 +271,13 @@ export function initEditor() {
         });
     });
     
-    // Sự kiện Nút LƯU (Đã xử lý chống kẹt nút)
     const saveNoteBtn = document.getElementById('saveNoteBtn');
     saveNoteBtn.addEventListener('click', async function() {
-        // Kiểm tra xem nút có đang bị khóa không
         if (this.classList.contains('is-processing')) return;
         
-        // Khóa nút, đổi icon sang trạng thái đang tải
         this.classList.add('is-processing');
         this.style.opacity = '0.5';
-        this.style.pointerEvents = 'none'; // Chặn click triệt để
+        this.style.pointerEvents = 'none'; 
         this.innerHTML = '<i class="material-icons is-syncing">sync</i>';
         
         try {
@@ -280,7 +285,6 @@ export function initEditor() {
             const title = editTitle.value.trim();
             const content = editBody.value.trim();
             
-            // Xử lý Tag
             if (newTagInput && newTagInput.value.trim() !== '') {
                 const val = newTagInput.value.trim();
                 if (!appState.currentEditingTags.includes(val)) appState.currentEditingTags.push(val);
@@ -318,7 +322,6 @@ export function initEditor() {
             setEditorMode(false);
             await loadNotesFromDBAndRender();
             
-            // Đồng bộ ngầm với Google Drive
             const isSuccess = await saveNotesToDrive();
             if (isSuccess) {
                 noteData.syncStatus = 'synced';
@@ -328,7 +331,6 @@ export function initEditor() {
         } catch (error) {
             console.error("Lỗi khi lưu:", error);
         } finally {
-            // Mở khóa nút khi mọi thứ đã xong
             this.classList.remove('is-processing');
             this.style.opacity = '1';
             this.style.pointerEvents = 'auto';
