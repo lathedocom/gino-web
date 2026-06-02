@@ -58,7 +58,6 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
     for (const note of notesToRender) {
         const card = document.createElement('div');
         card.className = 'note-card';
-        // Ép min-width: 0 để chống Grid blowout (kích hoạt thanh cuộn)
         card.style.minWidth = '0'; 
 
         let displayIdx = note.colorIndex !== undefined ? note.colorIndex : hexToIndex(note.color || note.bgColor || '#FFFFFF');
@@ -77,13 +76,13 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         let matchCount = imageNames.length;
 
         if (matchCount > 0) {
-            // Thay đổi cssText: Dùng nowrap, width 100% để ép cuộn ngang
-            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 8px; margin-bottom: 12px;">';
+            // [FIX] Thêm max-width: 100% và -webkit-overflow-scrolling: touch để tối ưu cuộn trên mobile/webview
+            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 8px; margin-bottom: 12px; -webkit-overflow-scrolling: touch;">';
             
             imageNames.forEach(rawFileName => {
                 const transparentGif = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-                // Thay gap bằng margin-right: 8px, thêm min-width: 64px để ảnh không bao giờ bị ép nhỏ
-                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="width: 64px; height: 64px; min-width: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; background: #e0e0e0; flex-shrink: 0; margin-right: 8px; cursor: pointer; display: block;">`;
+                // [FIX] Sử dụng flex: 0 0 auto để chống méo/thu nhỏ hình ảnh, buộc tạo overflow
+                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="flex: 0 0 auto; width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; background: #e0e0e0; margin-right: 8px; cursor: pointer; display: block;">`;
             });
             imagesPreviewHtml += '</div>';
         }
@@ -165,8 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
         .note-editor-overlay { overflow: hidden !important; }
         
-        .note-images-preview::-webkit-scrollbar, #editorImageArea::-webkit-scrollbar { height: 6px; }
-        .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        /* [FIX] Hiện rõ Track và Thumb của thanh cuộn ngang */
+        .note-images-preview::-webkit-scrollbar, #editorImageArea::-webkit-scrollbar { height: 8px; display: block; }
+        .note-images-preview::-webkit-scrollbar-track, #editorImageArea::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+        .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
+        .note-images-preview, #editorImageArea { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.25) rgba(0,0,0,0.05); }
     `;
     document.head.appendChild(styleFix);
 
