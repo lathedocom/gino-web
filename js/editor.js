@@ -52,8 +52,8 @@ function renderEditorImages() {
     if (!imageArea) {
         imageArea = document.createElement('div');
         imageArea.id = 'editorImageArea';
-        // [FIX] Cập nhật CSS hiển thị ngang: max-width 100% để ép giới hạn
-        imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding: 10px 0 14px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; -webkit-overflow-scrolling: touch;';
+        // Khóa khung ảnh không vượt quá 100% bằng box-sizing, ép tạo thanh cuộn bên trong
+        imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; width: 100%; box-sizing: border-box; padding: 10px 0 14px 0; margin-bottom: 10px; border-bottom: 1px solid #eee; -webkit-overflow-scrolling: touch;';
         const tagsArea = document.getElementById('editorTagsArea');
         tagsArea.parentNode.insertBefore(imageArea, tagsArea.nextSibling);
     }
@@ -67,7 +67,6 @@ function renderEditorImages() {
     imageArea.style.display = 'flex';
     appState.currentEditingImages.forEach((imgObj, index) => {
         const wrapper = document.createElement('div');
-        // [FIX] flex: 0 0 auto bắt buộc thẻ phải giữ độ lớn thiết lập ban đầu (80x80)
         wrapper.style.cssText = 'flex: 0 0 auto; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; margin-right: 12px; position: relative; display: block;';
         
         const img = document.createElement('img');
