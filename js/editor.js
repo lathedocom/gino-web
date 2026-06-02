@@ -52,9 +52,9 @@ function renderEditorImages() {
     
     if (!imageArea) return; 
     
-    // Đã thêm overflow-y: hidden để ẩn thanh cuộn dọc
-    // Tăng padding-bottom để thanh cuộn ngang không lẹm vào ảnh
-    imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; width: 100%; box-sizing: border-box; padding-bottom: 12px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; align-items: flex-start;';
+    // [FIX] Thêm min-height: 105px để đảm bảo không bị lẹm ảnh khi thanh cuộn ngang xuất hiện,
+    // đồng thời dùng overflow-y: hidden để xóa sổ thanh cuộn dọc.
+    imageArea.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; width: 100%; box-sizing: border-box; padding-bottom: 12px; margin-bottom: 12px; min-height: 105px; align-items: center; -webkit-overflow-scrolling: touch;';
     
     imageArea.innerHTML = '';
     
