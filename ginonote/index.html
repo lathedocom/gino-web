@@ -4,11 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="GinoNote - Ứng dụng ghi chú kết hợp phương pháp Active Recall và Spaced Repetition.">
-<title>GinoNote - Ghi chú để nhớ lâu hơn</title>
+<title>GinoNote - Khắc ghi chú vào trí nhớ</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+/* Thêm một chút style bổ sung trực tiếp để nút Web app hiển thị đồng bộ và đẹp mắt */
+.webapp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #202124; /* Màu tối lịch lãm, bạn có thể đổi theo file style.css */
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.webapp-btn:hover {
+    background-color: #35373a;
+}
+.webapp-btn i {
+    margin-right: 8px;
+}
+.hero-content, .super__free {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+</style>
 </head>
 <body>
 <div class="toolbar">
@@ -29,6 +55,10 @@ GinoNote
 <a href="https://play.google.com/store/apps/details?id=com.lathedo.ginonote" class="playstore-btn" target="_blank">
 <i class="material-icons">shop</i>
 <span data-i18n="download">Tải trên Google Play</span>
+</a>
+<a href="https://gino.lathedo.com" class="webapp-btn" target="_blank" style="margin-top: 12px;">
+<i class="material-icons">apps</i>
+<span data-i18n="webapp">Web app</span>
 </a>
 </div>
 </section>
@@ -280,6 +310,10 @@ Sở hữu trọn đời chỉ với một lần thanh toán.
 <a href="https://play.google.com/store/apps/details?id=com.lathedo.ginonote" class="playstore-btn mt-4" target="_blank" style="margin-top: 24px; display: inline-flex;">
 <i class="material-icons">shop</i>
 <span data-i18n="download_cta">Tải trên Google Play</span>
+</a>
+<a href="https://gino.lathedo.com" class="webapp-btn" target="_blank" style="margin-top: 12px;">
+<i class="material-icons">apps</i>
+<span data-i18n="webapp_cta">Web app</span>
 </a>
 </div>
 </section>
