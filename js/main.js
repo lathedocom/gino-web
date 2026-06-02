@@ -5,7 +5,6 @@ import { initEditor, openNoteInEditor } from './editor.js';
 import { initCalendar, renderCalendarView, renderTagsSidebar, selectedFilterDate, selectedFilterTag, setSelectedFilterDate, setSelectedFilterTag } from './calendar.js';
 import { extractTagsFromNote, extractImageNamesFromNote, indexToHex, getThemeAwareColor, hexToIndex, getImageUrlSafe, previewImageInApp } from './utils.js';
 
-// Khai báo biến toàn cục cho Pagination
 let currentRenderLimit = 20;
 let filteredNotesCache = [];
 let observer = null;
@@ -29,41 +28,31 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         currentRenderLimit = 20;
         notesGrid.innerHTML = '';
 
-        // Lấy từ khóa tìm kiếm (chuyển thành chữ thường)
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-        // Chỉ lọc lại khi reset
         filteredNotesCache = appState.globalNotesArray.filter(note => {
-            // Lọc theo Tag
             if (selectedFilterTag) {
                 const tagsArray = extractTagsFromNote(note);
                 if (!tagsArray.includes(selectedFilterTag)) return false;
             }
-            
-            // Lọc theo Ngày
             if (selectedFilterDate) {
                 const noteDate = new Date(note.updatedAt || note.createdAt);
                 if (noteDate.getFullYear() !== selectedFilterDate.getFullYear() ||
                     noteDate.getMonth() !== selectedFilterDate.getMonth() ||
                     noteDate.getDate() !== selectedFilterDate.getDate()) return false;
             }
-
-            // Lọc theo Search Term (Tiêu đề hoặc Nội dung)
             if (searchTerm) {
                 const title = (note.title || note.memoTitle || '').toLowerCase();
                 const content = (note.content || note.memoContent || note.text || '').toLowerCase();
-                
                 if (!title.includes(searchTerm) && !content.includes(searchTerm)) {
-                    return false; // Bỏ qua nếu không chứa từ khóa ở cả title và content
+                    return false;
                 }
             }
-
             return true;
         });
     }
 
-    // Cắt mảng để render (Phân trang)
     const notesToRender = filteredNotesCache.slice(notesGrid.childElementCount, currentRenderLimit);
     
     for (const note of notesToRender) {
@@ -86,21 +75,18 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         let matchCount = imageNames.length;
 
         if (matchCount > 0) {
-            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">';
-            const previewNames = imageNames.slice(0, 4);
-
-            previewNames.forEach(rawFileName => {
-                // Sử dụng Placeholder base64 và loading="lazy" thay vì await trực tiếp
+            // [FIX] Chuyển đổi thành cuộn ngang (overflow-x: auto), thêm flex-shrink: 0 cho các ảnh
+            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 6px;">';
+            
+            // Render toàn bộ ảnh để có thể cuộn, không dùng hàm slice nữa
+            imageNames.forEach(rawFileName => {
                 const transparentGif = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; background: #e0e0e0;">`;
+                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; background: #e0e0e0; flex-shrink: 0; cursor: pointer;">`;
             });
             imagesPreviewHtml += '</div>';
         }
 
         let displayContent = note.content || note.memoContent || note.text || '';
-
-        // [FIX]: Loại bỏ HOÀN TOÀN các thẻ <img> ra khỏi văn bản hiển thị.
-        // Thay thế bằng dòng chữ nhỏ để trình duyệt không gửi request ảo gây lỗi 404.
         displayContent = displayContent.replace(/<img[^>]*>/gi, ' <span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span> ');
 
         card.innerHTML = `
@@ -114,10 +100,7 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         notesGrid.appendChild(card);
     }
     
-    // Kích hoạt tải ảnh bất đồng bộ không chặn luồng
     loadLazyImagesFromDexie();
-    
-    // Thiết lập IntersectionObserver cho cuộn vô hạn
     setupInfiniteScroll();
     
     if (resetLimit) {
@@ -126,7 +109,6 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
     }
 }
 
-// Hàm chạy ngầm đổi thẻ img data-filename thành Blob URL từ Dexie
 function loadLazyImagesFromDexie() {
     const lazyImages = document.querySelectorAll('.lazy-local-img');
     lazyImages.forEach(async (img) => {
@@ -135,14 +117,18 @@ function loadLazyImagesFromDexie() {
             const localUrl = await getImageUrlSafe(fileName);
             if (localUrl) {
                 img.src = localUrl;
-                img.classList.remove('lazy-local-img'); // Xóa class để không quét lại
+                img.classList.remove('lazy-local-img'); 
 
-                // Gắn sự kiện click phóng to sau khi có ảnh thật
-                img.style.cursor = 'zoom-in';
-                img.title = "Nhấp để xem phóng to";
+                // [FIX] Lấy danh sách toàn bộ ảnh thuộc ghi chú hiện tại để truyền vào Slider
+                img.title = "Nhấp để xem";
                 img.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    previewImageInApp(img.src);
+                    const container = img.closest('.note-images-preview');
+                    const allImgs = Array.from(container.querySelectorAll('img.preview-img'));
+                    const imageUrls = allImgs.map(i => i.src);
+                    const currentIndex = allImgs.indexOf(img);
+                    
+                    previewImageInApp(imageUrls, currentIndex);
                 });
             }
         }
@@ -150,11 +136,9 @@ function loadLazyImagesFromDexie() {
 }
 
 function setupInfiniteScroll() {
-    // Xóa trigger cũ nếu có
     const oldTrigger = document.getElementById('loadMoreTrigger');
     if (oldTrigger) oldTrigger.remove();
     
-    // Nếu đã load hết thì không gắn thêm trigger
     if (currentRenderLimit >= filteredNotesCache.length) return;
     
     const trigger = document.createElement('div');
@@ -165,26 +149,27 @@ function setupInfiniteScroll() {
     if (observer) observer.disconnect();
     observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
-            currentRenderLimit += 20; // Tải thêm 20 note nữa
-            renderSyncedNotesToWeb(false); // Gọi lại nhưng KHÔNG reset limit
+            currentRenderLimit += 20; 
+            renderSyncedNotesToWeb(false); 
         }
     }, { rootMargin: "100px" });
     
     observer.observe(trigger);
 }
 
-// BẮT ĐẦU CHẠY ỨNG DỤNG TẠI ĐÂY
 document.addEventListener('DOMContentLoaded', () => {
-    // CSS Fix (nếu chưa có bên HTML)
     const styleFix = document.createElement('style');
     styleFix.innerHTML = `
         .editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
         .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
         .note-editor-overlay { overflow: hidden !important; }
+        
+        /* [FIX] CSS tùy chỉnh thanh cuộn ngang cho vùng ảnh */
+        .note-images-preview::-webkit-scrollbar, #editorImageArea::-webkit-scrollbar { height: 6px; }
+        .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
     `;
     document.head.appendChild(styleFix);
 
-    // Xử lý điều hướng thanh bên (Sidebar)
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
     const navItems = document.querySelectorAll('.nav-item');
@@ -205,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 setSelectedFilterDate(null);
                 setSelectedFilterTag(null);
                 
-                // Clear search input khi reset bộ lọc
                 const searchInput = document.getElementById('searchInput');
                 if (searchInput) searchInput.value = '';
                 
@@ -215,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Sự kiện tìm kiếm (Search) theo thời gian thực
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', () => {
@@ -223,11 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Khởi tạo UI Editor và Lịch
     initEditor();
     initCalendar();
 
-    // Gắn sự kiện nút Add (FAB)
     const fabBtn = document.getElementById('fabBtn');
     if (fabBtn) {
         fabBtn.addEventListener('click', () => {
@@ -236,9 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tải dữ liệu từ Local
     loadNotesFromDBAndRender();
-
-    // Nếu API Google đã tải xong trễ, gọi check ngay
     checkAndFetchDriveData();
 });
