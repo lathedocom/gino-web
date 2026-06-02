@@ -58,6 +58,8 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
     for (const note of notesToRender) {
         const card = document.createElement('div');
         card.className = 'note-card';
+        // Ép min-width: 0 để chống Grid blowout (kích hoạt thanh cuộn)
+        card.style.minWidth = '0'; 
 
         let displayIdx = note.colorIndex !== undefined ? note.colorIndex : hexToIndex(note.color || note.bgColor || '#FFFFFF');
         let cardHex = indexToHex(displayIdx);
@@ -75,13 +77,13 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         let matchCount = imageNames.length;
 
         if (matchCount > 0) {
-            // [FIX] Chuyển đổi thành cuộn ngang (overflow-x: auto), thêm flex-shrink: 0 cho các ảnh
-            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 6px;">';
+            // Thay đổi cssText: Dùng nowrap, width 100% để ép cuộn ngang
+            imagesPreviewHtml += '<div class="note-images-preview" style="display: flex; flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 8px; margin-bottom: 12px;">';
             
-            // Render toàn bộ ảnh để có thể cuộn, không dùng hàm slice nữa
             imageNames.forEach(rawFileName => {
                 const transparentGif = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; background: #e0e0e0; flex-shrink: 0; cursor: pointer;">`;
+                // Thay gap bằng margin-right: 8px, thêm min-width: 64px để ảnh không bao giờ bị ép nhỏ
+                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="width: 64px; height: 64px; min-width: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; background: #e0e0e0; flex-shrink: 0; margin-right: 8px; cursor: pointer; display: block;">`;
             });
             imagesPreviewHtml += '</div>';
         }
@@ -119,7 +121,6 @@ function loadLazyImagesFromDexie() {
                 img.src = localUrl;
                 img.classList.remove('lazy-local-img'); 
 
-                // [FIX] Lấy danh sách toàn bộ ảnh thuộc ghi chú hiện tại để truyền vào Slider
                 img.title = "Nhấp để xem";
                 img.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -164,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; resize: none; padding-bottom: 50px; }
         .note-editor-overlay { overflow: hidden !important; }
         
-        /* [FIX] CSS tùy chỉnh thanh cuộn ngang cho vùng ảnh */
         .note-images-preview::-webkit-scrollbar, #editorImageArea::-webkit-scrollbar { height: 6px; }
         .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
     `;
