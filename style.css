@@ -11,7 +11,7 @@
   --border-color: #E8EAED;
   --fab-color: #FFB300;          /* Nút FAB nổi bật với màu Vàng */
   --editor-active-color: #1A73E8; /* Giữ màu xanh Google Blue cho các action trong Editor */
-  
+
   /* Màu nền ghi chú - Chế độ Sáng (Khớp colors.xml) */
   --note-bg-default: #FFFFFF;
   --note-bg-yellow: #FFF9C4;
@@ -19,7 +19,7 @@
   --note-bg-blue: #BBDEFB;
   --note-bg-green: #C8E6C9;
   --note-bg-purple: #E1BEE7;
-  
+
   /* Biến tương thích ngược cho file HTML/JS cũ nếu chưa đổi tên */
   --note-default: var(--note-bg-default);
   --note-yellow: var(--note-bg-yellow);
@@ -29,8 +29,12 @@
   --note-purple: var(--note-bg-purple);
 
   /* Màu thanh cuộn chế độ Sáng */
-  --scrollbar-thumb: rgba(0, 0, 0, 0.2); 
-  --scrollbar-hover: rgba(0, 0, 0, 0.4); 
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-hover: rgba(0, 0, 0, 0.4);
+
+  /* Biến màu cho tính năng Active Recall (Cloze) - Chế độ Sáng */
+  --cloze-bg: rgba(255, 179, 0, 0.15);
+  --cloze-text: var(--primary-color);
 }
 
 /* Tự động nhận diện giao diện tối của hệ thống */
@@ -48,7 +52,7 @@
     --border-color: #3C4043;
     --fab-color: #FFCA28;
     --editor-active-color: #64B5F6;
-    
+
     /* Màu nền ghi chú - Chế độ Tối (Khớp colors-night.xml) */
     --note-bg-default: #1E1E1E;
     --note-bg-yellow: #3E3B2E;
@@ -56,15 +60,18 @@
     --note-bg-blue: #1A2835;
     --note-bg-green: #1B3320;
     --note-bg-purple: #2D2033;
-    
+
     /* Màu thanh cuộn chế độ Tối */
     --scrollbar-thumb: rgba(255, 255, 255, 0.2);
     --scrollbar-hover: rgba(255, 255, 255, 0.4);
+
+    /* Biến màu cho tính năng Active Recall (Cloze) - Chế độ Tối */
+    --cloze-bg: rgba(255, 202, 40, 0.15);
+    --cloze-text: var(--accent-color);
   }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   font-family: 'Roboto', Arial, sans-serif;
   background-color: var(--surface-bg);
@@ -78,11 +85,11 @@ body {
 /* --------------------------------------------------- */
 /* HIỆU ỨNG ANIMATION GLOBAL */
 /* --------------------------------------------------- */
-@keyframes spin { 
-  100% { transform: rotate(360deg); } 
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
-.is-syncing { 
-  animation: spin 1s linear infinite; 
+.is-syncing {
+  animation: spin 1s linear infinite;
 }
 
 /* --------------------------------------------------- */
@@ -90,23 +97,21 @@ body {
 /* --------------------------------------------------- */
 .app-header {
   display: flex;
-  align-items: center; 
+  align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  height: 64px; 
+  height: 64px;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--card-bg);
   z-index: 1000;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-
-.header-left { 
-  display: flex; 
-  align-items: center; 
-  gap: 16px; 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   flex: 1; /* Dùng flex 1 để cân đối với phần search và right */
 }
-
 /* Tiêu đề ứng dụng */
 .app-title {
   font-size: 20px;
@@ -114,7 +119,6 @@ body {
   color: var(--primary-color);
   white-space: nowrap;
 }
-
 /* Thanh tìm kiếm */
 .search-container {
   display: flex;
@@ -128,17 +132,14 @@ body {
   margin: 0 16px;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
-
 .search-container:focus-within {
   background-color: var(--card-bg);
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   border: 1px solid var(--border-color);
 }
-
 .search-container i {
   color: var(--text-light);
 }
-
 .search-container input {
   width: 100%;
   border: none;
@@ -148,36 +149,32 @@ body {
   color: var(--text-main);
   font-family: inherit;
 }
-
-.header-right { 
-  display: flex; 
-  align-items: center; 
-  justify-content: flex-end; 
-  flex: 1; 
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
 }
-
 .icon-btn {
   background: none;
-  border: none; 
-  color: var(--text-light); 
+  border: none;
+  color: var(--text-light);
   cursor: pointer;
   padding: 12px;
-  border-radius: 50%; 
-  display: flex; 
-  align-items: center; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
 }
-
-.icon-btn:hover { 
-  background-color: rgba(128,128,128,0.1); 
-  color: var(--text-main); 
+.icon-btn:hover {
+  background-color: rgba(128,128,128,0.1);
+  color: var(--text-main);
 }
-
 /* Nút Đồng bộ - Dạng hình tròn chứa Icon */
 .sync-btn {
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: center;
   justify-content: center;
   background-color: var(--card-bg);
   color: var(--primary-color);
@@ -187,12 +184,10 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
 .sync-btn:hover {
   background-color: var(--primary-color);
   color: #fff;
 }
-
 .sync-btn.active-auth {
   background-color: var(--primary-color);
   color: white;
@@ -202,15 +197,14 @@ body {
 
 /* Sidebar */
 .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
-
 .sidebar {
   width: 280px;
   background-color: var(--card-bg);
   padding-top: 16px;
-  overflow-y: auto; border-right: 1px solid var(--border-color);
+  overflow-y: auto; 
+  border-right: 1px solid var(--border-color);
   transition: transform 0.3s ease;
 }
-
 .nav-item {
   display: flex;
   align-items: center; padding: 0 24px; height: 48px; margin-right: 16px; border-radius: 0 24px 24px 0;
@@ -218,20 +212,16 @@ body {
   color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
   font-weight: 500; font-size: 14px;
 }
-
 .nav-item i { color: var(--text-light); font-size: 24px; }
-
 .nav-item.active {
   /* Nền vàng nhạt, chữ Xanh Navy */
   background-color: rgba(255, 179, 0, 0.15);
   color: var(--primary-color);
   font-weight: 700;
 }
-
 .nav-item.active i {
   color: var(--accent-color); /* Icon màu vàng */
 }
-
 @media (max-width: 600px) {
   .sidebar {
     position: absolute; left: 0; top: 0; bottom: 0; z-index: 900;
@@ -244,56 +234,85 @@ body {
   .search-container { display: none; /* Ẩn tìm kiếm trên mobile hoặc thiết kế lại riêng */ }
 }
 
-/* Main Content & Views */
-.main-content { flex: 1; padding: 32px 24px; overflow-y: auto; background-color: var(--surface-bg); }
+/* --------------------------------------------------- */
+/* Main Content & Views (Nâng cấp Cột Masonry) */
+/* --------------------------------------------------- */
+.main-content { 
+  flex: 1; 
+  padding: 32px 24px; 
+  overflow-y: auto; 
+  background-color: var(--surface-bg); 
+}
 
-.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+/* Thiết lập Layout dạng lưới Masonry (giống Google Keep) */
+.notes-grid { 
+  column-count: 1; 
+  column-gap: 16px; 
+  width: 100%; 
+}
+@media (min-width: 600px) { .notes-grid { column-count: 2; } }
+@media (min-width: 900px) { .notes-grid { column-count: 3; } }
+@media (min-width: 1200px) { .notes-grid { column-count: 4; } }
 
 .note-card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 16px; 
-  padding: 20px; 
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-  border-top: 4px solid transparent; 
+  border-top: 4px solid transparent;
+  
+  /* Giúp thẻ ghi chú không bị cắt ngang ở giữa 2 cột */
+  break-inside: avoid;
+  margin-bottom: 16px;
 }
-
 .note-card:hover {
-  transform: translateY(-4px); 
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
-  border-top: 4px solid var(--accent-color); 
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  border-top: 4px solid var(--accent-color);
 }
-
 .note-title { font-size: 18px; font-weight: bold; color: var(--text-main); }
 .note-body { font-size: 14px; color: var(--text-light); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.tag { 
-  font-size: 12px; 
-  padding: 6px 12px; 
-  background-color: rgba(128,128,128,0.1); 
-  color: var(--text-main); 
-  border-radius: 12px; 
-  cursor: pointer; 
+.tag {
+  font-size: 12px;
+  padding: 6px 12px;
+  background-color: rgba(128,128,128,0.1);
+  color: var(--text-main);
+  border-radius: 12px;
+  cursor: pointer;
   border: 1px solid var(--border-color);
 }
-.tag:hover { 
-  background-color: rgba(77, 182, 172, 0.1); 
-  border-color: var(--accent-color); 
+.tag:hover {
+  background-color: rgba(77, 182, 172, 0.1);
+  border-color: var(--accent-color);
   color: var(--accent-color);
 }
 
+/* --------------------------------------------------- */
+/* Tối ưu hiển thị tính năng Active Recall (Cloze) */
+/* --------------------------------------------------- */
+.cloze-hint {
+  background-color: var(--cloze-bg);
+  color: var(--cloze-text);
+  border-bottom: 2px dashed var(--accent-color);
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------- */
 /* Calendar */
+/* --------------------------------------------------- */
 .calendar-container { max-width: 600px; margin: 0 auto; background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
 .cal-day-name { font-weight: bold; color: var(--text-light); font-size: 14px; margin-bottom: 8px;}
-
 /* MATERIAL DESIGN CHO LỊCH */
 .cal-day {
   display: flex;
@@ -305,9 +324,7 @@ body {
   position: relative;
   min-height: 48px;
 }
-
 .cal-day:hover .day-number { background-color: rgba(128,128,128,0.1); }
-
 /* Vòng tròn bọc con số */
 .day-number {
   display: flex;
@@ -320,20 +337,17 @@ body {
   color: var(--text-main);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-
 /* Ngày hôm nay */
 .cal-day.today .day-number {
   font-weight: bold;
   color: var(--primary-color);
 }
-
 /* Ngày đang chọn */
 .cal-day.selected .day-number {
   background-color: var(--primary-color);
   color: #ffffff !important;
   font-weight: bold;
 }
-
 /* Dấu chấm báo hiệu có ghi chú */
 .note-dot {
   width: 6px;
@@ -342,17 +356,16 @@ body {
   border-radius: 50%;
   margin-top: 4px;
 }
-
 /* Tags View (Cập nhật định dạng Chip Material Design) */
-.tags-container { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 8px; 
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-.tags-container .tag { 
-  font-size: 14px; 
+.tags-container .tag {
+  font-size: 14px;
   font-weight: 500;
-  padding: 6px 14px; 
+  padding: 6px 14px;
   border-radius: 24px; /* Bo góc lớn để tạo hình Chip */
   background-color: rgba(128,128,128,0.08); /* Background nhạt nhẹ */
   border: 1px solid var(--border-color);
@@ -363,35 +376,43 @@ body {
   transition: all 0.2s ease;
 }
 
-/* FAB */
+/* --------------------------------------------------- */
+/* FAB (Đã Nâng cấp Hiệu ứng) */
+/* --------------------------------------------------- */
 .fab-btn {
   position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
   background-color: var(--accent-color); color: #000;
   border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
   cursor: pointer; box-shadow: 0 4px 14px rgba(255, 179, 0, 0.4); z-index: 90;
-  transition: transform 0.2s, background-color 0.2s;
+  /* Thêm transition cho box-shadow */
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.2s, box-shadow 0.3s;
+}
+.fab-btn:hover { 
+  filter: brightness(0.95); 
+  transform: translateY(-4px); /* Nhô lên nhẹ khi hover */
+  box-shadow: 0 8px 20px rgba(255, 179, 0, 0.6); 
+}
+.fab-btn:active { 
+  transform: translateY(0) scale(0.95); /* Cảm giác nhấn vật lý */
 }
 
-.fab-btn:hover { filter: brightness(0.9); }
-.fab-btn:active { transform: scale(1.1); }
-
+/* --------------------------------------------------- */
 /* Editor Overlay */
+/* --------------------------------------------------- */
 .note-editor-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   z-index: 1001;
-  background-color: rgba(0, 0, 0, 0.4); 
+  background-color: rgba(0, 0, 0, 0.4);
   display: none;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   padding: 20px;
-  transform: none; 
+  transform: none;
 }
-
 .note-editor-overlay.active {
   display: flex;
 }
-
 /* Header cố định trong chế độ Editor */
 .editor-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -401,45 +422,39 @@ body {
   border-bottom: none;
   background-color: transparent;
 }
-
 .editor-header-actions { display: flex; gap: 8px; }
 .action-btn:hover { color: var(--editor-active-color); }
 #deleteNoteBtn:hover {
-  color: #D32F2F; 
+  color: #D32F2F;
 }
-
 .save-btn { color: var(--editor-active-color); }
 .color-picker-container { position: relative; }
-
 .color-palette-popup {
   position: absolute; top: 100%; right: 0; background-color: var(--card-bg);
   border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none;
   grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
 }
-
 .color-palette-popup.open { display: grid; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
 .color-option.active { border: 2px solid var(--editor-active-color); }
-
 /* Khung ghi chú kiểu Keep */
 #editorBody {
   width: 100%;
-  max-width: 600px; 
+  max-width: 600px;
   max-height: 90vh;
-  border-radius: 16px; 
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
-  overflow: hidden; 
+  overflow: hidden;
   position: relative;
   background-color: var(--note-bg-default);
   transition: background-color 0.3s;
 }
-
 /* Nội dung cuộn độc lập */
 .editor-body-content {
   flex: 1;
-  overflow-y: auto; 
+  overflow-y: auto;
   padding: 10px 20px 20px 20px;
   display: flex;
   flex-direction: column;
@@ -452,18 +467,17 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
-
 ::-webkit-scrollbar {
-  width: 8px; 
-  height: 8px; 
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent; 
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
   border-radius: 10px;
-  border: 2px solid transparent; 
+  border: 2px solid transparent;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -471,24 +485,21 @@ body {
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-/* --------------------------------------------------- */
 
+/* --------------------------------------------------- */
 .editor-body {
   padding: 20px;
 }
-
-.editor-title-input { 
+.editor-title-input {
   width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: bold; color: var(--text-main); font-family: inherit; margin-bottom: 12px;
 }
-
 .editor-time-container { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
 .editor-tags-area { padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
 .editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-
 .tag-input { width: 100px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
-.editor-textarea { 
+.editor-textarea {
   width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
-  resize: none; margin-top: 8px; 
+  resize: none; margin-top: 8px;
 }
 
 /* Responsive Sidebar Desktop */
@@ -501,7 +512,6 @@ body {
 /* Fix Cuộn Readonly */
 .readonly-mode .editor-title-input { pointer-events: none; }
 .readonly-mode .editor-textarea { cursor: default; }
-
 .editor-tag-item { display: inline-flex; align-items: center; gap: 4px; }
 .remove-tag-btn { cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 50%; padding: 2px; }
 .remove-tag-btn:hover { background: rgba(255,0,0,0.2); color: #D32F2F; }
@@ -510,16 +520,34 @@ body {
 .note-card, #editorBody {
   color: var(--text-main) !important;
 }
-
 .note-title, .editor-title-input {
   color: var(--text-main) !important;
 }
-
 .note-body, .editor-textarea {
   color: var(--text-light) !important;
 }
-
 /* Đảm bảo nền Editor đồng bộ chính xác biến CSS */
 #editorBody {
   background-color: var(--note-bg-default);
+}
+
+/* --------------------------------------------------- */
+/* Nâng cấp Editor trên thiết bị di động (Mobile) */
+/* Biến Editor thành dạng Full-screen tràn viền */
+/* --------------------------------------------------- */
+@media (max-width: 600px) {
+  .note-editor-overlay {
+    padding: 0; /* Xóa khoảng trống thừa */
+  }
+  
+  #editorBody {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh; /* Chiếm trọn màn hình */
+    border-radius: 0; /* Bỏ bo góc */
+  }
+  
+  .editor-body-content {
+    padding-bottom: 80px; /* Chừa không gian cho bàn phím ảo */
+  }
 }
