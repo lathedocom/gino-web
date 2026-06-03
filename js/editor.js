@@ -10,12 +10,31 @@ function setEditorMode(isEditing) {
     const editorBody = document.getElementById('editorBody');
     const newTagInput = document.getElementById('newTagInput');
     const editBody = document.getElementById('editNoteBody');
-    
+
+    // TẠO THẺ DIV PREVIEW ẢO (ĐỂ RENDER HIGHLIGHT CLOZE DELETION)
+    let previewDiv = document.getElementById('editNoteBodyPreview');
+    if (!previewDiv) {
+        previewDiv = document.createElement('div');
+        previewDiv.id = 'editNoteBodyPreview';
+        previewDiv.className = 'editor-textarea'; // Kế thừa toàn bộ CSS của textarea
+        previewDiv.style.whiteSpace = 'pre-wrap'; // Giữ nguyên định dạng xuống dòng
+        previewDiv.style.wordBreak = 'break-word';
+        previewDiv.style.cursor = 'default';
+        previewDiv.style.display = 'none';
+        // Chèn div preview này ngay sau thẻ textarea
+        editBody.parentNode.insertBefore(previewDiv, editBody.nextSibling);
+    }
+
     if (isEditing) {
         editNoteModeBtn.style.display = 'none';
         editModeToolbar.style.display = 'flex';
         editorBody.classList.remove('readonly-mode');
         newTagInput.style.display = 'inline-block';
+        
+        // Ẩn bản preview, hiển thị Textarea để người dùng gõ
+        previewDiv.style.display = 'none';
+        editBody.style.display = 'block';
+        
         editBody.removeAttribute('readonly');
         document.querySelectorAll('.image-remove-btn, .remove-tag-btn').forEach(b => b.style.display = 'flex');
     } else {
@@ -23,6 +42,22 @@ function setEditorMode(isEditing) {
         editModeToolbar.style.display = 'none';
         editorBody.classList.add('readonly-mode');
         newTagInput.style.display = 'none';
+        
+        // Render nội dung Active Recall cho bản preview
+        let displayContent = editBody.value || '';
+        
+        // Thoát các ký tự HTML đặc biệt để chống lỗi hiển thị và bảo mật XSS nhẹ
+        displayContent = displayContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        // Regex Highlight các từ khóa nằm trong {}
+        displayContent = displayContent.replace(/\{([^}]+)\}/g, '<span class="cloze-hint">$1</span>');
+        
+        previewDiv.innerHTML = displayContent;
+
+        // Ẩn Textarea, hiển thị bản Preview đã được tô sáng
+        editBody.style.display = 'none';
+        previewDiv.style.display = 'block';
+
         editBody.setAttribute('readonly', 'true');
         document.querySelectorAll('.image-remove-btn, .remove-tag-btn').forEach(b => b.style.display = 'none');
     }
@@ -316,7 +351,9 @@ export function initEditor() {
                 }
             });
             
+            // Xử lý chuyển sang chế độ đọc (render Preview Div)
             setEditorMode(false);
+            
             await loadNotesFromDBAndRender();
             
             const isSuccess = await saveNotesToDrive();
