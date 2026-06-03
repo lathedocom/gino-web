@@ -12,7 +12,7 @@
   --fab-color: #FFB300;          /* Nút FAB nổi bật với màu Vàng */
   --editor-active-color: #1A73E8; /* Giữ màu xanh Google Blue cho các action trong Editor */
 
-  /* Màu nền ghi chú - Chế độ Sáng (Khớp colors.xml) */
+  /* Màu nền ghi chú - Chế độ Sáng */
   --note-bg-default: #FFFFFF;
   --note-bg-yellow: #FFF9C4;
   --note-bg-red: #FFCDD2;
@@ -20,7 +20,7 @@
   --note-bg-green: #C8E6C9;
   --note-bg-purple: #E1BEE7;
 
-  /* Biến tương thích ngược cho file HTML/JS cũ nếu chưa đổi tên */
+  /* Biến tương thích ngược */
   --note-default: var(--note-bg-default);
   --note-yellow: var(--note-bg-yellow);
   --note-red: var(--note-bg-red);
@@ -40,7 +40,6 @@
 /* Tự động nhận diện giao diện tối của hệ thống */
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Đồng bộ với Dark mode của Landing Page */
     --primary-color: #64B5F6;
     --primary-variant: #90CAF9;
     --accent-color: #FFCA28;
@@ -53,7 +52,7 @@
     --fab-color: #FFCA28;
     --editor-active-color: #64B5F6;
 
-    /* Màu nền ghi chú - Chế độ Tối (Khớp colors-night.xml) */
+    /* Màu nền ghi chú - Chế độ Tối */
     --note-bg-default: #1E1E1E;
     --note-bg-yellow: #3E3B2E;
     --note-bg-red: #3E2723;
@@ -82,9 +81,7 @@ body {
   overflow: hidden;
 }
 
-/* --------------------------------------------------- */
 /* HIỆU ỨNG ANIMATION GLOBAL */
-/* --------------------------------------------------- */
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }
@@ -110,9 +107,8 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex: 1; /* Dùng flex 1 để cân đối với phần search và right */
+  flex: 1;
 }
-/* Tiêu đề ứng dụng */
 .app-title {
   font-size: 20px;
   font-weight: 700;
@@ -123,10 +119,10 @@ body {
 .search-container {
   display: flex;
   align-items: center;
-  flex: 2; /* Cấp nhiều không gian hơn để ô tìm kiếm rộng rãi */
+  flex: 2;
   max-width: 600px;
-  background-color: rgba(128, 128, 128, 0.1); /* Background nhạt */
-  border-radius: 24px; /* Bo góc mềm mại */
+  background-color: rgba(128, 128, 128, 0.1);
+  border-radius: 24px;
   padding: 8px 16px;
   gap: 8px;
   margin: 0 16px;
@@ -137,9 +133,7 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   border: 1px solid var(--border-color);
 }
-.search-container i {
-  color: var(--text-light);
-}
+.search-container i { color: var(--text-light); }
 .search-container input {
   width: 100%;
   border: none;
@@ -171,7 +165,7 @@ body {
   background-color: rgba(128,128,128,0.1);
   color: var(--text-main);
 }
-/* Nút Đồng bộ - Dạng hình tròn chứa Icon */
+/* Nút Đồng bộ */
 .sync-btn {
   display: flex;
   align-items: center;
@@ -179,8 +173,8 @@ body {
   background-color: var(--card-bg);
   color: var(--primary-color);
   border: 1px solid var(--border-color);
-  padding: 12px; /* Điều chỉnh padding ôm trọn icon */
-  border-radius: 50%; /* Tròn hoàn toàn */
+  padding: 12px;
+  border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -195,7 +189,9 @@ body {
   box-shadow: 0 2px 8px rgba(14, 75, 117, 0.3);
 }
 
+/* --------------------------------------------------- */
 /* Sidebar */
+/* --------------------------------------------------- */
 .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
 .sidebar {
   width: 280px;
@@ -214,13 +210,17 @@ body {
 }
 .nav-item i { color: var(--text-light); font-size: 24px; }
 .nav-item.active {
-  /* Nền vàng nhạt, chữ Xanh Navy */
   background-color: rgba(255, 179, 0, 0.15);
   color: var(--primary-color);
   font-weight: 700;
 }
-.nav-item.active i {
-  color: var(--accent-color); /* Icon màu vàng */
+.nav-item.active i { color: var(--accent-color); }
+
+/* Responsive Sidebar Desktop */
+@media (min-width: 768px) {
+  .sidebar { width: 340px; flex-shrink: 0; }
+  .calendar-sidebar .calendar-container { border: none; box-shadow: none; padding: 0 16px; background: transparent; }
+  .cal-day { padding: 8px 0; }
 }
 
 /* --------------------------------------------------- */
@@ -228,9 +228,16 @@ body {
 /* --------------------------------------------------- */
 @media (max-width: 600px) {
   .sidebar {
-    position: absolute; left: 0; top: 0; bottom: 0; z-index: 900;
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    bottom: 0; 
+    z-index: 900;
     box-shadow: 4px 0 8px rgba(0,0,0,0.1);
     transform: translateX(-100%);
+    /* Mở rộng Sidebar trên Mobile để xem lịch thoải mái hơn */
+    width: 300px;
+    max-width: 85vw;
   }
   .sidebar.mobile-open { transform: translateX(0); }
   .main-content { padding: 16px; }
@@ -239,38 +246,27 @@ body {
   .app-header { 
     border-bottom: none; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-    padding: 8px; /* Giảm padding hai bên để tiết kiệm không gian */
+    padding: 8px; 
   }
-  .header-left {
-    flex: 0 0 auto; /* Không dãn */
-    gap: 8px;
-  }
+  .header-left { flex: 0 0 auto; gap: 8px; }
   
   /* HIỂN THỊ LẠI THANH TÌM KIẾM TRÊN MOBILE */
   .search-container { 
     display: flex; 
-    flex: 1; /* Chiếm trọn không gian trống ở giữa */
+    flex: 1; 
     margin: 0 8px;
     padding: 6px 12px;
   }
-  .search-container input {
-    font-size: 14px; /* Giảm size chữ để vừa với mobile */
-  }
-  
-  .header-right {
-    flex: 0 0 auto; /* Không dãn */
-  }
+  .search-container input { font-size: 14px; }
+  .header-right { flex: 0 0 auto; }
 }
 
-/* Tinh chỉnh thêm: Nếu màn hình điện thoại cực nhỏ (dưới 420px), ẩn chữ "GinoNote" để ô tìm kiếm không bị bóp nghẹt */
 @media (max-width: 420px) {
-  .app-title {
-    display: none;
-  }
+  .app-title { display: none; }
 }
 
 /* --------------------------------------------------- */
-/* Main Content & Views (Nâng cấp Cột Masonry) */
+/* Main Content & Views (Layout Masonry) */
 /* --------------------------------------------------- */
 .main-content { 
   flex: 1; 
@@ -278,8 +274,6 @@ body {
   overflow-y: auto; 
   background-color: var(--surface-bg); 
 }
-
-/* Thiết lập Layout dạng lưới Masonry (giống Google Keep) */
 .notes-grid { 
   column-count: 1; 
   column-gap: 16px; 
@@ -301,8 +295,7 @@ body {
   gap: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
   border-top: 4px solid transparent;
-  
-  /* Giúp thẻ ghi chú không bị cắt ngang ở giữa 2 cột */
+  /* Hỗ trợ hiển thị dạng lưới Masonry */
   break-inside: avoid;
   margin-bottom: 16px;
 }
@@ -330,7 +323,7 @@ body {
 }
 
 /* --------------------------------------------------- */
-/* Tối ưu hiển thị tính năng Active Recall (Cloze) */
+/* Active Recall (Cloze Deletion) */
 /* --------------------------------------------------- */
 .cloze-hint {
   background-color: var(--cloze-bg);
@@ -348,6 +341,7 @@ body {
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
 .cal-day-name { font-weight: bold; color: var(--text-light); font-size: 14px; margin-bottom: 8px;}
+
 /* MATERIAL DESIGN CHO LỊCH */
 .cal-day {
   display: flex;
@@ -360,7 +354,6 @@ body {
   min-height: 48px;
 }
 .cal-day:hover .day-number { background-color: rgba(128,128,128,0.1); }
-/* Vòng tròn bọc con số */
 .day-number {
   display: flex;
   align-items: center;
@@ -372,37 +365,35 @@ body {
   color: var(--text-main);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-/* Ngày hôm nay */
-.cal-day.today .day-number {
-  font-weight: bold;
-  color: var(--primary-color);
+.cal-day.today .day-number { font-weight: bold; color: var(--primary-color); }
+.cal-day.selected .day-number { background-color: var(--primary-color); color: #ffffff !important; font-weight: bold; }
+.note-dot { width: 6px; height: 6px; background-color: var(--accent-color); border-radius: 50%; margin-top: 4px; }
+
+/* ---- TỐI ƯU LỊCH KHÔNG BỊ TRÀN TRÊN SIDEBAR NHỎ ---- */
+.calendar-sidebar .calendar-container {
+  padding: 12px 8px;
 }
-/* Ngày đang chọn */
-.cal-day.selected .day-number {
-  background-color: var(--primary-color);
-  color: #ffffff !important;
-  font-weight: bold;
+.calendar-sidebar .calendar-grid {
+  gap: 4px; 
 }
-/* Dấu chấm báo hiệu có ghi chú */
-.note-dot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--accent-color);
-  border-radius: 50%;
-  margin-top: 4px;
+.calendar-sidebar .day-number {
+  width: 30px; 
+  height: 30px;
 }
-/* Tags View (Cập nhật định dạng Chip Material Design) */
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.calendar-sidebar .cal-day-name {
+  font-size: 13px;
 }
+
+/* --------------------------------------------------- */
+/* Tags View */
+/* --------------------------------------------------- */
+.tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
 .tags-container .tag {
   font-size: 14px;
   font-weight: 500;
   padding: 6px 14px;
-  border-radius: 24px; /* Bo góc lớn để tạo hình Chip */
-  background-color: rgba(128,128,128,0.08); /* Background nhạt nhẹ */
+  border-radius: 24px;
+  background-color: rgba(128,128,128,0.08);
   border: 1px solid var(--border-color);
   display: inline-flex;
   align-items: center;
@@ -412,24 +403,21 @@ body {
 }
 
 /* --------------------------------------------------- */
-/* FAB (Đã Nâng cấp Hiệu ứng) */
+/* FAB (Nút nổi) */
 /* --------------------------------------------------- */
 .fab-btn {
   position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
   background-color: var(--accent-color); color: #000;
   border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
   cursor: pointer; box-shadow: 0 4px 14px rgba(255, 179, 0, 0.4); z-index: 90;
-  /* Thêm transition cho box-shadow */
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.2s, box-shadow 0.3s;
 }
 .fab-btn:hover { 
   filter: brightness(0.95); 
-  transform: translateY(-4px); /* Nhô lên nhẹ khi hover */
+  transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(255, 179, 0, 0.6); 
 }
-.fab-btn:active { 
-  transform: translateY(0) scale(0.95); /* Cảm giác nhấn vật lý */
-}
+.fab-btn:active { transform: translateY(0) scale(0.95); }
 
 /* --------------------------------------------------- */
 /* Editor Overlay */
@@ -445,10 +433,7 @@ body {
   padding: 20px;
   transform: none;
 }
-.note-editor-overlay.active {
-  display: flex;
-}
-/* Header cố định trong chế độ Editor */
+.note-editor-overlay.active { display: flex; }
 .editor-header {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; max-width: 600px;
@@ -459,9 +444,7 @@ body {
 }
 .editor-header-actions { display: flex; gap: 8px; }
 .action-btn:hover { color: var(--editor-active-color); }
-#deleteNoteBtn:hover {
-  color: #D32F2F;
-}
+#deleteNoteBtn:hover { color: #D32F2F; }
 .save-btn { color: var(--editor-active-color); }
 .color-picker-container { position: relative; }
 .color-palette-popup {
@@ -472,7 +455,7 @@ body {
 .color-palette-popup.open { display: grid; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
 .color-option.active { border: 2px solid var(--editor-active-color); }
-/* Khung ghi chú kiểu Keep */
+
 #editorBody {
   width: 100%;
   max-width: 600px;
@@ -486,7 +469,6 @@ body {
   background-color: var(--note-bg-default);
   transition: background-color 0.3s;
 }
-/* Nội dung cuộn độc lập */
 .editor-body-content {
   flex: 1;
   overflow-y: auto;
@@ -495,20 +477,13 @@ body {
   flex-direction: column;
 }
 
-/* --------------------------------------------------- */
 /* TÙY CHỈNH THANH CUỘN TOÀN CỤC */
-/* --------------------------------------------------- */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
   border-radius: 10px;
@@ -521,10 +496,7 @@ body {
   background-clip: padding-box;
 }
 
-/* --------------------------------------------------- */
-.editor-body {
-  padding: 20px;
-}
+.editor-body { padding: 20px; }
 .editor-title-input {
   width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: bold; color: var(--text-main); font-family: inherit; margin-bottom: 12px;
 }
@@ -537,13 +509,6 @@ body {
   resize: none; margin-top: 8px;
 }
 
-/* Responsive Sidebar Desktop */
-@media (min-width: 768px) {
-  .sidebar { width: 340px; flex-shrink: 0; }
-  .calendar-sidebar .calendar-container { border: none; box-shadow: none; padding: 0 16px; background: transparent; }
-  .cal-day { padding: 8px 0; }
-}
-
 /* Fix Cuộn Readonly */
 .readonly-mode .editor-title-input { pointer-events: none; }
 .readonly-mode .editor-textarea { cursor: default; }
@@ -551,38 +516,28 @@ body {
 .remove-tag-btn { cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 50%; padding: 2px; }
 .remove-tag-btn:hover { background: rgba(255,0,0,0.2); color: #D32F2F; }
 
-/* Đảm bảo chữ luôn lấy đúng màu của Theme (Sáng/Tối) */
-.note-card, #editorBody {
-  color: var(--text-main) !important;
-}
-.note-title, .editor-title-input {
-  color: var(--text-main) !important;
-}
-.note-body, .editor-textarea {
-  color: var(--text-light) !important;
-}
-/* Đảm bảo nền Editor đồng bộ chính xác biến CSS */
-#editorBody {
-  background-color: var(--note-bg-default);
-}
+/* Đồng bộ Theme Editor */
+.note-card, #editorBody { color: var(--text-main) !important; }
+.note-title, .editor-title-input { color: var(--text-main) !important; }
+.note-body, .editor-textarea { color: var(--text-light) !important; }
+#editorBody { background-color: var(--note-bg-default); }
 
 /* --------------------------------------------------- */
-/* Nâng cấp Editor trên thiết bị di động (Mobile) */
-/* Biến Editor thành dạng Full-screen tràn viền */
+/* Full-screen Editor cho Mobile */
 /* --------------------------------------------------- */
 @media (max-width: 600px) {
   .note-editor-overlay {
-    padding: 0; /* Xóa khoảng trống thừa */
+    padding: 0;
   }
   
   #editorBody {
     max-width: 100%;
     max-height: 100vh;
-    height: 100vh; /* Chiếm trọn màn hình */
-    border-radius: 0; /* Bỏ bo góc */
+    height: 100vh; 
+    border-radius: 0; 
   }
   
   .editor-body-content {
-    padding-bottom: 80px; /* Chừa không gian cho bàn phím ảo */
+    padding-bottom: 80px; 
   }
 }
