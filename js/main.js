@@ -88,6 +88,7 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
 
         let displayContent = note.content || note.memoContent || note.text || '';
         displayContent = displayContent.replace(/<img[^>]*>/gi, ' <span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span> ');
+        displayContent = displayContent.replace(/\{([^}]+)\}/g, '<span class="cloze-hint">$1</span>');
 
         card.innerHTML = `
             ${matchCount > 0 ? imagesPreviewHtml : ''}
