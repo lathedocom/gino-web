@@ -222,6 +222,10 @@ body {
 .nav-item.active i {
   color: var(--accent-color); /* Icon màu vàng */
 }
+
+/* --------------------------------------------------- */
+/* Tối ưu Header và Sidebar cho Mobile */
+/* --------------------------------------------------- */
 @media (max-width: 600px) {
   .sidebar {
     position: absolute; left: 0; top: 0; bottom: 0; z-index: 900;
@@ -242,7 +246,7 @@ body {
     gap: 8px;
   }
   
-  /* HIỂN THỊ LẠI THANH TÌM KIẾM */
+  /* HIỂN THỊ LẠI THANH TÌM KIẾM TRÊN MOBILE */
   .search-container { 
     display: flex; 
     flex: 1; /* Chiếm trọn không gian trống ở giữa */
