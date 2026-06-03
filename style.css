@@ -229,9 +229,40 @@ body {
     transform: translateX(-100%);
   }
   .sidebar.mobile-open { transform: translateX(0); }
-  .app-header { border-bottom: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .main-content { padding: 16px; }
-  .search-container { display: none; /* Ẩn tìm kiếm trên mobile hoặc thiết kế lại riêng */ }
+  
+  /* Tối ưu Header để chứa Ô tìm kiếm trên Mobile */
+  .app-header { 
+    border-bottom: none; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    padding: 8px; /* Giảm padding hai bên để tiết kiệm không gian */
+  }
+  .header-left {
+    flex: 0 0 auto; /* Không dãn */
+    gap: 8px;
+  }
+  
+  /* HIỂN THỊ LẠI THANH TÌM KIẾM */
+  .search-container { 
+    display: flex; 
+    flex: 1; /* Chiếm trọn không gian trống ở giữa */
+    margin: 0 8px;
+    padding: 6px 12px;
+  }
+  .search-container input {
+    font-size: 14px; /* Giảm size chữ để vừa với mobile */
+  }
+  
+  .header-right {
+    flex: 0 0 auto; /* Không dãn */
+  }
+}
+
+/* Tinh chỉnh thêm: Nếu màn hình điện thoại cực nhỏ (dưới 420px), ẩn chữ "GinoNote" để ô tìm kiếm không bị bóp nghẹt */
+@media (max-width: 420px) {
+  .app-title {
+    display: none;
+  }
 }
 
 /* --------------------------------------------------- */
