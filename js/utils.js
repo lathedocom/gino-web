@@ -86,6 +86,15 @@ export async function getImageUrlSafe(fileName) {
     const imageRecord = await db.images.get(fileName);
     if (imageRecord && imageRecord.blob) {
         const url = URL.createObjectURL(imageRecord.blob);
+        
+        // --- FIX MEMORY LEAK: Giới hạn tối đa 50 ảnh được lưu trong RAM ---
+        const cachedKeys = Object.keys(appState.imageBlobUrls);
+        if (cachedKeys.length >= 50) {
+            const oldestKey = cachedKeys[0]; // Lấy URL cũ nhất
+            URL.revokeObjectURL(appState.imageBlobUrls[oldestKey]); // Giải phóng bộ nhớ
+            delete appState.imageBlobUrls[oldestKey]; // Xóa khỏi cache
+        }
+        
         appState.imageBlobUrls[fileName] = url;
         return url;
     }
@@ -197,4 +206,11 @@ export function showToast(message) {
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
+}
+export function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>'"]/g, match => {
+        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+        return escapeMap[match];
+    });
 }
