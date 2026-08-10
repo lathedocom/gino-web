@@ -258,3 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadNotesFromDBAndRender();
     checkAndFetchDriveData();
 });
+window.addEventListener('online', () => {
+    if (localStorage.getItem('gino_gdrive_token')) {
+        import('./gdrive.js').then(module => module.saveNotesToDrive());
+    }
+});
