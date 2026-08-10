@@ -237,6 +237,7 @@ export function initEditor() {
         let noteData = await db.notes.get(appState.currentEditingNoteId);
         if (noteData) {
             noteData.isDeleted = true;
+            noteData.is_deleted = 1;
             noteData.syncStatus = 'pending';
             noteData.updatedAt = new Date().getTime();
             await db.notes.put(noteData);
@@ -343,6 +344,7 @@ export function initEditor() {
             noteData.imagePaths = JSON.stringify(finalFileNames);
             noteData.updatedAt = new Date().getTime();
             noteData.isDeleted = false;
+            noteData.is_deleted = 0;
             noteData.syncStatus = 'pending';
             
             if (!appState.currentEditingNoteId) noteData.createdAt = noteData.updatedAt;
