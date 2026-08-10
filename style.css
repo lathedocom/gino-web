@@ -477,6 +477,32 @@ body {
   flex-direction: column;
 }
 
+/* --- Toast Notification (Thông báo cập nhật ngầm) --- */
+.gino-toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--primary-color);
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px 24px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s, visibility 0.3s;
+}
+
+.gino-toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+}
 /* TÙY CHỈNH THANH CUỘN TOÀN CỤC */
 * {
   scrollbar-width: thin;
