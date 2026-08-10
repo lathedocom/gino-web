@@ -120,7 +120,13 @@ function renderEditorImages() {
         removeBtn.style.cssText = 'position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0;';
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            appState.currentEditingImages.splice(index, 1);
+            const removedImg = appState.currentEditingImages.splice(index, 1)[0];
+            
+            // --- FIX MEMORY LEAK: Giải phóng RAM ngay khi xóa ảnh nháp ---
+            if (removedImg && removedImg.isNew && removedImg.url) {
+                URL.revokeObjectURL(removedImg.url);
+            }
+            
             renderEditorImages();
         });
         
