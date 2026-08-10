@@ -1,7 +1,7 @@
 // === js/gdrive.js ===
 import { db, appState } from './db.js';
 import { loadNotesFromDBAndRender } from './main.js';
-
+import { showToast } from './utils.js';
 const CLIENT_ID = '631532964907-hi703ubcopoqjmv0e5fn6ui3h2u2mi5b.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -183,6 +183,7 @@ export async function fetchNotesFromHiddenDrive() {
         const tokenObj = gapi.client.getToken();
         if(!tokenObj) throw { status: 401 };
         const token = tokenObj.access_token;
+        let hasNewUpdates = false; // Biến cờ kiểm tra có dữ liệu mới không
         
         // Tải JSON
         if (deltaFilesToDownload.length > 0) {
@@ -197,6 +198,7 @@ export async function fetchNotesFromHiddenDrive() {
             }));
             appState.lastSyncTime = deltaFilesToDownload[deltaFilesToDownload.length - 1].ts;
             localStorage.setItem('gino_last_sync_time', appState.lastSyncTime.toString());
+            hasNewUpdates = true; // Có ghi chú mới
         }
 
         // Tải Ảnh
@@ -217,9 +219,17 @@ export async function fetchNotesFromHiddenDrive() {
                     }
                 }));
             }
+            hasNewUpdates = true; // Có ảnh mới
         }
+
         updateSyncUI('done');
-        await loadNotesFromDBAndRender();
+        
+        // Nếu thực sự có dữ liệu mới được kéo về, hiển thị thông báo và render lại UI
+        if (hasNewUpdates) {
+            showToast("Đã đồng bộ ghi chú mới từ các thiết bị khác!");
+            await loadNotesFromDBAndRender();
+        }
+
     } catch (err) {
         console.error("Lỗi Fetch Drive:", err);
         if (err.status === 401) {
