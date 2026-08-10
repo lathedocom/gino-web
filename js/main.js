@@ -3,7 +3,7 @@ import { db, appState } from './db.js';
 import { checkAndFetchDriveData } from './gdrive.js';
 import { initEditor, openNoteInEditor } from './editor.js';
 import { initCalendar, renderCalendarView, renderTagsSidebar, selectedFilterDate, selectedFilterTag, setSelectedFilterDate, setSelectedFilterTag } from './calendar.js';
-import { extractTagsFromNote, extractImageNamesFromNote, indexToHex, getThemeAwareColor, hexToIndex, getImageUrlSafe, previewImageInApp } from './utils.js';
+import { extractTagsFromNote, extractImageNamesFromNote, indexToHex, getThemeAwareColor, hexToIndex, getImageUrlSafe, previewImageInApp, escapeHTML } from './utils.js';
 
 let currentRenderLimit = 20;
 let filteredNotesCache = [];
@@ -53,7 +53,9 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         });
     }
 
-    const notesToRender = filteredNotesCache.slice(notesGrid.childElementCount, currentRenderLimit);
+    // --- FIX INFINITE SCROLL: Đếm chính xác thẻ thay vì dùng childElementCount ---
+    const currentCount = notesGrid.querySelectorAll('.note-card').length;
+    const notesToRender = filteredNotesCache.slice(currentCount, currentRenderLimit);
     
     for (const note of notesToRender) {
         const card = document.createElement('div');
@@ -68,7 +70,8 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         const tagsArray = extractTagsFromNote(note);
         if (tagsArray.length > 0) {
             card.setAttribute('data-tags', tagsArray.join(','));
-            tagsArray.forEach(tag => { if(tag) tagsHtml += `<span class="tag">${tag}</span>`; });
+            // FIX XSS TRÊN TAGS
+            tagsArray.forEach(tag => { if(tag) tagsHtml += `<span class="tag">${escapeHTML(tag)}</span>`; });
         }
 
         let imagesPreviewHtml = '';
@@ -81,19 +84,30 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
             
             imageNames.forEach(rawFileName => {
                 const transparentGif = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${rawFileName}" class="preview-img lazy-local-img" style="flex: 0 0 auto; width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; background: #e0e0e0; margin-right: 8px; cursor: pointer; display: block;">`;
+                // Lưu ý escape filename để an toàn
+                imagesPreviewHtml += `<img loading="lazy" decoding="async" src="${transparentGif}" data-filename="${escapeHTML(rawFileName)}" class="preview-img lazy-local-img" style="flex: 0 0 auto; width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; background: #e0e0e0; margin-right: 8px; cursor: pointer; display: block;">`;
             });
             imagesPreviewHtml += '</div>';
         }
 
-        let displayContent = note.content || note.memoContent || note.text || '';
-        displayContent = displayContent.replace(/<img[^>]*>/gi, ' <span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span> ');
-        displayContent = displayContent.replace(/\{([^}]+)\}/g, '<span class="cloze-hint">$1</span>');
+        // --- FIX XSS: Xử lý an toàn Tiêu đề và Nội dung ---
+        let safeTitle = escapeHTML(note.title || note.memoTitle || 'Không có tiêu đề');
+        
+        let rawContent = note.content || note.memoContent || note.text || '';
+        // Bước 1: Replace ảnh thành text giả trước khi escape để không bị lỗi thẻ HTML
+        rawContent = rawContent.replace(/<img[^>]*>/gi, ' [Đã đính kèm ảnh] ');
+        
+        // Bước 2: Escape toàn bộ nội dung mã độc
+        let safeContent = escapeHTML(rawContent);
+        
+        // Bước 3: Phục hồi lại các class làm đẹp (hiển thị ảnh & highlight)
+        safeContent = safeContent.replace(/\[Đã đính kèm ảnh\]/g, '<span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span>');
+        safeContent = safeContent.replace(/\{([^}]+)\}/g, '<span class="cloze-hint">$1</span>');
 
         card.innerHTML = `
             ${matchCount > 0 ? imagesPreviewHtml : ''}
-            <div class="note-title">${note.title || note.memoTitle || 'Không có tiêu đề'}</div>
-            <div class="note-body">${displayContent}</div>
+            <div class="note-title">${safeTitle}</div>
+            <div class="note-body">${safeContent}</div>
             <div class="note-tags">${tagsHtml}</div>
         `;
 
