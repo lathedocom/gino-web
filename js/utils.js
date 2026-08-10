@@ -182,3 +182,19 @@ export function previewImageInApp(imageUrls, startIndex = 0) {
 
     document.body.appendChild(overlay);
 }
+export function showToast(message) {
+    let toast = document.getElementById('gino-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'gino-toast';
+        toast.className = 'gino-toast';
+        document.body.appendChild(toast);
+    }
+    toast.innerText = message;
+    toast.classList.add('show');
+    
+    // Tự động ẩn sau 3 giây
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
