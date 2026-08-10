@@ -6,8 +6,13 @@ const urlsToCache = [
     './',
     './index.html',
     './style.css',
-    './script.js',
-    './manifest.json'
+    './manifest.json',
+    './js/main.js',
+    './js/db.js',
+    './js/calendar.js',
+    './js/editor.js',
+    './js/gdrive.js',
+    './js/utils.js'
 ];
 
 self.addEventListener('install', event => {
