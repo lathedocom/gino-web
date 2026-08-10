@@ -222,6 +222,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- BỔ SUNG: TỰ ĐỘNG ĐỒNG BỘ NGAY KHI CÓ SỰ THAY ĐỔI ---
+
+    // 1. Tự động kiểm tra dữ liệu từ Google Drive mỗi 60 giây
+    setInterval(() => {
+        if (localStorage.getItem('gino_gdrive_token') && window.gapi && gapi.client.getToken() !== null) {
+            import('./gdrive.js').then(module => {
+                module.fetchNotesFromHiddenDrive();
+            });
+        }
+    }, 60000);
+
+    // 2. Kích hoạt đồng bộ ngay lập tức khi người dùng chuyển lại tab (Focus vào Web App)
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && localStorage.getItem('gino_gdrive_token')) {
+            import('./gdrive.js').then(module => {
+                module.checkAndFetchDriveData();
+            });
+        }
+    });
     loadNotesFromDBAndRender();
     checkAndFetchDriveData();
 });
