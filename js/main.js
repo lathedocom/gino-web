@@ -172,6 +172,22 @@ function setupInfiniteScroll() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const styleFix = document.createElement('style');
+    styleFix.innerHTML = `
+        .editor-body { display: flex; flex-direction: column; height: calc(100vh - 70px) !important; overflow-y: auto !important; }
+        
+        /* KHÓA CHIỀU NGANG CHO VĂN BẢN (CHỐNG TRÀN) */
+        .editor-body-content { overflow-x: hidden !important; width: 100% !important; box-sizing: border-box !important; }
+        .editor-textarea { flex-grow: 1; min-height: 50vh; overflow-y: auto !important; overflow-x: hidden !important; resize: none; padding-bottom: 50px; width: 100%; box-sizing: border-box; }
+        .note-editor-overlay { overflow: hidden !important; }
+        
+        /* Tùy chỉnh thanh cuộn ngang */
+        .note-images-preview::-webkit-scrollbar, #editorImageArea::-webkit-scrollbar { height: 8px; display: block; }
+        .note-images-preview::-webkit-scrollbar-track, #editorImageArea::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+        .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
+        .note-images-preview, #editorImageArea { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.25) rgba(0,0,0,0.05); }
+    `;
+    document.head.appendChild(styleFix);
 
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
