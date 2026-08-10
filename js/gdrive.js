@@ -118,6 +118,7 @@ function handleTokenResponse(resp) {
     const expiresAt = Date.now() + (resp.expires_in * 1000);
     localStorage.setItem('gino_gdrive_token', resp.access_token);
     localStorage.setItem('gino_gdrive_expires', expiresAt.toString());
+    db.settings.put({ key: 'gdrive_token', value: resp.access_token });
     gapi.client.setToken({ access_token: resp.access_token });
     
     updateSyncUI('syncing');
