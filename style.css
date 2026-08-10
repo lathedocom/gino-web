@@ -458,7 +458,8 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  display: none;
+  display: flex;
+  pointer-events: none;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -470,6 +471,7 @@ body {
 
 .note-editor-overlay.active { 
   display: flex; 
+  pointer-events: auto;
   opacity: 1; 
   visibility: visible; 
 }
