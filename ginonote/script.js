@@ -20,7 +20,7 @@ const translations = {
 // Khối 3: Lịch sử học tập
 "cal_title": "Lịch sử ghi chú",
 "cal_desc": "Xem lại những ngày bạn đã ghi chú.",
-"cal_dot": "ĐĐánh dấu những ngày có ghi chú.",
+"cal_dot": "Đánh dấu những ngày có ghi chú.",
 "cal_today": "Xem lịch sử ghi chú và quay về hôm nay chỉ với một chạm.",
 "cal_notes": "Xem chi tiết ghi chú theo từng ngày.",
 // Khối 4: Thống kê tiến độ học tập
