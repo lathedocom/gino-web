@@ -1,22 +1,17 @@
-/* ===================================================
-   FILE: style.css (Đã nâng cấp Giao diện Material 3)
-   =================================================== */
-
 :root {
   /* Đồng bộ với màu Landing Page */
   --primary-color: #0E4B75;      /* Xanh Navy chủ đạo */
   --primary-variant: #0A3552;    /* Xanh Navy đậm */
   --accent-color: #FFB300;       /* Vàng Hổ phách làm điểm nhấn */
-  --bg-body: #F0F4F8;            
+  --bg-body: #F0F4F8;            /* Dùng xám xanh cực nhạt như section-bg-alt của landing page */
   --surface-bg: #F0F4F8;
   --card-bg: #FFFFFF;
-  --header-bg: rgba(255, 255, 255, 0.85); /* Nền Header kính mờ */
   --text-main: #202124;
   --text-light: #5F6368;
   --border-color: #E8EAED;
-  --fab-color: #FFB300;          
-  --editor-active-color: #1A73E8; 
-  
+  --fab-color: #FFB300;          /* Nút FAB nổi bật với màu Vàng */
+  --editor-active-color: #1A73E8; /* Giữ màu xanh Google Blue cho các action trong Editor */
+
   /* Màu nền ghi chú - Chế độ Sáng */
   --note-bg-default: #FFFFFF;
   --note-bg-yellow: #FFF9C4;
@@ -24,7 +19,7 @@
   --note-bg-blue: #BBDEFB;
   --note-bg-green: #C8E6C9;
   --note-bg-purple: #E1BEE7;
-  
+
   /* Biến tương thích ngược */
   --note-default: var(--note-bg-default);
   --note-yellow: var(--note-bg-yellow);
@@ -32,12 +27,12 @@
   --note-blue: var(--note-bg-blue);
   --note-green: var(--note-bg-green);
   --note-purple: var(--note-bg-purple);
-  
+
   /* Màu thanh cuộn chế độ Sáng */
   --scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --scrollbar-hover: rgba(0, 0, 0, 0.4);
-  
-  /* Biến màu cho tính năng Active Recall (Cloze) */
+
+  /* Biến màu cho tính năng Active Recall (Cloze) - Chế độ Sáng */
   --cloze-bg: rgba(255, 179, 0, 0.15);
   --cloze-text: var(--primary-color);
 }
@@ -51,13 +46,12 @@
     --bg-body: #202124;
     --surface-bg: #202124;
     --card-bg: #2D2E31;
-    --header-bg: rgba(32, 33, 36, 0.85); /* Nền Header kính mờ Dark */
     --text-main: #E8EAED;
     --text-light: #9AA0A6;
     --border-color: #3C4043;
     --fab-color: #FFCA28;
     --editor-active-color: #64B5F6;
-    
+
     /* Màu nền ghi chú - Chế độ Tối */
     --note-bg-default: #1E1E1E;
     --note-bg-yellow: #3E3B2E;
@@ -65,19 +59,18 @@
     --note-bg-blue: #1A2835;
     --note-bg-green: #1B3320;
     --note-bg-purple: #2D2033;
-    
+
     /* Màu thanh cuộn chế độ Tối */
     --scrollbar-thumb: rgba(255, 255, 255, 0.2);
     --scrollbar-hover: rgba(255, 255, 255, 0.4);
-    
-    /* Biến màu cho tính năng Active Recall (Cloze) */
+
+    /* Biến màu cho tính năng Active Recall (Cloze) - Chế độ Tối */
     --cloze-bg: rgba(255, 202, 40, 0.15);
     --cloze-text: var(--accent-color);
   }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   font-family: 'Roboto', Arial, sans-serif;
   background-color: var(--surface-bg);
@@ -97,7 +90,7 @@ body {
 }
 
 /* --------------------------------------------------- */
-/* Header (Glassmorphism) */
+/* Header */
 /* --------------------------------------------------- */
 .app-header {
   display: flex;
@@ -105,29 +98,23 @@ body {
   justify-content: space-between;
   padding: 8px 16px;
   height: 64px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  background-color: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--card-bg);
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-
 .header-left {
   display: flex;
   align-items: center;
   gap: 16px;
   flex: 1;
 }
-
 .app-title {
   font-size: 20px;
   font-weight: 700;
   color: var(--primary-color);
   white-space: nowrap;
-  letter-spacing: 0.5px;
 }
-
 /* Thanh tìm kiếm */
 .search-container {
   display: flex;
@@ -135,20 +122,17 @@ body {
   flex: 2;
   max-width: 600px;
   background-color: rgba(128, 128, 128, 0.1);
-  border-radius: 28px;
-  padding: 10px 20px;
-  gap: 12px;
+  border-radius: 24px;
+  padding: 8px 16px;
+  gap: 8px;
   margin: 0 16px;
-  border: 1px solid transparent;
-  transition: all 0.25s ease;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
-
 .search-container:focus-within {
   background-color: var(--card-bg);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(14, 75, 117, 0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-color);
 }
-
 .search-container i { color: var(--text-light); }
 .search-container input {
   width: 100%;
@@ -159,14 +143,12 @@ body {
   color: var(--text-main);
   font-family: inherit;
 }
-
 .header-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex: 1;
 }
-
 .icon-btn {
   background: none;
   border: none;
@@ -177,14 +159,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
-
 .icon-btn:hover {
   background-color: rgba(128,128,128,0.1);
   color: var(--text-main);
 }
-
 /* Nút Đồng bộ */
 .sync-btn {
   display: flex;
@@ -201,7 +181,6 @@ body {
 .sync-btn:hover {
   background-color: var(--primary-color);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(14, 75, 117, 0.2);
 }
 .sync-btn.active-auth {
   background-color: var(--primary-color);
@@ -226,13 +205,10 @@ body {
   display: flex;
   align-items: center; padding: 0 24px; height: 48px; margin-right: 16px; border-radius: 0 24px 24px 0;
   cursor: pointer;
-  color: var(--text-main); text-decoration: none; transition: all 0.2s; gap: 20px;
-  font-weight: 500; font-size: 15px;
+  color: var(--text-main); text-decoration: none; transition: background-color 0.2s; gap: 20px;
+  font-weight: 500; font-size: 14px;
 }
 .nav-item i { color: var(--text-light); font-size: 24px; }
-.nav-item:hover {
-  background-color: rgba(128, 128, 128, 0.05);
-}
 .nav-item.active {
   background-color: rgba(255, 179, 0, 0.15);
   color: var(--primary-color);
@@ -247,6 +223,9 @@ body {
   .cal-day { padding: 8px 0; }
 }
 
+/* --------------------------------------------------- */
+/* Tối ưu Header và Sidebar cho Mobile */
+/* --------------------------------------------------- */
 @media (max-width: 600px) {
   .sidebar {
     position: absolute; 
@@ -254,29 +233,34 @@ body {
     top: 0; 
     bottom: 0; 
     z-index: 900;
-    box-shadow: 4px 0 16px rgba(0,0,0,0.15);
+    box-shadow: 4px 0 8px rgba(0,0,0,0.1);
     transform: translateX(-100%);
+    /* Mở rộng Sidebar trên Mobile để xem lịch thoải mái hơn */
     width: 300px;
     max-width: 85vw;
   }
   .sidebar.mobile-open { transform: translateX(0); }
   .main-content { padding: 16px; }
   
+  /* Tối ưu Header để chứa Ô tìm kiếm trên Mobile */
   .app-header { 
     border-bottom: none; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
     padding: 8px; 
   }
   .header-left { flex: 0 0 auto; gap: 8px; }
   
+  /* HIỂN THỊ LẠI THANH TÌM KIẾM TRÊN MOBILE */
   .search-container { 
     display: flex; 
     flex: 1; 
     margin: 0 8px;
-    padding: 8px 16px;
+    padding: 6px 12px;
   }
   .search-container input { font-size: 14px; }
   .header-right { flex: 0 0 auto; }
 }
+
 @media (max-width: 420px) {
   .app-title { display: none; }
 }
@@ -299,60 +283,38 @@ body {
 @media (min-width: 900px) { .notes-grid { column-count: 3; } }
 @media (min-width: 1200px) { .notes-grid { column-count: 4; } }
 
-/* THẺ GHI CHÚ (MATERIAL 3) */
 .note-card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 24px; 
-  padding: 24px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  border-top: 4px solid transparent;
+  /* Hỗ trợ hiển thị dạng lưới Masonry */
   break-inside: avoid;
   margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
 }
-
 .note-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 16px 32px rgba(0,0,0,0.08);
-  border-color: transparent;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  border-top: 4px solid var(--accent-color);
 }
-
-.note-title { 
-  font-size: 19px; 
-  font-weight: 700; 
-  color: var(--text-main); 
-  letter-spacing: 0.2px;
-  line-height: 1.4;
-}
-
-.note-body { 
-  font-size: 15px; 
-  color: var(--text-main); 
-  line-height: 1.6; 
-  opacity: 0.85; 
-  display: -webkit-box; 
-  -webkit-line-clamp: 8; 
-  -webkit-box-orient: vertical; 
-  overflow: hidden; 
-}
-
-.note-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.note-title { font-size: 18px; font-weight: bold; color: var(--text-main); }
+.note-body { font-size: 14px; color: var(--text-light); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.note-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
   font-size: 12px;
-  padding: 6px 14px;
-  background-color: rgba(128,128,128,0.08);
+  padding: 6px 12px;
+  background-color: rgba(128,128,128,0.1);
   color: var(--text-main);
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
-  border: 1px solid transparent;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
 }
 .tag:hover {
   background-color: rgba(77, 182, 172, 0.1);
@@ -367,7 +329,7 @@ body {
   background-color: var(--cloze-bg);
   color: var(--cloze-text);
   border-bottom: 2px dashed var(--accent-color);
-  padding: 2px 6px;
+  padding: 0 4px;
   border-radius: 4px;
   font-weight: 500;
 }
@@ -375,10 +337,12 @@ body {
 /* --------------------------------------------------- */
 /* Calendar */
 /* --------------------------------------------------- */
-.calendar-container { max-width: 600px; margin: 0 auto; background-color: var(--card-bg); padding: 16px; border-radius: 20px; border: 1px solid var(--border-color); }
+.calendar-container { max-width: 600px; margin: 0 auto; background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
 .cal-day-name { font-weight: bold; color: var(--text-light); font-size: 14px; margin-bottom: 8px;}
+
+/* MATERIAL DESIGN CHO LỊCH */
 .cal-day {
   display: flex;
   flex-direction: column;
@@ -389,6 +353,7 @@ body {
   position: relative;
   min-height: 48px;
 }
+.cal-day:hover .day-number { background-color: rgba(128,128,128,0.1); }
 .day-number {
   display: flex;
   align-items: center;
@@ -400,14 +365,24 @@ body {
   color: var(--text-main);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-.cal-day:hover .day-number { background-color: rgba(128,128,128,0.1); }
 .cal-day.today .day-number { font-weight: bold; color: var(--primary-color); }
 .cal-day.selected .day-number { background-color: var(--primary-color); color: #ffffff !important; font-weight: bold; }
 .note-dot { width: 6px; height: 6px; background-color: var(--accent-color); border-radius: 50%; margin-top: 4px; }
-.calendar-sidebar .calendar-container { padding: 12px 8px; }
-.calendar-sidebar .calendar-grid { gap: 4px; }
-.calendar-sidebar .day-number { width: 30px; height: 30px; }
-.calendar-sidebar .cal-day-name { font-size: 13px; }
+
+/* ---- TỐI ƯU LỊCH KHÔNG BỊ TRÀN TRÊN SIDEBAR NHỎ ---- */
+.calendar-sidebar .calendar-container {
+  padding: 12px 8px;
+}
+.calendar-sidebar .calendar-grid {
+  gap: 4px; 
+}
+.calendar-sidebar .day-number {
+  width: 30px; 
+  height: 30px;
+}
+.calendar-sidebar .cal-day-name {
+  font-size: 13px;
+}
 
 /* --------------------------------------------------- */
 /* Tags View */
@@ -416,9 +391,9 @@ body {
 .tags-container .tag {
   font-size: 14px;
   font-weight: 500;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 24px;
-  background-color: rgba(128,128,128,0.05);
+  background-color: rgba(128,128,128,0.08);
   border: 1px solid var(--border-color);
   display: inline-flex;
   align-items: center;
@@ -426,137 +401,109 @@ body {
   color: var(--text-main);
   transition: all 0.2s ease;
 }
-.tags-container .tag:hover {
-  background-color: var(--card-bg);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  transform: translateY(-2px);
-}
 
 /* --------------------------------------------------- */
 /* FAB (Nút nổi) */
 /* --------------------------------------------------- */
 .fab-btn {
-  position: fixed; right: 32px; bottom: 32px; width: 64px; height: 64px;
+  position: fixed; right: 24px; bottom: 24px; width: 56px; height: 56px;
   background-color: var(--accent-color); color: #000;
-  border: none; border-radius: 20px; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 8px 24px rgba(255, 179, 0, 0.4); z-index: 90;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s;
+  border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(255, 179, 0, 0.4); z-index: 90;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.2s, box-shadow 0.3s;
 }
-.fab-btn i { font-size: 28px; }
 .fab-btn:hover { 
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 12px 28px rgba(255, 179, 0, 0.5); 
+  filter: brightness(0.95); 
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(255, 179, 0, 0.6); 
 }
 .fab-btn:active { transform: translateY(0) scale(0.95); }
 
 /* --------------------------------------------------- */
-/* Editor Overlay (Modal mượt mà) */
+/* Editor Overlay */
 /* --------------------------------------------------- */
 .note-editor-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   z-index: 1001;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background-color: rgba(0, 0, 0, 0.4);
   display: none;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   padding: 20px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transform: none;
 }
-
-.note-editor-overlay.active { 
-  display: flex; 
-  opacity: 1; 
-  visibility: visible; 
-}
-
-#editorBody {
-  width: 100%;
-  max-width: 650px;
-  max-height: 90vh;
-  border-radius: 28px;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-  background-color: var(--note-bg-default);
-  transform: translateY(30px) scale(0.98);
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.note-editor-overlay.active #editorBody {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-
+.note-editor-overlay.active { display: flex; }
 .editor-header {
   display: flex; align-items: center; justify-content: space-between;
-  width: 100%; max-width: 650px;
-  height: 72px; padding: 0 20px;
+  width: 100%; max-width: 600px;
+  height: 64px; padding: 0 16px;
   flex-shrink: 0;
   border-bottom: none;
   background-color: transparent;
 }
 .editor-header-actions { display: flex; gap: 8px; }
-.action-btn { padding: 12px; }
-.action-btn:hover { color: var(--editor-active-color); background-color: rgba(0,0,0,0.05); }
-#deleteNoteBtn:hover { color: #D32F2F; background-color: rgba(211, 47, 47, 0.1); }
+.action-btn:hover { color: var(--editor-active-color); }
+#deleteNoteBtn:hover { color: #D32F2F; }
 .save-btn { color: var(--editor-active-color); }
-
 .color-picker-container { position: relative; }
 .color-palette-popup {
   position: absolute; top: 100%; right: 0; background-color: var(--card-bg);
-  border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: none;
-  grid-template-columns: repeat(3, 1fr); gap: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1002;
+  border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: none;
+  grid-template-columns: repeat(3, 1fr); gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1002;
 }
 .color-palette-popup.open { display: grid; }
-.color-option { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
-.color-option:hover { transform: scale(1.1); }
-.color-option.active { border: 2px solid var(--editor-active-color); box-shadow: 0 0 0 2px var(--card-bg) inset; }
+.color-option { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; }
+.color-option.active { border: 2px solid var(--editor-active-color); }
 
+#editorBody {
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--note-bg-default);
+  transition: background-color 0.3s;
+}
 .editor-body-content {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 32px 32px 32px;
+  padding: 10px 20px 20px 20px;
   display: flex;
   flex-direction: column;
 }
 
-.editor-title-input {
-  width: 100%; border: none; background: none; outline: none; font-size: 26px; font-weight: 700; color: var(--text-main); font-family: inherit; margin-bottom: 16px; padding: 8px 0;
+/* --- Toast Notification (Thông báo cập nhật ngầm) --- */
+.gino-toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--primary-color);
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px 24px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s, visibility 0.3s;
 }
-.editor-title-input::placeholder { opacity: 0.4; }
 
-.editor-time-container { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); margin-bottom: 16px; opacity: 0.8; }
-.editor-tags-area { padding: 12px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 20px; }
-.editor-tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag-input { width: 120px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
-.editor-textarea {
-  width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 17px; color: var(--text-main); line-height: 1.7; font-family: inherit;
-  resize: none; margin-top: 8px;
+.gino-toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
 }
-.editor-textarea::placeholder { opacity: 0.4; }
-
-/* Fix Cuộn Readonly */
-.readonly-mode .editor-title-input { pointer-events: none; }
-.readonly-mode .editor-textarea { cursor: default; }
-.editor-tag-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; }
-.remove-tag-btn { cursor: pointer; background: rgba(0,0,0,0.05); border-radius: 50%; padding: 2px; transition: all 0.2s; }
-.remove-tag-btn:hover { background: rgba(255,0,0,0.1); color: #D32F2F; }
-
-/* Đồng bộ Theme Editor */
-.note-title, .editor-title-input { color: var(--text-main) !important; }
-.note-body, .editor-textarea { color: var(--text-main) !important; opacity: 0.9; }
-
-/* --------------------------------------------------- */
 /* TÙY CHỈNH THANH CUỘN TOÀN CỤC */
-/* --------------------------------------------------- */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -575,55 +522,48 @@ body {
   background-clip: padding-box;
 }
 
+.editor-body { padding: 20px; }
+.editor-title-input {
+  width: 100%; border: none; background: none; outline: none; font-size: 20px; font-weight: bold; color: var(--text-main); font-family: inherit; margin-bottom: 12px;
+}
+.editor-time-container { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
+.editor-tags-area { padding: 8px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
+.editor-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-input { width: 100px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
+.editor-textarea {
+  width: 100%; flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
+  resize: none; margin-top: 8px;
+}
+
+/* Fix Cuộn Readonly */
+.readonly-mode .editor-title-input { pointer-events: none; }
+.readonly-mode .editor-textarea { cursor: default; }
+.editor-tag-item { display: inline-flex; align-items: center; gap: 4px; }
+.remove-tag-btn { cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 50%; padding: 2px; }
+.remove-tag-btn:hover { background: rgba(255,0,0,0.2); color: #D32F2F; }
+
+/* Đồng bộ Theme Editor */
+.note-card, #editorBody { color: var(--text-main) !important; }
+.note-title, .editor-title-input { color: var(--text-main) !important; }
+.note-body, .editor-textarea { color: var(--text-light) !important; }
+#editorBody { background-color: var(--note-bg-default); }
+
 /* --------------------------------------------------- */
 /* Full-screen Editor cho Mobile */
 /* --------------------------------------------------- */
 @media (max-width: 600px) {
   .note-editor-overlay {
     padding: 0;
-    backdrop-filter: none;
-    background-color: var(--surface-bg);
   }
+  
   #editorBody {
     max-width: 100%;
     max-height: 100vh;
     height: 100vh; 
     border-radius: 0; 
-    transform: translateY(100%);
   }
+  
   .editor-body-content {
-    padding: 10px 20px 80px 20px; 
+    padding-bottom: 80px; 
   }
-  .fab-btn {
-    right: 20px; bottom: 20px; width: 56px; height: 56px; border-radius: 16px;
-  }
-}
-
-/* --------------------------------------------------- */
-/* Toast Notification */
-/* --------------------------------------------------- */
-.gino-toast {
-    visibility: hidden;
-    min-width: 280px;
-    background-color: var(--primary-color);
-    color: #fff;
-    text-align: center;
-    border-radius: 12px;
-    padding: 14px 24px;
-    position: fixed;
-    z-index: 9999;
-    left: 50%;
-    bottom: 20px;
-    transform: translateX(-50%) translateY(20px);
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    opacity: 0;
-    transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.3s;
-}
-
-.gino-toast.show {
-    visibility: visible;
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
 }
