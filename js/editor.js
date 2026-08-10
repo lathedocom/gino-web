@@ -341,7 +341,15 @@ export function initEditor() {
             
             if (!appState.currentEditingNoteId) noteData.createdAt = noteData.updatedAt;
             
+            // 1. Lưu vào cơ sở dữ liệu cục bộ (IndexedDB)
             await db.notes.put(noteData);
+            
+            // 2. GỌI LỆNH ĐĂNG KÝ BACKGROUND SYNC VÌ TRẠNG THÁI ĐANG LÀ PENDING
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.sync.register('sync-notes').catch(err => console.log('Sync registration failed:', err));
+                });
+            }
             
             appState.currentEditingImages.forEach(imgObj => {
                 if (imgObj.isNew) {
@@ -356,6 +364,7 @@ export function initEditor() {
             
             await loadNotesFromDBAndRender();
             
+            // 3. Thử đồng bộ ngay lập tức (nếu đang online)
             const isSuccess = await saveNotesToDrive();
             if (isSuccess) {
                 noteData.syncStatus = 'synced';
@@ -371,4 +380,3 @@ export function initEditor() {
             this.innerHTML = '<i class="material-icons">save</i>';
         }
     });
-}
