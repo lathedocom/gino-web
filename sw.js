@@ -117,12 +117,15 @@ async function doBackgroundSync() {
                 body: form
             });
 
-            if (noteRes.ok) {
+           if (noteRes.ok) {
                 const ids = pendingNotes.map(n => n.id);
                 await db.notes.where('id').anyOf(ids).modify({ syncStatus: 'synced' });
                 console.log('[SW] Đồng bộ ngầm ghi chú thành công!');
             } else {
-                if (noteRes.status === 401) await db.settings.delete('gdrive_token');
+                if (noteRes.status === 401) {
+                    console.warn('[SW] Token hết hạn trong lúc đồng bộ ngầm. Bỏ qua để giao diện chính tự xử lý làm mới.');
+                    throw new Error('Token expired'); // Chỉ ném lỗi, tuyệt đối không tự xóa token
+                }
                 throw new Error('Note upload failed');
             }
         }
