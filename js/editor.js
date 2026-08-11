@@ -210,13 +210,18 @@ export async function openNoteInEditor(noteData) {
         editBody.style.height = editBody.scrollHeight + 'px';
     }, 50);
 }
-
 export function initEditor() {
     const editNoteModeBtn = document.getElementById('editNoteModeBtn');
     const editBody = document.getElementById('editNoteBody');
     const newTagInput = document.getElementById('newTagInput');
     const colorPalettePopup = document.getElementById('colorPalettePopup');
     const editorBody = document.getElementById('editorBody');
+    
+    // CHUYỂN SỰ KIỆN TỰ GIÃN CHIỀU CAO VÀO ĐÂY
+    editBody.addEventListener('input', () => {
+        editBody.style.height = 'auto';
+        editBody.style.height = editBody.scrollHeight + 'px';
+    });
     
     editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
     document.getElementById('closeEditorBtn').addEventListener('click', () => {
@@ -341,7 +346,8 @@ export function initEditor() {
             }
             
             const tags = appState.currentEditingTags;
-            const finalFileNames = appState.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
+            // ĐÃ SỬA LỖI ANDROID PREFIX Ở ĐÂY
+            const finalFileNames = appState.currentEditingImages.map(imgObj => imgObj.fileName);
             let noteData = appState.currentRawNoteData ? { ...appState.currentRawNoteData } : {};
             
             noteData.id = appState.currentEditingNoteId || new Date().getTime();
