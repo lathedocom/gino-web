@@ -8,25 +8,63 @@ const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/res
 
 let tokenRefreshTimer = null;
 
-// Hỗ trợ cập nhật giao diện Nút đồng bộ nhanh
+// Hỗ trợ cập nhật giao diện Nút đồng bộ (Tích hợp Avatar Gmail)
 function updateSyncUI(status) {
     const btnAuthGoogle = document.getElementById('btnAuthGoogle');
     if (!btnAuthGoogle) return;
-    if (status === 'syncing') {
-        btnAuthGoogle.classList.add('active-auth');
-        btnAuthGoogle.innerHTML = '<i class="material-icons is-syncing">sync</i>';
-        btnAuthGoogle.title = 'Đang đồng bộ...';
-    } else if (status === 'done') {
-        btnAuthGoogle.classList.add('active-auth');
-        btnAuthGoogle.innerHTML = '<i class="material-icons">cloud_done</i>';
-        btnAuthGoogle.title = 'Đồng bộ thành công';
-    } else if (status === 'error') {
-        btnAuthGoogle.innerHTML = '<i class="material-icons">cloud_off</i>';
-        btnAuthGoogle.title = 'Lỗi kết nối';
-    } else if (status === 'logout') {
-        btnAuthGoogle.classList.remove('active-auth');
+
+    // Lưu trạng thái hiện tại để chặn race-condition (lỗi do API phản hồi chậm)
+    btnAuthGoogle.setAttribute('data-status', status);
+    
+    // Reset toàn bộ class cũ
+    btnAuthGoogle.className = 'sync-btn'; 
+
+    if (status === 'logout') {
+        appState.userAvatarUrl = null; // Xóa cache avatar
+        btnAuthGoogle.classList.add('status-logout');
         btnAuthGoogle.innerHTML = '<i class="material-icons">account_circle</i>';
         btnAuthGoogle.title = 'Chưa đăng nhập';
+        return;
+    }
+
+    // Hàm tiện ích render HTML bên trong nút
+    const renderInnerUI = () => {
+        // Đảm bảo không đè giao diện nếu trạng thái đã bị thay đổi trong lúc chờ API
+        if (btnAuthGoogle.getAttribute('data-status') !== status) return;
+        
+        // Nếu có URL avatar thì hiển thị ảnh, nếu không thì hiển thị Icon mặc định màu chính
+        const avatarHtml = appState.userAvatarUrl 
+            ? `<img src="${appState.userAvatarUrl}" class="avatar-img" alt="Avatar">`
+            : `<i class="material-icons" style="color: var(--primary-color); font-size: 36px;">account_circle</i>`;
+
+        btnAuthGoogle.innerHTML = avatarHtml;
+
+        if (status === 'syncing') {
+            btnAuthGoogle.classList.add('status-syncing');
+            btnAuthGoogle.title = 'Đang đồng bộ...';
+        } else if (status === 'done') {
+            btnAuthGoogle.classList.add('status-done');
+            btnAuthGoogle.title = 'Đồng bộ thành công';
+        } else if (status === 'error') {
+            btnAuthGoogle.classList.add('status-error');
+            btnAuthGoogle.title = 'Lỗi kết nối';
+        }
+    };
+
+    // 1. Render giao diện ngay lập tức với dữ liệu hiện có
+    renderInnerUI();
+
+    // 2. Nếu đang đăng nhập nhưng CHƯA có ảnh Avatar -> Gọi API ngầm lấy ảnh về
+    if (!appState.userAvatarUrl && gapi.client.getToken() !== null) {
+        gapi.client.drive.about.get({ fields: 'user' }).then(response => {
+            if (response.result && response.result.user && response.result.user.photoLink) {
+                appState.userAvatarUrl = response.result.user.photoLink;
+                // Có ảnh thì render đè lại một lần nữa cho mượt
+                if (btnAuthGoogle.getAttribute('data-status') === status) {
+                    renderInnerUI();
+                }
+            }
+        }).catch(e => console.log("Ghi chú: Không lấy được Avatar Gmail", e));
     }
 }
 
