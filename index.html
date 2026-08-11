@@ -107,6 +107,7 @@
 </div>
 </div>
 </header>
+  
 <div class="editor-body-content">
 <div class="editor-title-container">
 <input type="text" id="editNoteTitle" placeholder="Tiêu đề" class="editor-title-input">
@@ -115,7 +116,6 @@
 <i class="material-icons">access_time</i>
 <span id="editNoteTime">Tự động tạo thời gian...</span>
 </div>
-<div id="editorImageArea"></div>
 <div class="editor-tags-area" id="editorTagsArea">
 <i class="material-icons" style="color: var(--text-light);">label</i>
 <div id="editorTagList" class="editor-tag-list"></div>
@@ -123,6 +123,11 @@
 </div>
 <textarea id="editNoteBody" placeholder="Nội dung ghi chú..." class="editor-textarea"></textarea>
 </div>
+<!-- Vùng chứa ảnh được tách riêng ra ngoài, cố định ở dưới cùng -->
+<div class="editor-fixed-bottom" style="flex-shrink: 0; padding: 0 20px;">
+<div id="editorImageArea"></div>
+</div>
+  
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
