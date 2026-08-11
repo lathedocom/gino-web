@@ -63,7 +63,7 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
             <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: var(--text-light); opacity: 0.7; text-align: center;">
                 <i class="material-icons" style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">note_alt</i>
                 <h3 style="font-size: 18px; font-weight: 500; color: var(--text-main); margin-bottom: 8px;">Chưa có ghi chú nào</h3>
-                <p style="font-size: 14px; max-width: 300px; line-height: 1.5;">Hãy nhấn nút + ở góc dưới để bắt đầu khắc ghi kiến thức của bạn.</p>
+                <p style="font-size: 14px; max-width: 300px; line-height: 1.5;">Hãy nhấn nút + ở góc dưới để tạo ghi chú.</p>
             </div>
         `;
         return; // Dừng lại không cần chạy vòng lặp tạo card nữa
