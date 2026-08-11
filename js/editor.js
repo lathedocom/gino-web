@@ -337,7 +337,6 @@ export function initEditor() {
             }
             
             const tags = appState.currentEditingTags;
-            const androidPrefix = "/data/user/0/com.lathedo.ginonote/files/images/";
             const finalFileNames = appState.currentEditingImages.map(imgObj => androidPrefix + imgObj.fileName);
             let noteData = appState.currentRawNoteData ? { ...appState.currentRawNoteData } : {};
             
