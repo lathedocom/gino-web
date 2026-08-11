@@ -299,18 +299,18 @@ body {
 @media (min-width: 900px) { .notes-grid { column-count: 3; } }
 @media (min-width: 1200px) { .notes-grid { column-count: 4; } }
 
-/* THẺ GHI CHÚ (MATERIAL 3) */
+/* TỐI ƯU GIAO DIỆN THẺ GHI CHÚ */
 .note-card {
   background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 24px; 
-  padding: 24px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.08); /* Viền mỏng, tinh tế hơn */
+  border-radius: 12px; /* Giảm bo góc từ 24px/16px xuống 12px cho chuyên nghiệp */
+  padding: 16px 20px;
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* Bóng đổ cực nhẹ, không gây rối mắt */
   break-inside: avoid;
   margin-bottom: 16px;
   position: relative;
@@ -318,26 +318,27 @@ body {
 }
 
 .note-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 16px 32px rgba(0,0,0,0.08);
-  border-color: transparent;
+  transform: translateY(-2px); /* Nổi lên nhẹ nhàng, không nhảy quá cao */
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
+/* TỐI ƯU ĐỘ DỄ ĐỌC (TYPOGRAPHY) */
 .note-title { 
-  font-size: 19px; 
-  font-weight: 700; 
+  font-size: 17px; 
+  font-weight: 600; 
   color: var(--text-main); 
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
   line-height: 1.4;
+  margin-bottom: 2px;
 }
 
 .note-body { 
-  font-size: 15px; 
-  color: var(--text-main); 
-  line-height: 1.6; 
-  opacity: 0.85; 
+  font-size: 14.5px; 
+  color: var(--text-light); 
+  line-height: 1.6; /* Tăng khoảng cách dòng để dễ đọc hơn */
   display: -webkit-box; 
-  -webkit-line-clamp: 8; 
+  -webkit-line-clamp: 6; 
   -webkit-box-orient: vertical; 
   overflow: hidden; 
 }
