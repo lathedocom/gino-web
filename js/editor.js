@@ -388,3 +388,4 @@ export function initEditor() {
             this.innerHTML = '<i class="material-icons">save</i>';
         }
     });
+}
