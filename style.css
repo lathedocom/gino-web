@@ -300,29 +300,31 @@ body {
 @media (min-width: 1200px) { .notes-grid { column-count: 4; } }
 
 /* TỐI ƯU GIAO DIỆN THẺ GHI CHÚ */
+/* TỐI ƯU GIAO DIỆN THẺ GHI CHÚ (Có gạch màu khi hover) */
 .note-card {
   background-color: var(--card-bg);
-  border: 1px solid rgba(0, 0, 0, 0.08); /* Viền mỏng, tinh tế hơn */
-  border-radius: 12px; /* Giảm bo góc từ 24px/16px xuống 12px cho chuyên nghiệp */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px; 
   padding: 16px 20px;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* Bóng đổ cực nhẹ, không gây rối mắt */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   break-inside: avoid;
   margin-bottom: 16px;
   position: relative;
   overflow: hidden;
+  border-top: 4px solid transparent; 
 }
 
 .note-card:hover {
-  transform: translateY(-2px); /* Nổi lên nhẹ nhàng, không nhảy quá cao */
+  transform: translateY(-2px); 
   box-shadow: 0 6px 16px rgba(0,0,0,0.08);
   border-color: rgba(0, 0, 0, 0.12);
+  border-top: 4px solid var(--accent-color); 
 }
-
 /* TỐI ƯU ĐỘ DỄ ĐỌC (TYPOGRAPHY) */
 .note-title { 
   font-size: 17px; 
