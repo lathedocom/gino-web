@@ -1,7 +1,7 @@
 // BƯỚC 2: Đã thay đổi đường link Dexie để tránh lỗi redirect
 importScripts('https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js');
 
-const CACHE_NAME = 'ginonote-cache-v4'; // Tăng version để trình duyệt cập nhật
+const CACHE_NAME = 'ginonote-cache-v2'; // Tăng version để trình duyệt cập nhật
 const urlsToCache = [
     './',
     './index.html',
