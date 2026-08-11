@@ -453,20 +453,21 @@ body {
 /* --------------------------------------------------- */
 /* Editor Overlay (Modal mượt mà) */
 /* --------------------------------------------------- */
+/* TỐI ƯU CỬA SỔ SOẠN THẢO TRÊN DESKTOP */
 .note-editor-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   z-index: 1001;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background-color: rgba(32, 33, 36, 0.6); /* Đổi màu nền tối mờ, sang trọng hơn */
+  backdrop-filter: blur(4px); /* Thêm hiệu ứng kính mờ cho background */
+  -webkit-backdrop-filter: blur(4px);
   display: none;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 20px;
+  padding: 40px 20px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .note-editor-overlay.active { 
@@ -477,25 +478,22 @@ body {
 
 #editorBody {
   width: 100%;
-  max-width: 650px;
-  max-height: 90vh;
-  border-radius: 28px;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+  max-width: 680px; /* Cho form to hơn một chút để dễ gõ */
+  max-height: 85vh; /* Tránh chạm mép màn hình */
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25); /* Bóng đổ nổi bật hơn */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
   background-color: var(--note-bg-default);
-  transform: translateY(30px) scale(0.98);
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translateY(20px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .note-editor-overlay.active #editorBody {
   transform: translateY(0) scale(1);
-  opacity: 1;
 }
-
 .editor-header {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; max-width: 650px;
