@@ -185,31 +185,80 @@ body {
   color: var(--text-main);
 }
 
-/* Nút Đồng bộ */
+/* TỐI ƯU NÚT ĐĂNG NHẬP (AVATAR GMAIL & VÒNG XOAY NGOÀI) */
 .sync-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: none;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--card-bg);
-  color: var(--primary-color);
-  border: 1px solid var(--border-color);
-  padding: 12px;
-  border-radius: 50%;
   cursor: pointer;
+  outline: none;
   transition: all 0.2s ease;
 }
-.sync-btn:hover {
-  background-color: var(--primary-color);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(14, 75, 117, 0.2);
-}
-.sync-btn.active-auth {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  box-shadow: 0 2px 8px rgba(14, 75, 117, 0.3);
+
+/* Pseudo-element tạo viền (Vòng xoay loading) */
+.sync-btn::after {
+  content: '';
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  pointer-events: none; /* Tránh đè lên sự kiện click của nút */
+  transition: all 0.3s ease;
+  z-index: 2;
 }
 
+/* Ảnh Avatar Gmail */
+.sync-btn .avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* TRẠNG THÁI: CHƯA ĐĂNG NHẬP (Màu xám) */
+.sync-btn.status-logout i {
+  color: var(--text-light); /* Biến màu xám có sẵn */
+  font-size: 36px;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+.sync-btn.status-logout:hover i {
+  opacity: 1;
+  color: var(--primary-color);
+}
+
+/* TRẠNG THÁI: ĐANG ĐỒNG BỘ (Vòng xoay màu vàng/xanh) */
+.sync-btn.status-syncing::after {
+  border-top-color: var(--accent-color);
+  border-right-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+}
+
+/* TRẠNG THÁI: ĐỒNG BỘ XONG (Nháy viền xanh lá) */
+.sync-btn.status-done::after {
+  border-color: #4CAF50; 
+  opacity: 0;
+  animation: pulse-green 1.5s ease-out;
+}
+
+/* TRẠNG THÁI: LỖI (Viền đỏ) */
+.sync-btn.status-error::after {
+  border-color: #F44336; 
+}
+
+@keyframes pulse-green {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
 /* --------------------------------------------------- */
 /* Sidebar */
 /* --------------------------------------------------- */
