@@ -187,8 +187,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const styleFix = document.createElement('style');
         styleFix.innerHTML = `
-            /* Khóa tràn chiều ngang */
-            .editor-body-content { overflow-x: hidden !important; width: 100% !important; box-sizing: border-box !important; }
+            /* Khóa tràn chiều ngang và SỬA LỖI MẤT THANH CUỘN DỌC */
+            .editor-body-content { 
+                overflow-x: hidden !important; 
+                overflow-y: auto !important;
+                width: 100% !important; 
+                box-sizing: border-box !important; 
+                min-height: 0 !important; /* CHÌA KHÓA: Ép khung phải tạo thanh cuộn thay vì phình to */
+                flex: 1 1 auto !important;
+            }
             .note-editor-overlay { overflow: hidden !important; }
             
             /* Tùy chỉnh thanh cuộn ngang của Danh sách ảnh */
@@ -197,6 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .note-images-preview::-webkit-scrollbar-thumb, #editorImageArea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
             .note-images-preview, #editorImageArea { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.25) rgba(0,0,0,0.05); }
         `;
+    
+    document.head.appendChild(styleFix);
     
     document.head.appendChild(styleFix);
 
