@@ -8,10 +8,6 @@ function setEditorMode(isEditing) {
     const editNoteModeBtn = document.getElementById('editNoteModeBtn');
     const editModeToolbar = document.getElementById('editModeToolbar');
     const editorBody = document.getElementById('editorBody');
-    editBody.addEventListener('input', () => {
-        editBody.style.height = 'auto';
-        editBody.style.height = editBody.scrollHeight + 'px';
-    });
     const newTagInput = document.getElementById('newTagInput');
     const editBody = document.getElementById('editNoteBody');
 
