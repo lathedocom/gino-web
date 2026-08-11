@@ -93,15 +93,15 @@ export async function renderSyncedNotesToWeb(resetLimit = true) {
         // --- FIX XSS: Xử lý an toàn Tiêu đề và Nội dung ---
         let safeTitle = escapeHTML(note.title || note.memoTitle || 'Không có tiêu đề');
         
-        let rawContent = note.content || note.memoContent || note.text || '';
-        // Bước 1: Replace ảnh thành text giả trước khi escape để không bị lỗi thẻ HTML
-        rawContent = rawContent.replace(/<img[^>]*>/gi, ' [Đã đính kèm ảnh] ');
+       let rawContent = note.content || note.memoContent || note.text || '';
+        // Bước 1: Dùng chuỗi định danh độc nhất (không thể gõ ngẫu nhiên) thay vì cụm từ tiếng Việt
+        rawContent = rawContent.replace(/<img[^>]*>/gi, ' __GINO_IMG_ATTACHED__ ');
         
         // Bước 2: Escape toàn bộ nội dung mã độc
         let safeContent = escapeHTML(rawContent);
         
-        // Bước 3: Phục hồi lại các class làm đẹp (hiển thị ảnh & highlight)
-        safeContent = safeContent.replace(/\[Đã đính kèm ảnh\]/g, '<span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span>');
+        // Bước 3: Phục hồi lại class làm đẹp từ chuỗi định danh
+        safeContent = safeContent.replace(/__GINO_IMG_ATTACHED__/g, '<span style="color: #888; font-size: 0.9em; font-style: italic;">[Đã đính kèm ảnh]</span>');
         safeContent = safeContent.replace(/\{([^}]+)\}/g, '<span class="cloze-hint">$1</span>');
 
         card.innerHTML = `
