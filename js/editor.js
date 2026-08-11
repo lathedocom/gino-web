@@ -181,11 +181,16 @@ export async function openNoteInEditor(noteData) {
         });
         appState.currentEditingTags = extractTagsFromNote(noteData);
         renderEditorTagsUI();
-        const imageNames = extractImageNamesFromNote(noteData);
+       const imageNames = extractImageNamesFromNote(noteData);
         for (let rawFileName of imageNames) {
             let localUrl = await getImageUrlSafe(rawFileName);
             if (localUrl) {
                 appState.currentEditingImages.push({ fileName: rawFileName, url: localUrl });
+            } else {
+                // Đẩy vào một ảnh giữ chỗ (placeholder) nếu ảnh thật chưa tải xong từ Google Drive
+                // Dùng ảnh trong suốt để không bị vỡ giao diện, nhưng vẫn giữ được fileName khi lưu lại
+                const transparentGif = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+                appState.currentEditingImages.push({ fileName: rawFileName, url: transparentGif, isPlaceholder: true });
             }
         }
         renderEditorImages();
