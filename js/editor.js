@@ -212,10 +212,6 @@ export async function openNoteInEditor(noteData) {
         setEditorMode(true);
     }
     noteEditor.classList.add('active');
-    setTimeout(() => {
-        editBody.style.height = 'auto';
-        editBody.style.height = editBody.scrollHeight + 'px';
-    }, 50);
 }
 export function initEditor() {
     const editNoteModeBtn = document.getElementById('editNoteModeBtn');
@@ -225,9 +221,9 @@ export function initEditor() {
     const editorBody = document.getElementById('editorBody');
     
     // CHUYỂN SỰ KIỆN TỰ GIÃN CHIỀU CAO VÀO ĐÂY
-    editBody.addEventListener('input', () => {
+   editBody.addEventListener('input', () => {
         editBody.style.height = 'auto';
-        editBody.style.height = editBody.scrollHeight + 'px';
+        editBody.style.height = (editBody.scrollHeight + 20) + 'px';
     });
     
     editNoteModeBtn.addEventListener('click', () => { setEditorMode(true); editBody.focus(); });
