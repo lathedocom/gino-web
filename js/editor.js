@@ -37,6 +37,13 @@ function setEditorMode(isEditing) {
         
         editBody.removeAttribute('readonly');
         document.querySelectorAll('.image-remove-btn, .remove-tag-btn').forEach(b => b.style.display = 'flex');
+
+        // Bắt buộc trình duyệt phải hiển thị chữ xong mới tính chiều cao
+        // Cộng thêm 20px để bù hao padding đáy, không bao giờ bị cắt chữ
+        requestAnimationFrame(() => {
+            editBody.style.height = 'auto';
+            editBody.style.height = (editBody.scrollHeight + 20) + 'px';
+        });
     } else {
         editNoteModeBtn.style.display = 'flex';
         editModeToolbar.style.display = 'none';
