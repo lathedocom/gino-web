@@ -573,9 +573,11 @@ body {
 .editor-body-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* THÊM DÒNG NÀY: Giấu thanh cuộn ngang rác */
   padding: 10px 32px 32px 32px;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* THÊM DÒNG NÀY (CỰC KỲ QUAN TRỌNG): Ép tạo thanh cuộn dọc khi chữ dài */
 }
 
 .editor-title-input {
@@ -589,8 +591,17 @@ body {
 .tag-input { width: 120px; border: none; background: none; outline: none; font-size: 14px; color: var(--editor-active-color); font-family: inherit; }
 
 .editor-textarea {
-  width: 100%; border: none; background: transparent; outline: none; font-size: 15px; color: var(--text-main); line-height: 1.6; font-family: inherit;
-  resize: none; margin-top: 8px;
+  width: 100%; 
+  flex: none; /* THÊM DÒNG NÀY: Cho phép khung dãn tự do theo độ dài chữ */
+  border: none; 
+  background: transparent; 
+  outline: none; 
+  font-size: 15px; 
+  color: var(--text-main); 
+  line-height: 1.6; 
+  font-family: inherit;
+  resize: none; 
+  margin-top: 8px;
   overflow-y: hidden; /* Tắt thanh cuộn bên trong của vùng gõ chữ */
   min-height: 300px; /* Đảm bảo vùng trống luôn đủ lớn để nhấp vào */
   padding-bottom: 40px;
