@@ -231,6 +231,14 @@ export function initEditor() {
         document.getElementById('noteEditor').classList.remove('active');
         colorPalettePopup.classList.remove('open');
     });
+    // THÊM ĐOẠN NÀY: Tắt editor khi bấm vào vùng mờ (overlay)
+    document.getElementById('noteEditor').addEventListener('click', function(e) {
+        // Kiểm tra nếu người dùng bấm chính xác vào thẻ overlay chứ không phải các thành phần con
+        if (e.target === this) {
+            this.classList.remove('active');
+            colorPalettePopup.classList.remove('open');
+        }
+    });
     
     if (newTagInput) {
         newTagInput.addEventListener('keypress', function(e) {
@@ -324,6 +332,7 @@ export function initEditor() {
             editorBody.style.backgroundColor = getThemeAwareColor(appState.currentNoteColorHex);
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
+            colorPalettePopup.classList.remove('open');
         });
     });
     
