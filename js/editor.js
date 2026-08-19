@@ -365,7 +365,8 @@ export function initEditor() {
             noteData.syncStatus = 'pending';
             
             if (!appState.currentEditingNoteId) noteData.createdAt = noteData.updatedAt;
-            
+            appState.currentEditingNoteId = noteData.id;
+            appState.currentRawNoteData = noteData;
             // 1. Lưu vào cơ sở dữ liệu cục bộ (IndexedDB)
             await db.notes.put(noteData);
             
