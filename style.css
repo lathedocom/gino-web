@@ -339,16 +339,14 @@ body {
   overflow-y: auto; 
   background-color: var(--surface-bg); 
 }
-.notes-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 16px; 
-  width: 100%;
-  align-items: start; 
+.notes-grid { 
+  column-count: 1; 
+  column-gap: 16px; 
+  width: 100%; 
 }
-@media (min-width: 600px) { .notes-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 900px) { .notes-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1200px) { .notes-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 600px) { .notes-grid { column-count: 2; } }
+@media (min-width: 900px) { .notes-grid { column-count: 3; } }
+@media (min-width: 1200px) { .notes-grid { column-count: 4; } }
 /* TỐI ƯU GIAO DIỆN THẺ GHI CHÚ */
 /* TỐI ƯU GIAO DIỆN THẺ GHI CHÚ (Có gạch màu khi hover) */
 .note-card {
