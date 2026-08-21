@@ -71,8 +71,8 @@
     --scrollbar-hover: rgba(255, 255, 255, 0.4);
     
     /* Biến màu cho tính năng Active Recall (Cloze) */
-    --cloze-bg: rgba(255, 202, 40, 0.15);
-    --cloze-text: var(--accent-color);
+    --cloze-bg: rgba(255, 202, 40, 0.08); 
+    --cloze-text: var(--text-main); 
   }
 }
 
